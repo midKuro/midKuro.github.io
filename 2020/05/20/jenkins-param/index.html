@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   
-  <title>&#39;(2) jenkins 参数化构建&#39; | Kuro&#39;s Blog</title>
+  <title>&#39;jenkins 参数化构建&#39; | Kuro&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
   <meta name="description" content="“本文讲解jenkins如何进行参数化配置及远程触发项目构建     jenkins参数化构建通过输入参数进行构建项目，需要插件build with parameters plugin，正常安装成功的jenkins应该都会自带了的，那么参数可以做什么事呢？如果我想要jenkins构建svn上指定版本号的代码并进行测试，就可以使用参数构建. 首先先了解一下怎么获取svn上指定的版本代码:通过项目路">
 <meta property="og:type" content="article">
-<meta property="og:title" content="&#39;(2) jenkins 参数化构建&#39;">
+<meta property="og:title" content="&#39;jenkins 参数化构建&#39;">
 <meta property="og:url" content="https://midkuro.github.io/2020/05/20/jenkins-param/index.html">
 <meta property="og:site_name" content="Kuro&#39;s Blog">
 <meta property="og:description" content="“本文讲解jenkins如何进行参数化配置及远程触发项目构建     jenkins参数化构建通过输入参数进行构建项目，需要插件build with parameters plugin，正常安装成功的jenkins应该都会自带了的，那么参数可以做什么事呢？如果我想要jenkins构建svn上指定版本号的代码并进行测试，就可以使用参数构建. 首先先了解一下怎么获取svn上指定的版本代码:通过项目路">
@@ -24,7 +24,7 @@
 <meta property="og:image" content="https://midkuro.github.io/images/jenkins-param/jenkins-7.png">
 <meta property="og:image" content="https://midkuro.github.io/images/jenkins-param/jenkins-8.png">
 <meta property="article:published_time" content="2020-05-20T07:50:40.000Z">
-<meta property="article:modified_time" content="2020-05-20T07:47:50.776Z">
+<meta property="article:modified_time" content="2020-05-20T08:05:13.943Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="DevOps">
 <meta property="article:tag" content="Jenkins">
@@ -125,10 +125,17 @@
         
   
     <h1 class="post-title" itemprop="name">
-      &#39;(2) jenkins 参数化构建&#39;
+      &#39;jenkins 参数化构建&#39;
     </h1>
     <div class="post-title-bar">
       <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/-[DevOps]-[Jenkins]/">-[DevOps] -[Jenkins]</a>
+                  
+              </li>
           
         <li>
           <i class="fa fa-calendar"></i>  2020-05-20
@@ -174,8 +181,8 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年05月20日 15:47</p>
-        <p>原始链接： <a class="post-url" href="/2020/05/20/jenkins-param/" title="&#39;(2) jenkins 参数化构建&#39;">https://midkuro.github.io/2020/05/20/jenkins-param/</a></p>
+        <p>最后更新： 2020年05月20日 16:05</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/20/jenkins-param/" title="&#39;jenkins 参数化构建&#39;">https://midkuro.github.io/2020/05/20/jenkins-param/</a></p>
         <footer>
             <a href="https://midkuro.github.io">
                 <img src="/images/logo.png" alt="Kuro">
@@ -232,7 +239,7 @@
     <div class="post-share-list" id="share-list">
         <ul class="share-icons">
           <li>
-            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/20/jenkins-param/&title=《'(2) jenkins 参数化构建'》 — Kuro's Blog&pic=https://midkuro.github.ioimages/logo.png" data-title="微博">
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/20/jenkins-param/&title=《'jenkins 参数化构建'》 — Kuro's Blog&pic=images/jenkins.png" data-title="微博">
               <i class="fa fa-weibo"></i>
             </a>
           </li>
@@ -242,7 +249,7 @@
             </a>
           </li>
           <li>
-            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/20/jenkins-param/&title=《'(2) jenkins 参数化构建'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/20/jenkins-param/&title=《'jenkins 参数化构建'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
               <i class="fa fa-qq"></i>
             </a>
           </li>
@@ -252,7 +259,7 @@
             </a>
           </li>
           <li>
-            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'(2) jenkins 参数化构建'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/20/jenkins-param/&via=https://midkuro.github.io" data-title="Twitter">
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'jenkins 参数化构建'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/20/jenkins-param/&via=https://midkuro.github.io" data-title="Twitter">
               <i class="fa fa-twitter"></i>
             </a>
           </li>
@@ -303,7 +310,7 @@
   
   
     <a href="/2020/05/20/jenkins-install/" id="article-nav-older" class="article-nav-link-wrap">
-      <span class="article-nav-title">&#39;(1) jenkins 安装及卸载&#39;</span>
+      <span class="article-nav-title">&#39;jenkins 安装及卸载&#39;</span>
       <i class="fa fa-hand-o-right" aria-hidden="true"></i>
     </a>
   
@@ -365,7 +372,7 @@
 <div class="sidebar-menu-box" id="sidebar-menu-box">
     <div class="sidebar-menu-box-container">
         <div id="sidebar-menu-box-categories">
-            
+            <a class="category-link" href="/categories/DevOps-Jenkins/">-[DevOps] -[Jenkins]</a><a class="category-link" href="/categories/DevOps/">DevOps</a><a class="category-link" href="/categories/DevOps/Jenkins/">Jenkins</a>
         </div>
         <div id="sidebar-menu-box-tags">
             <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 10px;">Jenkins</a>
