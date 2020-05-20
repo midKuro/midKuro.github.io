@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;linux 下安装nginx、redis&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="安装nginx1.下载安装包nginx-1.14.1.tar.gz  其他版本请自行下载 官网地址 2.上传并解压安装包 1tar -zxvf nginx-1.14.1.tar.gz  3.设置配置信息 1.&#x2F;configure --prefix&#x3D;&#x2F;usr&#x2F;local&#x2F;nginx  (安装后的文件存放路径）  如果出现以下异常信息 1234.&#x2F;configure: error: the HTTP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;linux 下安装nginx、redis&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/20/software-install/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="安装nginx1.下载安装包nginx-1.14.1.tar.gz  其他版本请自行下载 官网地址 2.上传并解压安装包 1tar -zxvf nginx-1.14.1.tar.gz  3.设置配置信息 1.&#x2F;configure --prefix&#x3D;&#x2F;usr&#x2F;local&#x2F;nginx  (安装后的文件存放路径）  如果出现以下异常信息 1234.&#x2F;configure: error: the HTTP">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/img/in-post/software-install/nginx-1.png">
+<meta property="article:published_time" content="2020-05-20T12:35:00.000Z">
+<meta property="article:modified_time" content="2020-05-20T13:32:33.030Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Nginx">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/img/in-post/software-install/nginx-1.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro" target="_blank" href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-software-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;linux 下安装nginx、redis&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Nginx/">Nginx</a>
+                  
+                      <a href="/categories/Redis/">Redis</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-20
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h3 id="安装nginx"><a href="#安装nginx" class="headerlink" title="安装nginx"></a>安装nginx</h3><p><strong>1.下载安装包</strong><br><a href="http://nginx.org/download/nginx-1.14.1.tar.gz" target="_blank" rel="noopener">nginx-1.14.1.tar.gz</a>  其他版本请自行下载 <a href="http://nginx.org/download/" target="_blank" rel="noopener">官网地址</a></p>
+<p><strong>2.上传并解压安装包</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf nginx-1.14.1.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p><strong>3.设置配置信息</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./configure --prefix=/usr/local/nginx  (安装后的文件存放路径）</span><br></pre></td></tr></table></figure>
+
+<p>如果出现以下异常信息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">./configure: error: the HTTP rewrite module requires the PCRE library.</span><br><span class="line">You can either disable the module by using --without-http_rewrite_module</span><br><span class="line">option, or install the PCRE library into the system, or build the PCRE library</span><br><span class="line">statically from the source with nginx by using --with-pcre=&lt;path&gt; option.</span><br></pre></td></tr></table></figure>
+
+<p><strong>则执行命令安装pcre-devel</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install pcre-devel</span><br></pre></td></tr></table></figure>
+
+<p><strong>安装pcre-devel完成后再次执行命令</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./configure --prefix=/usr/local/nginx</span><br></pre></td></tr></table></figure>
+
+<p><strong>执行完后还有可能会出现这样的问题：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">checking for PCRE JIT support ... not found</span><br><span class="line">checking for system md library ... not found</span><br><span class="line">checking for system md5 library ... not found</span><br><span class="line">checking for OpenSSL md5 crypto library ... not found</span><br><span class="line">checking for sha1 in system md library ... not found</span><br><span class="line">checking for OpenSSL sha1 crypto library ... not found</span><br><span class="line">checking for zlib library ... found</span><br></pre></td></tr></table></figure>
+
+<p><strong>若出现上述问题则安装openssl</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install openssl openssl-devel</span><br></pre></td></tr></table></figure>
+
+<p><strong>安装openssl完成后再次执行命令</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./configure --prefix=/usr/local/nginx</span><br></pre></td></tr></table></figure>
+
+<p>出现下图信息则说明配置成功<br><img src="/img/in-post/software-install/nginx-1.png" alt="nginx-1"></p>
+<p><strong>4.安装</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+<p>出现类似这样的就表示安装成功了</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cp conf/nginx.conf '/usr/local/nginx/conf/nginx.conf.default'</span><br><span class="line">test -d '/usr/local/nginx/logs'               || mkdir -p '/usr/local/nginx/logs'</span><br><span class="line">test -d '/usr/local/nginx/logs' ||            mkdir -p '/usr/local/nginx/logs'</span><br><span class="line">test -d '/usr/local/nginx/html'               || cp -R html '/usr/local/nginx'</span><br><span class="line">test -d '/usr/local/nginx/logs' ||            mkdir -p '/usr/local/nginx/logs'</span><br><span class="line">make[1]: Leaving directory '/root/setup/nginx/nginx-1.14.1'</span><br></pre></td></tr></table></figure>
+
+<p><strong>安装完后/usr/local/nginx 后出现几个文件夹conf、html、logs、sbin</strong>，配置<code>nginx.conf</code>在文件夹<code>conf</code>中</p>
+<p><strong>启动nginx</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./usr/nginx/sbin/nginx</span><br></pre></td></tr></table></figure>
+
+<p><strong>部分nginx启动失败解决方法 关闭SELINUX</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/selinux/config</span><br><span class="line">将SELINUX=enforcing改为SELINUX=disabled</span><br></pre></td></tr></table></figure>
+
+<p>这时候需要注意，开启nginx配置的防火墙端口 <a href="https://midkuro.github.io/2019/04/19/firewall-use/">开启防火墙端口教程</a></p>
+<h3 id="安装redis"><a href="#安装redis" class="headerlink" title="安装redis"></a>安装redis</h3><p><strong>1.安装redis</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install redis</span><br></pre></td></tr></table></figure>
+
+<p><strong>2.下载fedora的epel仓库</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install epel-release</span><br></pre></td></tr></table></figure>
+
+<p><strong>3.安装redis数据库</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install redis</span><br></pre></td></tr></table></figure>
+
+<p><strong>4.修改redis.conf配置文件</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">原文件：</span><br><span class="line">bind 127.0.0.1</span><br><span class="line">protected-mode yes</span><br><span class="line">appendonly no//持久化</span><br><span class="line"><span class="meta">#</span><span class="bash"> requirepass foobared</span></span><br><span class="line"></span><br><span class="line">修改后：</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="built_in">bind</span> 127.0.0.1</span></span><br><span class="line">protected-mode no</span><br><span class="line">appendonly yes//持久化</span><br><span class="line">requirepass yourpassword //redis密码</span><br></pre></td></tr></table></figure>
+
+<p><strong>5.使用配置文件启动 redis</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-server /etc/redis.conf &amp;</span><br></pre></td></tr></table></figure>
+
+<p><strong>6.启动redis相关命令</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 启动redis</span></span><br><span class="line">service redis start 或 systemctl start redis.service</span><br><span class="line"><span class="meta">#</span><span class="bash"> 停止redis</span></span><br><span class="line">service redis stop 或 systemctl stop redis.service</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看redis运行状态</span></span><br><span class="line">service redis status 或 systemctl status redis.service</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看redis进程</span></span><br><span class="line">ps -ef | grep redis</span><br></pre></td></tr></table></figure>
+
+<p><strong>7.本机测试访问</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">redis-cli -h 127.0.0.1 -p 6379</span><br><span class="line">quit</span><br></pre></td></tr></table></figure>
+
+<p>这时候需要注意，非本机访问redis需要开启防火墙端口 <a href="https://midkuro.github.io/2019/04/19/firewall-use/">开启防火墙端口教程</a></p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月20日 21:32</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/20/software-install/" title="&#39;linux 下安装nginx、redis&#39;">https://midkuro.github.io/2020/05/20/software-install/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/20/software-install/&title=《'linux 下安装nginx、redis'》 — Kuro's Blog&pic=images/redis.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/20/software-install/&title=《'linux 下安装nginx、redis'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/20/software-install/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'linux 下安装nginx、redis'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/20/software-install/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/20/software-install/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/20/software-install/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Linux/" class="color1">Linux</a>
+      
+    <a href="/tags/Nginx/" class="color1">Nginx</a>
+      
+    <a href="/tags/Redis/" class="color1">Redis</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装nginx"><span class="post-toc-text">安装nginx</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装redis"><span class="post-toc-text">安装redis</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/05/20/nodeJs-install/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;linux 安装Nodejs&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/05/20/systemctl-use/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;centos7 设置应用程序为系统服务&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/Jenkins/" style="font-size: 16.67px;">Jenkins</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/Jenkins/" style="font-size: 16.67px;">Jenkins</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

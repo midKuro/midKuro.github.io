@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;centos7 设置应用程序为系统服务&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="centos7使用systemctl以下的 xxx为服务名称，需根据自身需求修改 1.进入目录 1cd &#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;  2.创建xxx.service文件 1vi xxx.service  3.赋予xxx.service文件权限 1chmod 754 xxx.service  xxx.service文件详解[Unit] 部份    设置参数 参数意义说明">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;centos7 设置应用程序为系统服务&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/20/systemctl-use/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="centos7使用systemctl以下的 xxx为服务名称，需根据自身需求修改 1.进入目录 1cd &#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;  2.创建xxx.service文件 1vi xxx.service  3.赋予xxx.service文件权限 1chmod 754 xxx.service  xxx.service文件详解[Unit] 部份    设置参数 参数意义说明">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-20T12:30:00.000Z">
+<meta property="article:modified_time" content="2020-05-20T13:25:51.999Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Systemctl">
+<meta name="twitter:card" content="summary">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro" target="_blank" href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-systemctl-use" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;centos7 设置应用程序为系统服务&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Systemctl/">Systemctl</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-20
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h3 id="centos7使用systemctl"><a href="#centos7使用systemctl" class="headerlink" title="centos7使用systemctl"></a>centos7使用systemctl</h3><p><strong>以下的 <code>xxx</code>为服务名称，需根据自身需求修改</strong></p>
+<p><strong>1.进入目录</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/lib/systemd/system/</span><br></pre></td></tr></table></figure>
+
+<p><strong>2.创建xxx.service文件</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi xxx.service</span><br></pre></td></tr></table></figure>
+
+<p><strong>3.赋予xxx.service文件权限</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chmod 754 xxx.service</span><br></pre></td></tr></table></figure>
+
+<h4 id="xxx-service文件详解"><a href="#xxx-service文件详解" class="headerlink" title="xxx.service文件详解"></a>xxx.service文件详解</h4><p><strong>[Unit] 部份</strong></p>
+<table>
+<thead>
+<tr>
+<th>设置参数</th>
+<th>参数意义说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Description</td>
+<td>服务名称</td>
+</tr>
+<tr>
+<td>After</td>
+<td>说明此服务 是在哪个服务启动之后才启动的意思！基本上仅是说明服务启动的顺序而已，并没有强制要求里头的服务一定要启动后此 unit 才能启动。</td>
+</tr>
+<tr>
+<td>Before</td>
+<td>与 After 的意义相反，是在什么服务启动前最好启动这个服务的意思。不过这仅是规范服务启动的顺序，并非强制要求的意思。</td>
+</tr>
+<tr>
+<td>Requires</td>
+<td>明确的定义此服务需要在哪个服务启动后才能够启动！就是设置相依服务！如果在此项设置的前导服务没有启动，那么此服务就不会被启动！</td>
+</tr>
+<tr>
+<td>Conflicts</td>
+<td>代表互斥的服务！亦即这个项目后面接的服务如果有启动，那么我们这个服务本身就不能启动！我们服务有启动，则此项目后的服务就不能启动！</td>
+</tr>
+</tbody></table>
+<p><strong>[Service] 部份</strong></p>
+<table>
+<thead>
+<tr>
+<th>设置参数</th>
+<th>参数意义说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Type</td>
+<td>说明这个程序启动的方式，会影响到 ExecStart,一般来说，有下面几种类型 <strong>simple</strong>：默认值，这个程序主要由 ExecStart 接的指令串来启动，启动后常驻于内存中。<strong>forking</strong>：由 ExecStart 启动的程序通过 spawns 延伸出其他子程序来作为此程序 的主要服务。原生的父程序在启动结束后就会终止运行。 <strong>传统的 unit 服务大多属于这种项目.</strong>还有oneshot、dbus、idle等类型，请自行了解.</td>
+</tr>
+<tr>
+<td>EnvironmentFile</td>
+<td>可以指定启动脚本的环境配置文件.例如 sshd.service 的配置文件写入到 /etc/sysconfig/sshd 当中！你也可以使用 Environment= 后面接多个不同的 Shell 变量来给予设置</td>
+</tr>
+<tr>
+<td>ExecStart</td>
+<td>启动应用程序的命令</td>
+</tr>
+<tr>
+<td>ExecStop</td>
+<td>停止应用程序的命令</td>
+</tr>
+<tr>
+<td>ExecReload</td>
+<td>重载应用程序的命令</td>
+</tr>
+<tr>
+<td>Restart</td>
+<td>当设置 Restart=1 时，则当此服务终止后，会再次的启动此服务</td>
+</tr>
+</tbody></table>
+<p><strong>[Install] 部份</strong></p>
+<table>
+<thead>
+<tr>
+<th>设置参数</th>
+<th>参数意义说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>WantedBy</td>
+<td>这个设置后面接的大部分是 *.target unit,意思是这个服务本身是附挂在哪一个target unit下面的,都是附挂在 multi-user.target下面</td>
+</tr>
+</tbody></table>
+<h4 id="redis及nginx为例"><a href="#redis及nginx为例" class="headerlink" title="redis及nginx为例"></a>redis及nginx为例</h4><p>以redis为例，在该路径下 <code>vi redis.service</code>，并复制进去以下内容，进行相应修改.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[unit]</span><br><span class="line">Description&#x3D;redis - high performance web server</span><br><span class="line">After&#x3D;network.target remote-fs.target nss-lookup.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type&#x3D;forking</span><br><span class="line">ExecStart&#x3D;&#x2F;usr&#x2F;local&#x2F;redis&#x2F;redis-5.0.2&#x2F;start.sh</span><br><span class="line">ExecReload&#x3D;</span><br><span class="line">ExecStop&#x3D;&#x2F;usr&#x2F;local&#x2F;redis&#x2F;redis-5.0.2&#x2F;stop.sh</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy&#x3D;multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>以nginx为例，在该路径下 <code>vi nginx.service</code>，并复制进去以下内容，进行相应修改.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[unit]</span><br><span class="line">Description&#x3D;nginx - high performance web server</span><br><span class="line">After&#x3D;network.target remote-fs.target nss-lookup.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type&#x3D;forking</span><br><span class="line">ExecStart&#x3D;&#x2F;usr&#x2F;local&#x2F;nginx&#x2F;sbin&#x2F;nginx -c &#x2F;usr&#x2F;local&#x2F;nginx&#x2F;conf&#x2F;nginx.conf</span><br><span class="line">ExecReload&#x3D;&#x2F;usr&#x2F;local&#x2F;nginx&#x2F;sbin&#x2F;nginx -s reload</span><br><span class="line">ExecStop&#x3D;&#x2F;usr&#x2F;local&#x2F;nginx&#x2F;sbin&#x2F;nginx -s stop</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy&#x3D;multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>比如我mtex-auth服务的启动需要依赖mtex-config服务，可以这样配置<code>vi mtex-auth.service</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description&#x3D;mtex-auth - high performance web server</span><br><span class="line">After&#x3D;network.target remote-fs.target nss-lookup.target mtex-config</span><br><span class="line">Requires&#x3D;mtex-config</span><br><span class="line">[Service]</span><br><span class="line">Type&#x3D;forking</span><br><span class="line">ExecStart&#x3D;&#x2F;home&#x2F;jenkins-running-shell&#x2F;mtex-auth&#x2F;start.sh</span><br><span class="line">ExecReload&#x3D;</span><br><span class="line">ExecStop&#x3D;&#x2F;home&#x2F;jenkins-running-shell&#x2F;mtex-auth&#x2F;stop.sh</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy&#x3D;multi-user.target</span><br></pre></td></tr></table></figure>
+
+<h4 id="服务命令操作"><a href="#服务命令操作" class="headerlink" title="服务命令操作"></a>服务命令操作</h4><p>以nginx为例，保存<strong>nginx.service</strong>文件后赋予执行权限</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chmod 754 nginx.service</span><br></pre></td></tr></table></figure>
+
+<p>nginx开机自启</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable nginx.service</span><br></pre></td></tr></table></figure>
+
+<p>启动nginx</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start nginx.service</span><br></pre></td></tr></table></figure>
+
+<p>停止nginx</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop nginx.service</span><br></pre></td></tr></table></figure>
+
+<p>重启nginx</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart nginx.service</span><br></pre></td></tr></table></figure>
+
+<p><strong>centos7也可以使用旧版命令 system stop xxx 、system start xxx达到效果.</strong></p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月20日 21:25</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/20/systemctl-use/" title="&#39;centos7 设置应用程序为系统服务&#39;">https://midkuro.github.io/2020/05/20/systemctl-use/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/20/systemctl-use/&title=《'centos7 设置应用程序为系统服务'》 — Kuro's Blog&pic=images/linux.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/20/systemctl-use/&title=《'centos7 设置应用程序为系统服务'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/20/systemctl-use/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'centos7 设置应用程序为系统服务'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/20/systemctl-use/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/20/systemctl-use/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/20/systemctl-use/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Linux/" class="color1">Linux</a>
+      
+    <a href="/tags/Systemctl/" class="color5">Systemctl</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#centos7使用systemctl"><span class="post-toc-text">centos7使用systemctl</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#xxx-service文件详解"><span class="post-toc-text">xxx.service文件详解</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#redis及nginx为例"><span class="post-toc-text">redis及nginx为例</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#服务命令操作"><span class="post-toc-text">服务命令操作</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/05/20/software-install/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;linux 下安装nginx、redis&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/05/20/firewalld-use/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;linux 开放防火墙端口&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/Jenkins/" style="font-size: 16.67px;">Jenkins</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/Jenkins/" style="font-size: 16.67px;">Jenkins</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
