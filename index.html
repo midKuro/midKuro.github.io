@@ -107,6 +107,69 @@
       <div class="outer">
         <section id="main" class="body-wrap">
   
+    <article id="post-jenkins-param" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/05/20/jenkins-param/"  >&#39;(2) jenkins 参数化构建&#39;</a>
+    </h1>
+  
+
+          
+      </header>
+    
+    <div class="article-entry " itemprop="articleBody">
+      
+        <div class="article-img">
+            <a href="/2020/05/20/jenkins-param/" >
+                
+                <img src="https://midkuro.github.io/images/banner.jpg" alt="'(2) jenkins 参数化构建'" title="'(2) jenkins 参数化构建'">
+                
+            </a>
+        </div>
+        <div class="article-feed">
+            <p>
+                
+“本文讲解jenkins如何进行参数化配置及远程触发项目构建
+
+
+
+
+jenkins参数化构建通过输入参数进行构建项目，需要插件build with parameters plugin，正常安装成功的jenkins应该都会自带了的，那么参数可以做什么事呢？如果我想要jenkins构建svn上...
+            </p>
+        </div>
+      
+        
+    </div>
+    <footer class="article-footer">
+        
+        <ul class="article-footer-menu">
+            
+                <li><i class="fa fa-calendar"></i>2020-05-20</li>
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/DevOps/" class="color2">DevOps</a>
+      
+    <a href="/tags/Jenkins/" class="color3">Jenkins</a>
+      
+  </li>
+
+        </ul>
+        
+            <a href="/2020/05/20/jenkins-param/#more" class="article-more-link" >more&gt;&gt;</a>
+        
+    </footer>
+  </div>
+</article>
+
+
+  
     <article id="post-jenkins-install" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -123,68 +186,25 @@
     
     <div class="article-entry " itemprop="articleBody">
       
-            
-            <blockquote>
-<p>“安装jenkins. ”</p>
-</blockquote>
-<p id = "build"></p>
-
-<hr>
-<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。<br> jdk-8u201-linux-x64.tar.gz   <a href="https://download.oracle.com/otn-pub/java/jdk/8u201-b09/42970487e3af4f5aa5bca3f542482c60/jdk-8u201-linux-x64.tar.gz" target="_blank" rel="noopener">下载地址</a>     <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html" target="_blank" rel="noopener">官网地址</a> </p>
-<p>apache-maven-3.6.0-bin.tar.gz   <a href="http://mirrors.shu.edu.cn/apache/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz" target="_blank" rel="noopener">下载地址</a>     <a href="http://maven.apache.org/download.cgi" target="_blank" rel="noopener">官网地址</a></p>
-<p>如需更换版本请另行到官网中下载,在linux系统中安装包请选择 <strong>linux-x64.tar.gz</strong>后缀的安装包进行下载.</p>
-<p><strong>下文涉及到JDK及Maven版本相关的命令请自行修改成对应的版本.</strong></p>
-<h3 id="安装JDK"><a href="#安装JDK" class="headerlink" title="安装JDK"></a>安装JDK</h3><p>在linux终端输入命令 <code>cd /usr/local/</code> ，并创建java文件夹 <code>mkdir java</code></p>
-<p>执行 <code>cd java</code> 进入java路径中，并将下载的安装包上传至该路径 <code>/usr/local/java</code>下</p>
-<p>然后执行命令解压下载的压缩包: <code>tar -zxvf jdk-8u201-linux-x64.tar.gz</code> </p>
-<p>若提示错误则请先执行 <code>yum install -y tar</code> 安装压缩包命令再执行解压命令(仅限centos，其他系统请自行百度).</p>
-<p>使用vi进入文件编辑模式，配置环境变量:<code>vi /etc/profile</code> </p>
-<p>敲击键盘<code>i</code>进入编辑模式，在文件末尾添加以下内容:  </p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">export JAVA_HOME=/usr/local/java/jdk1.8.0_201</span><br><span class="line">export JAVA_BIN=/usr/local/java/jdk1.8.0_201/bin</span><br><span class="line">export PATH=$PATH:$JAVA_HOME/bin</span><br><span class="line">export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar</span><br><span class="line">export PATH=$JAVA_HOME/bin:$PATH</span><br></pre></td></tr></table></figure>
-
-
-<p>敲击键盘<code>:wq</code>  表示退出vi编辑模式并保存修改</p>
-<p>执行命令使系统环境变量配置重新加载：<code>source /etc/profile</code></p>
-<p>测试JDK安装是否成功,输入 <code>javac</code> 和<code>java -version</code> 是否安装成功.出现下图类似的信息即安装成功<br><img src="/images/jenkins-install/javac.png" alt="javac"><br><img src="/images/jenkins-install/java-version.png" alt="java-version"></p>
-<p><strong>安装Maven操作与JDK基本相同</strong>，Maven环境变量需要配置的内容：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export MAVEN_HOME=/usr/local/maven/apache-maven-3.6.0</span><br><span class="line">export PATH=$PATH:$MAVEN_HOME/bin`</span><br></pre></td></tr></table></figure>
-
-<p>测试Maven安装是否成功，输入 <code>mvn -v</code> 或者 <code>mvn -version</code> 即可.</p>
-<h3 id="安装Jenkins"><a href="#安装Jenkins" class="headerlink" title="安装Jenkins"></a>安装Jenkins</h3><p>jenkins安装包 jenkins-2.138.3-1.1.noarch.rpm   <a href="https://prodjenkinsreleases.blob.core.windows.net/redhat-stable/jenkins-2.138.3-1.1.noarch.rpm" target="_blank" rel="noopener">下载地址</a>     <a href="https://pkg.jenkins.io/redhat-stable/" target="_blank" rel="noopener">官网地址</a></p>
-<p>不同版本的jenkins安装插件的成功率不一样，<strong>推荐使用该jenkins版本</strong>，支持中文，并且插件安装的成功率较高。</p>
-<p>上传安装包至linux服务器任意路径下，并在该路径下执行 <code>rpm -ivh jenkins-2.138.3-1.1.noarch.rpm</code> 进行安装</p>
-<p>安装成功后可查看jenkins默认安装目录： <code>rpm -ql jenkins</code></p>
-<p>可自定义修改jenkins配置文件： <code>vi /etc/sysconfig/jenkins</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">jenkins端口配置</span></span><br><span class="line">JENKINS_PORT="8080"</span><br><span class="line"><span class="meta">#</span><span class="bash">启动jenkins的用户，最好使用root，否则会出现权限不够等问题</span></span><br><span class="line">JENKINS_USER="jenkins"</span><br><span class="line"><span class="meta">#</span><span class="bash">jenkins的项目路径，建议将其改成 `/data/jenkins` 放在大空间的路径下，避免出现空间不足等问题</span></span><br><span class="line">JENKINS_HOME="/var/lib/jenkins"</span><br></pre></td></tr></table></figure>
-
-<p> 若修改了JENKINS_HOME 配置，则需执行 <code>cp -r 原路径 目标路径</code> 命令，其中 <code>-r</code> 参数表示若给出的源文件是一个目录文件，此时将复制该目录下所有的子目录和文件.</p>
-<p> 根据上文将<code>/var/lib/jenkins/</code>路径修改为 <code>/data/jenkins</code>,则执行的命令为 <code>cp -r /var/lib/jenkins/* /data/jenkins/</code> </p>
-<p> 退出vi编辑模式并保存</p>
-<p>然后设置jenkins服务开机自启动: <code>systemctl enable jenkins.service</code></p>
-<p>启动jenkins: <code>systemtl start jenkins.service</code> ，将<code>start</code>改为<code>restart</code>、<code>stop</code>分别为重启、停止jenkins</p>
-<p>如果启动时报错 <strong>Starting Jenkins -bash: /usr/bin/java: No such file or directory</strong>，则需要编辑文件 <code>vim /etc/init.d/jenkins</code>，将<strong>/usr/bin/java</strong>改为自己java的地址，自己java地址的查看命令 <code>which java</code></p>
-<p>启动jenkins后，浏览器访问  <a href="http://ip:端口">http://ip:端口</a>  </p>
-<p>第一次登录Jenkins会要求解锁，复制红色标记中的路径，执行命令 <code>cat 红色标记的路径</code>，将返回的密码填入浏览器页面中，点击continue继续<br><img src="/images/jenkins-install/jenkins-1.png" alt="jenkins-1"><br><img src="/images/jenkins-install/jenkins-2.png" alt="jenkins-2"><br><img src="/images/jenkins-install/jenkins-3.png" alt="jenkins-3"></p>
-<p>输入完成后会提示安装自定义插件还是推荐插件，<strong>此处我选择左边的推荐插件</strong>，安装过程可能由于网络原因导致失败，后续失败的可以在系统设置-插件管理里面卸载或者重新安装即可，<strong>也可以在插件安装完成后选择retry重新安装失败的插件</strong>，尝试多几次即可。<br><img src="/images/jenkins-install/jenkins-4.png" alt="jenkins-4"></p>
-<p>创建用户并登陆<br><img src="/images/jenkins-install/jenkins-5.png" alt="jenkins-5"></p>
-<p>看到以下界面则代表jenkins已安装成功，到这里linux下安装配置jenkins教程就结束了<br><img src="/images/jenkins-install/jenkins-6.png" alt="jenkins-6"></p>
-<h3 id="卸载Jenkins"><a href="#卸载Jenkins" class="headerlink" title="卸载Jenkins"></a>卸载Jenkins</h3><p>依次执行以下命令彻底卸载Jenkins</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">service jenkins stop</span><br><span class="line">yum clean all</span><br><span class="line">yum -y remove jenkins</span><br><span class="line">rm -rf /var/cache/jenkins</span><br><span class="line"><span class="meta">#</span><span class="bash">请修改为自身机器的jenkins的路径</span></span><br><span class="line">rm -rf /var/lib/jenkins/</span><br></pre></td></tr></table></figure>
-
-
-            <div class="post-copyright">
-    <div class="content">
-        <p>最后更新： 2020年05月20日 14:31</p>
-        <p>原始链接： <a class="post-url" href="/2020/05/20/jenkins-install/" title="&#39;(1) jenkins 安装及卸载&#39;">https://midkuro.github.io/2020/05/20/jenkins-install/</a></p>
-        <footer>
-            <a href="https://midkuro.github.io">
-                <img src="/images/logo.png" alt="Kuro">
-                Kuro
+        <div class="article-img">
+            <a href="/2020/05/20/jenkins-install/" >
+                
+                <img src="https://midkuro.github.io/images/jenkins.png" alt="'(1) jenkins 安装及卸载'" title="'(1) jenkins 安装及卸载'">
+                
             </a>
-        </footer>
-    </div>
-</div>
+        </div>
+        <div class="article-feed">
+            <p>
+                
+“安装jenkins. ”
 
+
+
+
+正文使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。 jdk-8u201-linux-x64.tar.gz   下载地址     官网地址 
+apache-maven-3.6.0-bin.t...
+            </p>
+        </div>
       
         
     </div>

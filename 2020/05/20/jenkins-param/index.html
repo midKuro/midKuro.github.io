@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;(2) jenkins 参数化构建&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="“本文讲解jenkins如何进行参数化配置及远程触发项目构建     jenkins参数化构建通过输入参数进行构建项目，需要插件build with parameters plugin，正常安装成功的jenkins应该都会自带了的，那么参数可以做什么事呢？如果我想要jenkins构建svn上指定版本号的代码并进行测试，就可以使用参数构建. 首先先了解一下怎么获取svn上指定的版本代码:通过项目路">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;(2) jenkins 参数化构建&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/20/jenkins-param/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="“本文讲解jenkins如何进行参数化配置及远程触发项目构建     jenkins参数化构建通过输入参数进行构建项目，需要插件build with parameters plugin，正常安装成功的jenkins应该都会自带了的，那么参数可以做什么事呢？如果我想要jenkins构建svn上指定版本号的代码并进行测试，就可以使用参数构建. 首先先了解一下怎么获取svn上指定的版本代码:通过项目路">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/jenkins-param/jenkins-1.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jenkins-param/jenkins-2.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jenkins-param/jenkins-3.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jenkins-param/jenkins-4.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jenkins-param/jenkins-5.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jenkins-param/jenkins-6.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jenkins-param/jenkins-7.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jenkins-param/jenkins-8.png">
+<meta property="article:published_time" content="2020-05-20T07:50:40.000Z">
+<meta property="article:modified_time" content="2020-05-20T07:47:50.776Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="DevOps">
+<meta property="article:tag" content="Jenkins">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/jenkins-param/jenkins-1.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro" target="_blank" href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-jenkins-param" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;(2) jenkins 参数化构建&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-20
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <blockquote>
+<p>“本文讲解jenkins如何进行参数化配置及远程触发项目构建</p>
+</blockquote>
+<p id = "build"></p>
+
+<hr>
+<h3 id="jenkins参数化构建"><a href="#jenkins参数化构建" class="headerlink" title="jenkins参数化构建"></a>jenkins参数化构建</h3><p>通过输入参数进行构建项目，需要插件<strong>build with parameters plugin</strong>，正常安装成功的jenkins应该都会自带了的，那么参数可以做什么事呢？如果我想要jenkins构建svn上指定版本号的代码并进行测试，就可以使用参数构建.</p>
+<p>首先先了解一下怎么获取svn上指定的版本代码:通过<strong>项目路径@版本号</strong>进行获取的，版本号为<strong>head</strong>时，则取最新版本.</p>
+<p>打开jenkins的任务配置，在<strong>General模块</strong>中找到<strong>参数化构建工程</strong>,勾选并添加自己的参数类型，本文选的是<strong>字符参数</strong>.<br><img src="/images/jenkins-param/jenkins-1.png" alt="jenkins-1"></p>
+<p>填写完相应的参数配置，需要修改项目svn的路径，将其改成<strong>项目路径@$参数名称</strong> 的格式.这时候的svn校验将失效，因为是配置了参数.<br><img src="/images/jenkins-param/jenkins-2.png" alt="jenkins-2"><br> <img src="/images/jenkins-param/jenkins-3.png" alt="jenkins-3"><br>点击保存，就已经完成了参数化构建的配置了.这时候立即构建的按钮将变成Build with Parameters ,是不是觉得很简单？</p>
+<p>这时候又会发现，上下游均配置了参数化构建，但是触发了上游项目构建，并不能将参数传递到我的下游项目中，这时候会发现下游项目使用的是配置中的默认参数<strong>head</strong>,怎么做到传递一次参数即可触发构建呢？</p>
+<p>这时候要先安装一款插件<strong>Parameterized Trigger Plugin，安装完成后解除项目的上下游关系</strong></p>
+<p>然后编辑上游项目的任务配置，找到<strong>Post Steps模块</strong>,点击<strong>Add post-build step</strong>,能够看到多了一项选择，选中<strong>Trigger/call builds other projects</strong><br> <img src="/images/jenkins-param/jenkins-4.png" alt="jenkins-4"></p>
+<p>这里做的是正向配置上下游关系，上文解除了之前上下游关系，目的就是为了在这里通过参数传递进行配置。填入下游项目的工程名称，并点击Add Parameters添加参数，在这里我选择的是<strong>Predefined parameters</strong>,其他的暂时没有去了解.并填写传参的参数，格式为<strong>参数名=${参数名大写}</strong>,这里我并有去测试小写能不能传递，亲们可以试试看…<br><img src="/images/jenkins-param/jenkins-5.png" alt="jenkins-5"></p>
+<p>这时候构建上游，也能够接收到同样的参数并指定的SVN版本号进行构建了,如果想要在shell命令中使用参数，也可以通过<strong>${参数名大写}</strong>进行取值.</p>
+<h3 id="jenkins远程触发项目构建"><a href="#jenkins远程触发项目构建" class="headerlink" title="jenkins远程触发项目构建"></a>jenkins远程触发项目构建</h3><p>jenkins远程触发项目构建能够实现的功能有很多，本文主要讲解如何通过一个url进行触发构建.</p>
+<p>打开任务配置并找到<strong>构建触发器模块</strong>，勾选<strong>触发远程构建</strong>并配置一个秘钥，这个秘钥相当于密码，密码错误的话不会触发构建.<br><img src="/images/jenkins-param/jenkins-6.png" alt="jenkins-6"><br> 如何调度已经说得很清楚了：<strong><a href="http://IP:端口号/job/任务名称/build?token=秘钥">http://IP:端口号/job/任务名称/build?token=秘钥</a></strong></p>
+<p>也可以使用参数进行远程触发：<strong><a href="http://IP:端口号/job/任务名称/buildWithParameters?token=秘钥&amp;&amp;参数名=参数值">http://IP:端口号/job/任务名称/buildWithParameters?token=秘钥&amp;&amp;参数名=参数值</a></strong></p>
+<p>也就是说，这时候项目配置了参数构建及远程触发构建，就可以通过http请求的调度促使jenkins进行参数化远程构建…</p>
+<p>这个时候会发现，如果我没有登录，它是不让我远程触发构建的，那我如何不需要登录就进行触发构建呢？</p>
+<p>首先先安装一个插件<strong>Build Authorization Token Root Plugin</strong>,然后登录用户-&gt;点击右上角的登录名-&gt;再点击设置<br><img src="/images/jenkins-param/jenkins-7.png" alt="jenkins-7"> </p>
+<p>输入生成token的字符串，并生成一串token秘钥，<strong>切记拷贝生成的token秘钥</strong>，然后回到项目的<strong>构建触发器模块</strong>，将生成的token秘钥填入身份验证令牌中即可<br><img src="/images/jenkins-param/jenkins-8.png" alt="jenkins-8"><br>  这时候请求的url将发生变化:</p>
+<p>无参请求:<strong><a href="http://IP:端口号/buildByToken/build?job=任务名称&amp;token=秘钥">http://IP:端口号/buildByToken/build?job=任务名称&amp;token=秘钥</a></strong></p>
+<p>参数请求:<strong><a href="http://IP:端口号/buildByToken/buildWithParameters?job=任务名称&amp;token=秘钥&amp;参数名=参数值">http://IP:端口号/buildByToken/buildWithParameters?job=任务名称&amp;token=秘钥&amp;参数名=参数值</a></strong></p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月20日 15:47</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/20/jenkins-param/" title="&#39;(2) jenkins 参数化构建&#39;">https://midkuro.github.io/2020/05/20/jenkins-param/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/20/jenkins-param/&title=《'(2) jenkins 参数化构建'》 — Kuro's Blog&pic=https://midkuro.github.ioimages/logo.png" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/20/jenkins-param/&title=《'(2) jenkins 参数化构建'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/20/jenkins-param/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'(2) jenkins 参数化构建'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/20/jenkins-param/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/20/jenkins-param/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/20/jenkins-param/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/DevOps/" class="color2">DevOps</a>
+      
+    <a href="/tags/Jenkins/" class="color3">Jenkins</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#jenkins参数化构建"><span class="post-toc-text">jenkins参数化构建</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#jenkins远程触发项目构建"><span class="post-toc-text">jenkins远程触发项目构建</span></a></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/05/20/jenkins-install/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;(1) jenkins 安装及卸载&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 10px;">Jenkins</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 10px;">Jenkins</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
