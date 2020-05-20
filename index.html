@@ -107,6 +107,148 @@
       <div class="outer">
         <section id="main" class="body-wrap">
   
+    <article id="post-nodeJs-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/05/20/nodeJs-install/"  >&#39;linux 安装Nodejs&#39;</a>
+    </h1>
+  
+
+          
+              <span class="header-cate">
+                <i class="fa fa-map-marker"></i>
+                  
+                  <a href="/categories/nodejs/">nodejs</a>
+                  
+              </span>
+          
+      </header>
+    
+    <div class="article-entry " itemprop="articleBody">
+      
+        <div class="article-img">
+            <a href="/2020/05/20/nodeJs-install/" >
+                
+                <img src="https://midkuro.github.io/images/nodejs.jpg" alt="'linux 安装Nodejs'" title="'linux 安装Nodejs'">
+                
+            </a>
+        </div>
+        <div class="article-feed">
+            <p>
+                node.js安装第一种安装方式1.安装gcc，make，openssl
+1yum install -y gcc make gcc-c++ openssl-devel
+
+2.下载安装包下载 node-v9.3.0-linux-x64.tar.gz 下载地址  
+需要其他版本的请到官网中下载即可...
+            </p>
+        </div>
+      
+        
+    </div>
+    <footer class="article-footer">
+        
+        <ul class="article-footer-menu">
+            
+                <li><i class="fa fa-calendar"></i>2020-05-20</li>
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/DevOps/" class="color2">DevOps</a>
+      
+    <a href="/tags/nodejs/" class="color2">nodejs</a>
+      
+  </li>
+
+        </ul>
+        
+            <a href="/2020/05/20/nodeJs-install/#more" class="article-more-link" >more&gt;&gt;</a>
+        
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article id="post-firewalld-use" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/05/20/firewalld-use/"  >&#39;linux 开放防火墙端口&#39;</a>
+    </h1>
+  
+
+          
+              <span class="header-cate">
+                <i class="fa fa-map-marker"></i>
+                  
+                  <a href="/categories/firewall/">firewall</a>
+                  
+              </span>
+          
+      </header>
+    
+    <div class="article-entry " itemprop="articleBody">
+      
+        <div class="article-img">
+            <a href="/2020/05/20/firewalld-use/" >
+                
+                <img src="https://midkuro.github.io/images/firewall.jpg" alt="'linux 开放防火墙端口'" title="'linux 开放防火墙端口'">
+                
+            </a>
+        </div>
+        <div class="article-feed">
+            <p>
+                centos7开放防火墙端口启动防火墙
+1systemctl start firewalld
+
+停止防火墙
+1systemctl stop firewalld
+
+查看防火墙状态
+1firewall-cmd --state
+
+查看防火墙启动状态详情
+1systemctl status firew...
+            </p>
+        </div>
+      
+        
+    </div>
+    <footer class="article-footer">
+        
+        <ul class="article-footer-menu">
+            
+                <li><i class="fa fa-calendar"></i>2020-05-20</li>
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/linux/" class="color1">linux</a>
+      
+    <a href="/tags/firewall/" class="color4">firewall</a>
+      
+  </li>
+
+        </ul>
+        
+            <a href="/2020/05/20/firewalld-use/#more" class="article-more-link" >more&gt;&gt;</a>
+        
+    </footer>
+  </div>
+</article>
+
+
+  
     <article id="post-jenkins-param" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -139,13 +281,8 @@
         </div>
         <div class="article-feed">
             <p>
-                
-“本文讲解jenkins如何进行参数化配置及远程触发项目构建
-
-
-
-
-jenkins参数化构建通过输入参数进行构建项目，需要插件build with parameters plugin，正常安装成功的jenkins应该都会自带了的，那么参数可以做什么事呢？如果我想要jenkins构建svn上...
+                jenkins参数化构建通过输入参数进行构建项目，需要插件build with parameters plugin，正常安装成功的jenkins应该都会自带了的，那么参数可以做什么事呢？如果我想要jenkins构建svn上指定版本号的代码并进行测试，就可以使用参数构建.
+首先先了解一下怎么获取...
             </p>
         </div>
       
@@ -209,14 +346,8 @@ jenkins参数化构建通过输入参数进行构建项目，需要插件build w
         </div>
         <div class="article-feed">
             <p>
-                
-“本文主要spring boot项目之间的引用触发上下游构建与持续集成. ”
-
-
----
-
-spring boot项目之间的引用触发上下游构建首先上下游关系是可以通过配置实现的，可以通过正向配置或反向配置实现，建议统一使用一种。
-先理解一下上游下游的概念，目前我的dao项目作为一个基础类库，...
+                spring boot项目之间的引用触发上下游构建首先上下游关系是可以通过配置实现的，可以通过正向配置或反向配置实现，建议统一使用一种。
+先理解一下上游下游的概念，目前我的dao项目作为一个基础类库，然后mtex-auth引入依赖dao，那么dao就是mtex-auth的上游，mtex-aut...
             </p>
         </div>
       
@@ -280,14 +411,9 @@ spring boot项目之间的引用触发上下游构建首先上下游关系是可
         </div>
         <div class="article-feed">
             <p>
-                
-“本文主要讲解jenkins的插件安装及配置简单的java任务. ”
-
-
----
-
-jenkins插件安装及环境配置在使用jenkins之前，我们先学会配置jenkins的环境以及插件的安装，jenkins的环境配置均支持自动下载安装，但是不建议，也许是个人对环境路径存放位置具有强迫症吧。
-...
+                jenkins插件安装及环境配置在使用jenkins之前，我们先学会配置jenkins的环境以及插件的安装，jenkins的环境配置均支持自动下载安装，但是不建议，也许是个人对环境路径存放位置具有强迫症吧。
+首先进入jenkins页面，点击左侧 系统管理 ,然后找到 全局工具配置
+然后选中 J...
             </p>
         </div>
       
@@ -351,14 +477,8 @@ jenkins插件安装及环境配置在使用jenkins之前，我们先学会配置
         </div>
         <div class="article-feed">
             <p>
-                
-“安装jenkins. ”
-
-
-
-
-正文使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。 jdk-8u201-linux-x64.tar.gz   下载地址     官网地址 
-apache-maven-3.6.0-bin.t...
+                安装JDK使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。 jdk-8u201-linux-x64.tar.gz   下载地址     官网地址 
+apache-maven-3.6.0-bin.tar.gz   下载地址    ...
             </p>
         </div>
       
@@ -444,10 +564,10 @@ apache-maven-3.6.0-bin.t...
 <div class="sidebar-menu-box" id="sidebar-menu-box">
     <div class="sidebar-menu-box-container">
         <div id="sidebar-menu-box-categories">
-            <a class="category-link" href="/categories/Jenkins/">Jenkins</a>
+            <a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/firewall/">firewall</a><a class="category-link" href="/categories/nodejs/">nodejs</a>
         </div>
         <div id="sidebar-menu-box-tags">
-            <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 10px;">Jenkins</a>
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/firewall/" style="font-size: 10px;">firewall</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/nodejs/" style="font-size: 10px;">nodejs</a>
         </div>
     </div>
     <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
@@ -480,7 +600,7 @@ apache-maven-3.6.0-bin.t...
     <div class="mobile-header-tag-container">
         <span class="title">Tags</span>
         <div id="mobile-header-container-tags">
-            <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 10px;">Jenkins</a>
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/firewall/" style="font-size: 10px;">firewall</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/nodejs/" style="font-size: 10px;">nodejs</a>
         </div>
     </div>
 </div>

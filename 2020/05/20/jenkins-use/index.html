@@ -8,12 +8,12 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
-  <meta name="description" content="“本文主要讲解jenkins的插件安装及配置简单的java任务. ”   ---  jenkins插件安装及环境配置在使用jenkins之前，我们先学会配置jenkins的环境以及插件的安装，jenkins的环境配置均支持自动下载安装，但是不建议，也许是个人对环境路径存放位置具有强迫症吧。 首先进入jenkins页面，点击左侧 系统管理 ,然后找到 全局工具配置 然后选中 JDK及Maven的环">
+  <meta name="description" content="jenkins插件安装及环境配置在使用jenkins之前，我们先学会配置jenkins的环境以及插件的安装，jenkins的环境配置均支持自动下载安装，但是不建议，也许是个人对环境路径存放位置具有强迫症吧。 首先进入jenkins页面，点击左侧 系统管理 ,然后找到 全局工具配置 然后选中 JDK及Maven的环境进行配置，点击新增将出现配置路径，将已安装的JDK及Maven路径配置上即可,对gi">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;jenkins 搭建简单的构建&#39;">
 <meta property="og:url" content="https://midkuro.github.io/2020/05/20/jenkins-use/index.html">
 <meta property="og:site_name" content="Kuro&#39;s Blog">
-<meta property="og:description" content="“本文主要讲解jenkins的插件安装及配置简单的java任务. ”   ---  jenkins插件安装及环境配置在使用jenkins之前，我们先学会配置jenkins的环境以及插件的安装，jenkins的环境配置均支持自动下载安装，但是不建议，也许是个人对环境路径存放位置具有强迫症吧。 首先进入jenkins页面，点击左侧 系统管理 ,然后找到 全局工具配置 然后选中 JDK及Maven的环">
+<meta property="og:description" content="jenkins插件安装及环境配置在使用jenkins之前，我们先学会配置jenkins的环境以及插件的安装，jenkins的环境配置均支持自动下载安装，但是不建议，也许是个人对环境路径存放位置具有强迫症吧。 首先进入jenkins页面，点击左侧 系统管理 ,然后找到 全局工具配置 然后选中 JDK及Maven的环境进行配置，点击新增将出现配置路径，将已安装的JDK及Maven路径配置上即可,对gi">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://midkuro.github.io/images/jenkins-use/jenkins-1.png">
 <meta property="og:image" content="https://midkuro.github.io/images/jenkins-use/jenkins-2.png">
@@ -37,7 +37,7 @@
 <meta property="og:image" content="https://midkuro.github.io/images/jenkins-use/jenkins-20.png">
 <meta property="og:image" content="https://midkuro.github.io/images/jenkins-use/jenkins-21.png">
 <meta property="article:published_time" content="2020-05-20T05:51:40.000Z">
-<meta property="article:modified_time" content="2020-05-20T09:28:31.095Z">
+<meta property="article:modified_time" content="2020-05-20T09:40:55.442Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="DevOps">
 <meta property="article:tag" content="Jenkins">
@@ -167,13 +167,7 @@
     <div class="article-entry post-content" itemprop="articleBody">
       
             
-            <blockquote>
-<p>“本文主要讲解jenkins的插件安装及配置简单的java任务. ”</p>
-</blockquote>
-<p id = "build"></p>
----
-
-<h3 id="jenkins插件安装及环境配置"><a href="#jenkins插件安装及环境配置" class="headerlink" title="jenkins插件安装及环境配置"></a>jenkins插件安装及环境配置</h3><p>在使用jenkins之前，我们先学会配置jenkins的环境以及插件的安装，jenkins的环境配置均支持自动下载安装，但是不建议，也许是个人对环境路径存放位置具有强迫症吧。</p>
+            <h3 id="jenkins插件安装及环境配置"><a href="#jenkins插件安装及环境配置" class="headerlink" title="jenkins插件安装及环境配置"></a>jenkins插件安装及环境配置</h3><p>在使用jenkins之前，我们先学会配置jenkins的环境以及插件的安装，jenkins的环境配置均支持自动下载安装，但是不建议，也许是个人对环境路径存放位置具有强迫症吧。</p>
 <p>首先进入jenkins页面，点击左侧 <strong>系统管理</strong> ,然后找到 <strong>全局工具配置</strong><br><img src="/images/jenkins-use/jenkins-1.png" alt="jenkins-1"><br><img src="/images/jenkins-use/jenkins-2.png" alt="jenkins-2"></p>
 <p>然后选中 JDK及Maven的环境进行配置，点击<strong>新增</strong>将出现配置路径，将已安装的JDK及Maven路径配置上即可,对git有需要的可以自行配置.<br><img src="/images/jenkins-use/jenkins-3.png" alt="jenkins-3"><br><img src="/images/jenkins-use/jenkins-4.png" alt="jenkins-4"><br><img src="/images/jenkins-use/jenkins-5.png" alt="jenkins-5"></p>
 <p>配置完成后点击下方的save进行保存，接下来进入插件安装，点击<strong>插件管理</strong>，并进入可选插件界面<br><img src="/images/jenkins-use/jenkins-6.png" alt="jenkins-6"><br><img src="/images/jenkins-use/jenkins-7.png" alt="jenkins-7"></p>
@@ -216,7 +210,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年05月20日 17:28</p>
+        <p>最后更新： 2020年05月20日 17:40</p>
         <p>原始链接： <a class="post-url" href="/2020/05/20/jenkins-use/" title="&#39;jenkins 搭建简单的构建&#39;">https://midkuro.github.io/2020/05/20/jenkins-use/</a></p>
         <footer>
             <a href="https://midkuro.github.io">
@@ -417,10 +411,10 @@
 <div class="sidebar-menu-box" id="sidebar-menu-box">
     <div class="sidebar-menu-box-container">
         <div id="sidebar-menu-box-categories">
-            <a class="category-link" href="/categories/Jenkins/">Jenkins</a>
+            <a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/firewall/">firewall</a><a class="category-link" href="/categories/nodejs/">nodejs</a>
         </div>
         <div id="sidebar-menu-box-tags">
-            <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 10px;">Jenkins</a>
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/firewall/" style="font-size: 10px;">firewall</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/nodejs/" style="font-size: 10px;">nodejs</a>
         </div>
     </div>
     <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
@@ -453,7 +447,7 @@
     <div class="mobile-header-tag-container">
         <span class="title">Tags</span>
         <div id="mobile-header-container-tags">
-            <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 10px;">Jenkins</a>
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/firewall/" style="font-size: 10px;">firewall</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/nodejs/" style="font-size: 10px;">nodejs</a>
         </div>
     </div>
 </div>

@@ -8,12 +8,12 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
-  <meta name="description" content="“安装jenkins. ”     正文使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。 jdk-8u201-linux-x64.tar.gz   下载地址     官网地址  apache-maven-3.6.0-bin.tar.gz   下载地址     官网地址 如需更换版本请另行到官网中下载,在linux系统中安装包请选择">
+  <meta name="description" content="安装JDK使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。 jdk-8u201-linux-x64.tar.gz   下载地址     官网地址  apache-maven-3.6.0-bin.tar.gz   下载地址     官网地址 如需更换版本请另行到官网中下载,在linux系统中安装包请选择 linux-x64.tar.g">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;jenkins 安装及卸载&#39;">
 <meta property="og:url" content="https://midkuro.github.io/2020/05/20/jenkins-install/index.html">
 <meta property="og:site_name" content="Kuro&#39;s Blog">
-<meta property="og:description" content="“安装jenkins. ”     正文使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。 jdk-8u201-linux-x64.tar.gz   下载地址     官网地址  apache-maven-3.6.0-bin.tar.gz   下载地址     官网地址 如需更换版本请另行到官网中下载,在linux系统中安装包请选择">
+<meta property="og:description" content="安装JDK使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。 jdk-8u201-linux-x64.tar.gz   下载地址     官网地址  apache-maven-3.6.0-bin.tar.gz   下载地址     官网地址 如需更换版本请另行到官网中下载,在linux系统中安装包请选择 linux-x64.tar.g">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/javac.png">
 <meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/java-version.png">
@@ -24,7 +24,7 @@
 <meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-5.png">
 <meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-6.png">
 <meta property="article:published_time" content="2020-05-20T05:50:40.000Z">
-<meta property="article:modified_time" content="2020-05-20T08:59:14.234Z">
+<meta property="article:modified_time" content="2020-05-20T09:41:55.078Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="DevOps">
 <meta property="article:tag" content="Jenkins">
@@ -154,17 +154,11 @@
     <div class="article-entry post-content" itemprop="articleBody">
       
             
-            <blockquote>
-<p>“安装jenkins. ”</p>
-</blockquote>
-<p id = "build"></p>
-
-<hr>
-<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。<br> jdk-8u201-linux-x64.tar.gz   <a href="https://download.oracle.com/otn-pub/java/jdk/8u201-b09/42970487e3af4f5aa5bca3f542482c60/jdk-8u201-linux-x64.tar.gz" target="_blank" rel="noopener">下载地址</a>     <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html" target="_blank" rel="noopener">官网地址</a> </p>
+            <h3 id="安装JDK"><a href="#安装JDK" class="headerlink" title="安装JDK"></a>安装JDK</h3><p>使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。<br> jdk-8u201-linux-x64.tar.gz   <a href="https://download.oracle.com/otn-pub/java/jdk/8u201-b09/42970487e3af4f5aa5bca3f542482c60/jdk-8u201-linux-x64.tar.gz" target="_blank" rel="noopener">下载地址</a>     <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html" target="_blank" rel="noopener">官网地址</a> </p>
 <p>apache-maven-3.6.0-bin.tar.gz   <a href="http://mirrors.shu.edu.cn/apache/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz" target="_blank" rel="noopener">下载地址</a>     <a href="http://maven.apache.org/download.cgi" target="_blank" rel="noopener">官网地址</a></p>
 <p>如需更换版本请另行到官网中下载,在linux系统中安装包请选择 <strong>linux-x64.tar.gz</strong>后缀的安装包进行下载.</p>
 <p><strong>下文涉及到JDK及Maven版本相关的命令请自行修改成对应的版本.</strong></p>
-<h3 id="安装JDK"><a href="#安装JDK" class="headerlink" title="安装JDK"></a>安装JDK</h3><p>在linux终端输入命令 <code>cd /usr/local/</code> ，并创建java文件夹 <code>mkdir java</code></p>
+<p>在linux终端输入命令 <code>cd /usr/local/</code> ，并创建java文件夹 <code>mkdir java</code></p>
 <p>执行 <code>cd java</code> 进入java路径中，并将下载的安装包上传至该路径 <code>/usr/local/java</code>下</p>
 <p>然后执行命令解压下载的压缩包: <code>tar -zxvf jdk-8u201-linux-x64.tar.gz</code> </p>
 <p>若提示错误则请先执行 <code>yum install -y tar</code> 安装压缩包命令再执行解压命令(仅限centos，其他系统请自行百度).</p>
@@ -204,7 +198,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年05月20日 16:59</p>
+        <p>最后更新： 2020年05月20日 17:41</p>
         <p>原始链接： <a class="post-url" href="/2020/05/20/jenkins-install/" title="&#39;jenkins 安装及卸载&#39;">https://midkuro.github.io/2020/05/20/jenkins-install/</a></p>
         <footer>
             <a href="https://midkuro.github.io">
@@ -324,7 +318,7 @@
 
     <aside class="post-toc-pos post-toc-top" id="post-toc">
         <nav class="post-toc-wrap">
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#正文"><span class="post-toc-text">正文</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装JDK"><span class="post-toc-text">安装JDK</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装Jenkins"><span class="post-toc-text">安装Jenkins</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#卸载Jenkins"><span class="post-toc-text">卸载Jenkins</span></a></li></ol></li></ol>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装JDK"><span class="post-toc-text">安装JDK</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装Jenkins"><span class="post-toc-text">安装Jenkins</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#卸载Jenkins"><span class="post-toc-text">卸载Jenkins</span></a></li></ol>
         </nav>
     </aside>
     
@@ -400,10 +394,10 @@
 <div class="sidebar-menu-box" id="sidebar-menu-box">
     <div class="sidebar-menu-box-container">
         <div id="sidebar-menu-box-categories">
-            <a class="category-link" href="/categories/Jenkins/">Jenkins</a>
+            <a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/firewall/">firewall</a><a class="category-link" href="/categories/nodejs/">nodejs</a>
         </div>
         <div id="sidebar-menu-box-tags">
-            <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 10px;">Jenkins</a>
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/firewall/" style="font-size: 10px;">firewall</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/nodejs/" style="font-size: 10px;">nodejs</a>
         </div>
     </div>
     <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
@@ -436,7 +430,7 @@
     <div class="mobile-header-tag-container">
         <span class="title">Tags</span>
         <div id="mobile-header-container-tags">
-            <a href="/tags/DevOps/" style="font-size: 10px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 10px;">Jenkins</a>
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/firewall/" style="font-size: 10px;">firewall</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/nodejs/" style="font-size: 10px;">nodejs</a>
         </div>
     </div>
 </div>
