@@ -572,7 +572,7 @@ body {
   width: 600px;
   margin: 20px auto;
   padding: 10px 0;
-  color: #666;
+  color: #fff;
   letter-spacing: 5px;
 }
 .header-nav {
@@ -583,7 +583,7 @@ body {
   text-align: center;
 }
 .header-nav .social a {
-  color: #696969;
+  color: #fff;
   margin-right: 15px;
   -webkit-transition: 0.2s ease;
   transition: 0.2s ease;
