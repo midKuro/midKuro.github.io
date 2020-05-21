@@ -3,33 +3,27 @@
 <head>
   <meta charset="utf-8">
   
-  <title>&#39;jenkins 安装及卸载&#39; | Kuro&#39;s Blog</title>
+  <title>&#39;docker 安装及存储路径配置&#39; | Kuro&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
-  <meta name="description" content="安装JDK使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。 jdk-8u201-linux-x64.tar.gz   下载地址     官网地址  apache-maven-3.6.0-bin.tar.gz   下载地址     官网地址 如需更换版本请另行到官网中下载,在linux系统中安装包请选择 linux-x64.tar.g">
+  <meta name="description" content="docker 安装及存储路径配置docker的安装安装docker yum install docker 启动服务 systemctl start docker.service 设置开机自启 systemctl enable docker.service 查看docker版本 docker version 使用centos7系统的，建议把selinux服务关闭，它会影响docker的启动及一些容器">
 <meta property="og:type" content="article">
-<meta property="og:title" content="&#39;jenkins 安装及卸载&#39;">
-<meta property="og:url" content="https://midkuro.github.io/2020/05/20/jenkins-install/index.html">
+<meta property="og:title" content="&#39;docker 安装及存储路径配置&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/21/docker-install/index.html">
 <meta property="og:site_name" content="Kuro&#39;s Blog">
-<meta property="og:description" content="安装JDK使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。 jdk-8u201-linux-x64.tar.gz   下载地址     官网地址  apache-maven-3.6.0-bin.tar.gz   下载地址     官网地址 如需更换版本请另行到官网中下载,在linux系统中安装包请选择 linux-x64.tar.g">
+<meta property="og:description" content="docker 安装及存储路径配置docker的安装安装docker yum install docker 启动服务 systemctl start docker.service 设置开机自启 systemctl enable docker.service 查看docker版本 docker version 使用centos7系统的，建议把selinux服务关闭，它会影响docker的启动及一些容器">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/javac.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/java-version.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-1.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-2.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-3.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-4.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-5.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-6.png">
-<meta property="article:published_time" content="2020-05-20T05:50:40.000Z">
-<meta property="article:modified_time" content="2020-05-20T09:41:55.078Z">
+<meta property="og:image" content="https://midkuro.github.io/images/docker-install/docker-1.png">
+<meta property="og:image" content="https://midkuro.github.io/images/docker-install/docker-2.png">
+<meta property="article:published_time" content="2020-05-21T11:00:00.000Z">
+<meta property="article:modified_time" content="2020-05-21T11:55:31.566Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="DevOps">
-<meta property="article:tag" content="Jenkins">
+<meta property="article:tag" content="Docker">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://midkuro.github.io/images/jenkins-install/javac.png">
+<meta name="twitter:image" content="https://midkuro.github.io/images/docker-install/docker-1.png">
   
   
     <link rel="icon" href="/favicon.ico">
@@ -118,14 +112,14 @@
     </div>
 </header>
       <div class="outer">
-        <section id="main" class="body-wrap"><article id="post-jenkins-install" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main" class="body-wrap"><article id="post-docker-install" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="post-title" itemprop="name">
-      &#39;jenkins 安装及卸载&#39;
+      &#39;docker 安装及存储路径配置&#39;
     </h1>
     <div class="post-title-bar">
       <ul>
@@ -133,12 +127,12 @@
               <li>
                   <i class="fa fa-book"></i>
                   
-                      <a href="/categories/Jenkins/">Jenkins</a>
+                      <a href="/categories/Docker/">Docker</a>
                   
               </li>
           
         <li>
-          <i class="fa fa-calendar"></i>  2020-05-20
+          <i class="fa fa-calendar"></i>  2020-05-21
         </li>
         <li>
           <i class="fa fa-eye"></i>
@@ -154,52 +148,91 @@
     <div class="article-entry post-content" itemprop="articleBody">
       
             
-            <h3 id="安装JDK"><a href="#安装JDK" class="headerlink" title="安装JDK"></a>安装JDK</h3><p>使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。<br> jdk-8u201-linux-x64.tar.gz   <a href="https://download.oracle.com/otn-pub/java/jdk/8u201-b09/42970487e3af4f5aa5bca3f542482c60/jdk-8u201-linux-x64.tar.gz" target="_blank" rel="noopener">下载地址</a>     <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html" target="_blank" rel="noopener">官网地址</a> </p>
-<p>apache-maven-3.6.0-bin.tar.gz   <a href="http://mirrors.shu.edu.cn/apache/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz" target="_blank" rel="noopener">下载地址</a>     <a href="http://maven.apache.org/download.cgi" target="_blank" rel="noopener">官网地址</a></p>
-<p>如需更换版本请另行到官网中下载,在linux系统中安装包请选择 <strong>linux-x64.tar.gz</strong>后缀的安装包进行下载.</p>
-<p><strong>下文涉及到JDK及Maven版本相关的命令请自行修改成对应的版本.</strong></p>
-<p>在linux终端输入命令 <code>cd /usr/local/</code> ，并创建java文件夹 <code>mkdir java</code></p>
-<p>执行 <code>cd java</code> 进入java路径中，并将下载的安装包上传至该路径 <code>/usr/local/java</code>下</p>
-<p>然后执行命令解压下载的压缩包: <code>tar -zxvf jdk-8u201-linux-x64.tar.gz</code> </p>
-<p>若提示错误则请先执行 <code>yum install -y tar</code> 安装压缩包命令再执行解压命令(仅限centos，其他系统请自行百度).</p>
-<p>使用vi进入文件编辑模式，配置环境变量:<code>vi /etc/profile</code> </p>
-<p>敲击键盘<code>i</code>进入编辑模式，在文件末尾添加以下内容:  </p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">export JAVA_HOME=/usr/local/java/jdk1.8.0_201</span><br><span class="line">export JAVA_BIN=/usr/local/java/jdk1.8.0_201/bin</span><br><span class="line">export PATH=$PATH:$JAVA_HOME/bin</span><br><span class="line">export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar</span><br><span class="line">export PATH=$JAVA_HOME/bin:$PATH</span><br></pre></td></tr></table></figure>
-
-
-<p>敲击键盘<code>:wq</code>  表示退出vi编辑模式并保存修改</p>
-<p>执行命令使系统环境变量配置重新加载：<code>source /etc/profile</code></p>
-<p>测试JDK安装是否成功,输入 <code>javac</code> 和<code>java -version</code> 是否安装成功.出现下图类似的信息即安装成功<br><img src="/images/jenkins-install/javac.png" alt="javac"><br><img src="/images/jenkins-install/java-version.png" alt="java-version"></p>
-<p><strong>安装Maven操作与JDK基本相同</strong>，Maven环境变量需要配置的内容：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export MAVEN_HOME=/usr/local/maven/apache-maven-3.6.0</span><br><span class="line">export PATH=$PATH:$MAVEN_HOME/bin`</span><br></pre></td></tr></table></figure>
-
-<p>测试Maven安装是否成功，输入 <code>mvn -v</code> 或者 <code>mvn -version</code> 即可.</p>
-<h3 id="安装Jenkins"><a href="#安装Jenkins" class="headerlink" title="安装Jenkins"></a>安装Jenkins</h3><p>jenkins安装包 jenkins-2.138.3-1.1.noarch.rpm   <a href="https://prodjenkinsreleases.blob.core.windows.net/redhat-stable/jenkins-2.138.3-1.1.noarch.rpm" target="_blank" rel="noopener">下载地址</a>     <a href="https://pkg.jenkins.io/redhat-stable/" target="_blank" rel="noopener">官网地址</a></p>
-<p>不同版本的jenkins安装插件的成功率不一样，<strong>推荐使用该jenkins版本</strong>，支持中文，并且插件安装的成功率较高。</p>
-<p>上传安装包至linux服务器任意路径下，并在该路径下执行 <code>rpm -ivh jenkins-2.138.3-1.1.noarch.rpm</code> 进行安装</p>
-<p>安装成功后可查看jenkins默认安装目录： <code>rpm -ql jenkins</code></p>
-<p>可自定义修改jenkins配置文件： <code>vi /etc/sysconfig/jenkins</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">jenkins端口配置</span></span><br><span class="line">JENKINS_PORT="8080"</span><br><span class="line"><span class="meta">#</span><span class="bash">启动jenkins的用户，最好使用root，否则会出现权限不够等问题</span></span><br><span class="line">JENKINS_USER="jenkins"</span><br><span class="line"><span class="meta">#</span><span class="bash">jenkins的项目路径，建议将其改成 `/data/jenkins` 放在大空间的路径下，避免出现空间不足等问题</span></span><br><span class="line">JENKINS_HOME="/var/lib/jenkins"</span><br></pre></td></tr></table></figure>
-
-<p> 若修改了JENKINS_HOME 配置，则需执行 <code>cp -r 原路径 目标路径</code> 命令，其中 <code>-r</code> 参数表示若给出的源文件是一个目录文件，此时将复制该目录下所有的子目录和文件.</p>
-<p> 根据上文将<code>/var/lib/jenkins/</code>路径修改为 <code>/data/jenkins</code>,则执行的命令为 <code>cp -r /var/lib/jenkins/* /data/jenkins/</code> </p>
-<p> 退出vi编辑模式并保存</p>
-<p>然后设置jenkins服务开机自启动: <code>systemctl enable jenkins.service</code></p>
-<p>启动jenkins: <code>systemtl start jenkins.service</code> ，将<code>start</code>改为<code>restart</code>、<code>stop</code>分别为重启、停止jenkins</p>
-<p>如果启动时报错 <strong>Starting Jenkins -bash: /usr/bin/java: No such file or directory</strong>，则需要编辑文件 <code>vim /etc/init.d/jenkins</code>，将<strong>/usr/bin/java</strong>改为自己java的地址，自己java地址的查看命令 <code>which java</code></p>
-<p>启动jenkins后，浏览器访问  <a href="http://ip:端口">http://ip:端口</a>  </p>
-<p>第一次登录Jenkins会要求解锁，复制红色标记中的路径，执行命令 <code>cat 红色标记的路径</code>，将返回的密码填入浏览器页面中，点击continue继续<br><img src="/images/jenkins-install/jenkins-1.png" alt="jenkins-1"><br><img src="/images/jenkins-install/jenkins-2.png" alt="jenkins-2"><br><img src="/images/jenkins-install/jenkins-3.png" alt="jenkins-3"></p>
-<p>输入完成后会提示安装自定义插件还是推荐插件，<strong>此处我选择左边的推荐插件</strong>，安装过程可能由于网络原因导致失败，后续失败的可以在系统设置-插件管理里面卸载或者重新安装即可，<strong>也可以在插件安装完成后选择retry重新安装失败的插件</strong>，尝试多几次即可。<br><img src="/images/jenkins-install/jenkins-4.png" alt="jenkins-4"></p>
-<p>创建用户并登陆<br><img src="/images/jenkins-install/jenkins-5.png" alt="jenkins-5"></p>
-<p>看到以下界面则代表jenkins已安装成功，到这里linux下安装配置jenkins教程就结束了<br><img src="/images/jenkins-install/jenkins-6.png" alt="jenkins-6"></p>
-<h3 id="卸载Jenkins"><a href="#卸载Jenkins" class="headerlink" title="卸载Jenkins"></a>卸载Jenkins</h3><p>依次执行以下命令彻底卸载Jenkins</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">service jenkins stop</span><br><span class="line">yum clean all</span><br><span class="line">yum -y remove jenkins</span><br><span class="line">rm -rf /var/cache/jenkins</span><br><span class="line"><span class="meta">#</span><span class="bash">请修改为自身机器的jenkins的路径</span></span><br><span class="line">rm -rf /var/lib/jenkins/</span><br></pre></td></tr></table></figure>
-
+            <h3 id="docker-安装及存储路径配置"><a href="#docker-安装及存储路径配置" class="headerlink" title="docker 安装及存储路径配置"></a>docker 安装及存储路径配置</h3><h4 id="docker的安装"><a href="#docker的安装" class="headerlink" title="docker的安装"></a>docker的安装</h4><p>安装docker <code>yum install docker</code></p>
+<p>启动服务 <code>systemctl start docker.service</code></p>
+<p>设置开机自启 <code>systemctl enable docker.service</code></p>
+<p>查看docker版本 <code>docker version</code></p>
+<p><strong>使用centos7系统的，建议把selinux服务关闭，它会影响docker的启动及一些容器的使用.</strong></p>
+<p>SELinux一共有3种状态，分别是Enforcing，Permissive和Disabled状态。第一种是默认状态，表示强制启用，第二种是宽容的意思，即大部分规则都放行。第三种是禁用，即不设置任何规则。可以通过命令 <code>getenforce</code> 查看selinux服务的状态，默认一般都是 Enforcing。</p>
+<p>修改selinux状态，编辑配置文件 <code>vi /etc/selinux/config</code> 将 <code>SELINUX=enforcing</code>改为<code>SELINUX=disabled</code>，该操作后需要重启机器。<br><img src="/images/docker-install/docker-1.png" alt="docker-1"></p>
+<h4 id="docker存储路径配置"><a href="#docker存储路径配置" class="headerlink" title="docker存储路径配置"></a>docker存储路径配置</h4><p>docker每次创建一个镜像、容器都会占据大量的内存空间，所以<strong>建议在安装的时候就把docker放在大空间的路径下</strong>，默认的docker是安装在<code>/var/lib/docker</code>下.</p>
+<p>如果docker已经启动，请先关闭它 <code>systemctl stop docker.service</code> . 我打算把它迁移到 <code>/home/docker</code> 路径下，所以先创建文件夹 <code>mkdir /home/docker</code></p>
+<p>然后编辑docker存储路径配置 <code>vi /lib/systemd/system/docker.service</code>,找到<strong>ExecStart</strong>项 ,把它改成<code>ExecStart=/usr/bin/dockerd  --graph /home/docker</code><br><img src="/images/docker-install/docker-2.png" alt="docker-2"></p>
+<p>保存文件后需要执行命令重新加载配置 <code>systemctl daemon-reload</code>.</p>
+<p>然后将原路径文件拷贝到新的路径下 <code>cp -r /var/lib/docker/* /home/docker/</code> docker中不存在容器的话，可以把原路径下的文件删除</p>
+<p>如果docker已经存在容器，需要迁移容器的挂载点</p>
+<ul>
+<li><p>首先输入命令 <code>df -hl</code> 查看挂载点，docker容器会创建名称为<strong>overlay和shm</strong>的挂载点.这时候可以执行命令<code>cat /proc/mounts|grep docker</code>查看挂载点哪些是属于docker的.</p>
+</li>
+<li><p>然后执行 <code>umount 挂载点全路径</code> 去掉该容器的挂载，并修改挂载点的路径，改成迁移后的docker路径,重新执行挂载命令 <code>mount 新挂载点路径</code></p>
+</li>
+<li><p>再次查看挂载 <code>df -hl</code> 这时候应该看到的都是新的路径，也可以删除原路径下的文件了，如果依旧删除失败，重启机器后可删除，然后尝试运行镜像。</p>
+</li>
+<li><p>如果运行镜像失败提示:<strong>Error response from daemon: shim error: docker-runc not installed on system</strong>,执行命令创建软连接<code>cd /usr/libexec/docker/</code>和<code>ln -s docker-runc-current docker-runc</code></p>
+</li>
+<li><p>如果运行镜像失败提示:<strong>exec: “docker-proxy”: executable file not found in $PATH</strong>，执行命令创建软连接 <code>ln -s /usr/libexec/docker/docker-proxy-current /usr/bin/docker-proxy</code></p>
+</li>
+<li><p>再次运行镜像，应该就能启动了，个人觉得迁移存储路径，有很大可能会出现上面的运行镜像失败的错误，如果是新装的docker迁移了存储路径，也可以先执行上面创建软连接的命令避免以后发生错误.</p>
+</li>
+</ul>
+<h3 id="常用的docker命令"><a href="#常用的docker命令" class="headerlink" title="常用的docker命令"></a>常用的docker命令</h3><table>
+<thead>
+<tr>
+<th>docker run 参数配置</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-v /etc/localtime:/etc/localtime:ro</td>
+<td>把主机时间同步到容器中，不同步会相差8小时</td>
+</tr>
+<tr>
+<td>--privileged=true</td>
+<td>centos默认关闭SElinux，需要开启特权模式，以root的形式进入容器，否则是普通用户</td>
+</tr>
+<tr>
+<td>--restart=always</td>
+<td>容器开启自动启动</td>
+</tr>
+<tr>
+<td>--net=host</td>
+<td>容器和宿主机的IP同网段</td>
+</tr>
+<tr>
+<td>-v 主机路径:容器路径</td>
+<td>用户把主机的文件挂载到容器中</td>
+</tr>
+<tr>
+<td>/usr/sbin/init</td>
+<td>在容器中开启系统命令，能够使用systemctl的命令</td>
+</tr>
+<tr>
+<td>-d:</td>
+<td>后台运行容器，并返回容器ID；</td>
+</tr>
+<tr>
+<td>-i:</td>
+<td>以交互模式运行容器，通常与 -t 同时使用；</td>
+</tr>
+<tr>
+<td>-p:</td>
+<td>端口映射，格式为：主机(宿主)端口:容器端口</td>
+</tr>
+<tr>
+<td>-t:</td>
+<td>为容器重新分配一个伪输入终端，通常与 -i 同时使用；</td>
+</tr>
+<tr>
+<td>--name=nginx-lb</td>
+<td>为容器指定一个名称；</td>
+</tr>
+</tbody></table>
+<p><a href="http://www.runoob.com/docker/docker-command-manual.html" target="_blank" rel="noopener">命令大全</a></p>
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年05月20日 17:41</p>
-        <p>原始链接： <a class="post-url" href="/2020/05/20/jenkins-install/" title="&#39;jenkins 安装及卸载&#39;">https://midkuro.github.io/2020/05/20/jenkins-install/</a></p>
+        <p>最后更新： 2020年05月21日 19:55</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/21/docker-install/" title="&#39;docker 安装及存储路径配置&#39;">https://midkuro.github.io/2020/05/21/docker-install/</a></p>
         <footer>
             <a href="https://midkuro.github.io">
                 <img src="/images/logo.png" alt="Kuro">
@@ -256,7 +289,7 @@
     <div class="post-share-list" id="share-list">
         <ul class="share-icons">
           <li>
-            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/20/jenkins-install/&title=《'jenkins 安装及卸载'》 — Kuro's Blog&pic=images/jenkins.png" data-title="微博">
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/21/docker-install/&title=《'docker 安装及存储路径配置'》 — Kuro's Blog&pic=images/Docker.jpg" data-title="微博">
               <i class="fa fa-weibo"></i>
             </a>
           </li>
@@ -266,22 +299,22 @@
             </a>
           </li>
           <li>
-            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/20/jenkins-install/&title=《'jenkins 安装及卸载'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/21/docker-install/&title=《'docker 安装及存储路径配置'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
               <i class="fa fa-qq"></i>
             </a>
           </li>
           <li>
-            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/20/jenkins-install/" data-title="Facebook">
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/21/docker-install/" data-title="Facebook">
               <i class="fa fa-facebook"></i>
             </a>
           </li>
           <li>
-            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'jenkins 安装及卸载'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/20/jenkins-install/&via=https://midkuro.github.io" data-title="Twitter">
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'docker 安装及存储路径配置'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/21/docker-install/&via=https://midkuro.github.io" data-title="Twitter">
               <i class="fa fa-twitter"></i>
             </a>
           </li>
           <li>
-            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/20/jenkins-install/" data-title="Google+">
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/21/docker-install/" data-title="Google+">
               <i class="fa fa-google-plus"></i>
             </a>
           </li>
@@ -291,7 +324,7 @@
 <div class="post-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;" id="wxShare-close">×</a>
     <p>扫一扫，分享到微信</p>
-    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/20/jenkins-install/" alt="微信分享二维码">
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/21/docker-install/" alt="微信分享二维码">
 </div>
 
 <div class="mask"></div>
@@ -305,7 +338,7 @@
       
     <a href="/tags/DevOps/" class="color2">DevOps</a>
       
-    <a href="/tags/Jenkins/" class="color3">Jenkins</a>
+    <a href="/tags/Docker/" class="color2">Docker</a>
       
   </li>
 
@@ -318,30 +351,35 @@
 
     <aside class="post-toc-pos post-toc-top" id="post-toc">
         <nav class="post-toc-wrap">
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装JDK"><span class="post-toc-text">安装JDK</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装Jenkins"><span class="post-toc-text">安装Jenkins</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#卸载Jenkins"><span class="post-toc-text">卸载Jenkins</span></a></li></ol>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#docker-安装及存储路径配置"><span class="post-toc-text">docker 安装及存储路径配置</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#docker的安装"><span class="post-toc-text">docker的安装</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#docker存储路径配置"><span class="post-toc-text">docker存储路径配置</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#常用的docker命令"><span class="post-toc-text">常用的docker命令</span></a></li></ol>
         </nav>
     </aside>
     
 
 <nav id="article-nav">
   
-    <a href="/2020/05/20/jenkins-use/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/05/21/docker-use/" id="article-nav-newer" class="article-nav-link-wrap">
 
       <span class="article-nav-title">
         <i class="fa fa-hand-o-left" aria-hidden="true"></i>
         
-          &#39;jenkins 搭建简单的构建&#39;
+          &#39;docker 安装nginx redis&#39;
         
       </span>
     </a>
   
+  
+    <a href="/2020/05/20/nodeJs-install/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;linux 安装Nodejs&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
   
 </nav>
 
 
 
     
-        <div id="SOHUCS" sid="jenkins-install" ></div>
+        <div id="SOHUCS" sid="docker-install" ></div>
 <script type="text/javascript">
     (function(){
         var appid = 'cyuQBWutQ';

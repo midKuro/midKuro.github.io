@@ -3,33 +3,29 @@
 <head>
   <meta charset="utf-8">
   
-  <title>&#39;jenkins 安装及卸载&#39; | Kuro&#39;s Blog</title>
+  <title>&#39;docker 安装私服仓库&#39; | Kuro&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
-  <meta name="description" content="安装JDK使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。 jdk-8u201-linux-x64.tar.gz   下载地址     官网地址  apache-maven-3.6.0-bin.tar.gz   下载地址     官网地址 如需更换版本请另行到官网中下载,在linux系统中安装包请选择 linux-x64.tar.g">
+  <meta name="description" content="docker私服仓库docker的私服仓库存储不像maven私服有完整独立的应用，它是通过docker获取私服仓库镜像，并根据镜像创建私服仓库容器 说白了，docker的私服仓库的搭建就是拉取镜像、创建容器、上传镜像的过程 宿主机环境IP：192.168.1.131 私服仓库的搭建1、拉取私服镜像 1docker pull registry:2  2、启动私服 1docker run --name">
 <meta property="og:type" content="article">
-<meta property="og:title" content="&#39;jenkins 安装及卸载&#39;">
-<meta property="og:url" content="https://midkuro.github.io/2020/05/20/jenkins-install/index.html">
+<meta property="og:title" content="&#39;docker 安装私服仓库&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/21/docker-registry/index.html">
 <meta property="og:site_name" content="Kuro&#39;s Blog">
-<meta property="og:description" content="安装JDK使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。 jdk-8u201-linux-x64.tar.gz   下载地址     官网地址  apache-maven-3.6.0-bin.tar.gz   下载地址     官网地址 如需更换版本请另行到官网中下载,在linux系统中安装包请选择 linux-x64.tar.g">
+<meta property="og:description" content="docker私服仓库docker的私服仓库存储不像maven私服有完整独立的应用，它是通过docker获取私服仓库镜像，并根据镜像创建私服仓库容器 说白了，docker的私服仓库的搭建就是拉取镜像、创建容器、上传镜像的过程 宿主机环境IP：192.168.1.131 私服仓库的搭建1、拉取私服镜像 1docker pull registry:2  2、启动私服 1docker run --name">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/javac.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/java-version.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-1.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-2.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-3.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-4.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-5.png">
-<meta property="og:image" content="https://midkuro.github.io/images/jenkins-install/jenkins-6.png">
-<meta property="article:published_time" content="2020-05-20T05:50:40.000Z">
-<meta property="article:modified_time" content="2020-05-20T09:41:55.078Z">
+<meta property="og:image" content="https://midkuro.github.io/images/docker-registry/registry-1.png">
+<meta property="og:image" content="https://midkuro.github.io/images/docker-registry/registry-2.png">
+<meta property="og:image" content="https://midkuro.github.io/images/docker-registry/registry-3.png">
+<meta property="og:image" content="https://midkuro.github.io/images/docker-registry/registry-4.png">
+<meta property="article:published_time" content="2020-05-21T13:00:00.000Z">
+<meta property="article:modified_time" content="2020-05-21T12:10:56.088Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="DevOps">
-<meta property="article:tag" content="Jenkins">
+<meta property="article:tag" content="Docker">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://midkuro.github.io/images/jenkins-install/javac.png">
+<meta name="twitter:image" content="https://midkuro.github.io/images/docker-registry/registry-1.png">
   
   
     <link rel="icon" href="/favicon.ico">
@@ -118,14 +114,14 @@
     </div>
 </header>
       <div class="outer">
-        <section id="main" class="body-wrap"><article id="post-jenkins-install" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main" class="body-wrap"><article id="post-docker-registry" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="post-title" itemprop="name">
-      &#39;jenkins 安装及卸载&#39;
+      &#39;docker 安装私服仓库&#39;
     </h1>
     <div class="post-title-bar">
       <ul>
@@ -133,12 +129,12 @@
               <li>
                   <i class="fa fa-book"></i>
                   
-                      <a href="/categories/Jenkins/">Jenkins</a>
+                      <a href="/categories/Docker/">Docker</a>
                   
               </li>
           
         <li>
-          <i class="fa fa-calendar"></i>  2020-05-20
+          <i class="fa fa-calendar"></i>  2020-05-21
         </li>
         <li>
           <i class="fa fa-eye"></i>
@@ -154,52 +150,46 @@
     <div class="article-entry post-content" itemprop="articleBody">
       
             
-            <h3 id="安装JDK"><a href="#安装JDK" class="headerlink" title="安装JDK"></a>安装JDK</h3><p>使用jenkins，需要安装jdk及maven，可以自己安装于本机，也可以通过安装完jenkins后进行自动安装。<br> jdk-8u201-linux-x64.tar.gz   <a href="https://download.oracle.com/otn-pub/java/jdk/8u201-b09/42970487e3af4f5aa5bca3f542482c60/jdk-8u201-linux-x64.tar.gz" target="_blank" rel="noopener">下载地址</a>     <a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html" target="_blank" rel="noopener">官网地址</a> </p>
-<p>apache-maven-3.6.0-bin.tar.gz   <a href="http://mirrors.shu.edu.cn/apache/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz" target="_blank" rel="noopener">下载地址</a>     <a href="http://maven.apache.org/download.cgi" target="_blank" rel="noopener">官网地址</a></p>
-<p>如需更换版本请另行到官网中下载,在linux系统中安装包请选择 <strong>linux-x64.tar.gz</strong>后缀的安装包进行下载.</p>
-<p><strong>下文涉及到JDK及Maven版本相关的命令请自行修改成对应的版本.</strong></p>
-<p>在linux终端输入命令 <code>cd /usr/local/</code> ，并创建java文件夹 <code>mkdir java</code></p>
-<p>执行 <code>cd java</code> 进入java路径中，并将下载的安装包上传至该路径 <code>/usr/local/java</code>下</p>
-<p>然后执行命令解压下载的压缩包: <code>tar -zxvf jdk-8u201-linux-x64.tar.gz</code> </p>
-<p>若提示错误则请先执行 <code>yum install -y tar</code> 安装压缩包命令再执行解压命令(仅限centos，其他系统请自行百度).</p>
-<p>使用vi进入文件编辑模式，配置环境变量:<code>vi /etc/profile</code> </p>
-<p>敲击键盘<code>i</code>进入编辑模式，在文件末尾添加以下内容:  </p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">export JAVA_HOME=/usr/local/java/jdk1.8.0_201</span><br><span class="line">export JAVA_BIN=/usr/local/java/jdk1.8.0_201/bin</span><br><span class="line">export PATH=$PATH:$JAVA_HOME/bin</span><br><span class="line">export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar</span><br><span class="line">export PATH=$JAVA_HOME/bin:$PATH</span><br></pre></td></tr></table></figure>
+            <h3 id="docker私服仓库"><a href="#docker私服仓库" class="headerlink" title="docker私服仓库"></a>docker私服仓库</h3><p><strong>docker的私服仓库存储不像maven私服有完整独立的应用，它是通过docker获取私服仓库镜像，并根据镜像创建私服仓库容器</strong></p>
+<p><strong>说白了，docker的私服仓库的搭建就是拉取镜像、创建容器、上传镜像的过程</strong></p>
+<p><strong>宿主机环境IP：192.168.1.131</strong></p>
+<h4 id="私服仓库的搭建"><a href="#私服仓库的搭建" class="headerlink" title="私服仓库的搭建"></a>私服仓库的搭建</h4><p><strong>1、拉取私服镜像</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull registry:2</span><br></pre></td></tr></table></figure>
 
-
-<p>敲击键盘<code>:wq</code>  表示退出vi编辑模式并保存修改</p>
-<p>执行命令使系统环境变量配置重新加载：<code>source /etc/profile</code></p>
-<p>测试JDK安装是否成功,输入 <code>javac</code> 和<code>java -version</code> 是否安装成功.出现下图类似的信息即安装成功<br><img src="/images/jenkins-install/javac.png" alt="javac"><br><img src="/images/jenkins-install/java-version.png" alt="java-version"></p>
-<p><strong>安装Maven操作与JDK基本相同</strong>，Maven环境变量需要配置的内容：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export MAVEN_HOME=/usr/local/maven/apache-maven-3.6.0</span><br><span class="line">export PATH=$PATH:$MAVEN_HOME/bin`</span><br></pre></td></tr></table></figure>
-
-<p>测试Maven安装是否成功，输入 <code>mvn -v</code> 或者 <code>mvn -version</code> 即可.</p>
-<h3 id="安装Jenkins"><a href="#安装Jenkins" class="headerlink" title="安装Jenkins"></a>安装Jenkins</h3><p>jenkins安装包 jenkins-2.138.3-1.1.noarch.rpm   <a href="https://prodjenkinsreleases.blob.core.windows.net/redhat-stable/jenkins-2.138.3-1.1.noarch.rpm" target="_blank" rel="noopener">下载地址</a>     <a href="https://pkg.jenkins.io/redhat-stable/" target="_blank" rel="noopener">官网地址</a></p>
-<p>不同版本的jenkins安装插件的成功率不一样，<strong>推荐使用该jenkins版本</strong>，支持中文，并且插件安装的成功率较高。</p>
-<p>上传安装包至linux服务器任意路径下，并在该路径下执行 <code>rpm -ivh jenkins-2.138.3-1.1.noarch.rpm</code> 进行安装</p>
-<p>安装成功后可查看jenkins默认安装目录： <code>rpm -ql jenkins</code></p>
-<p>可自定义修改jenkins配置文件： <code>vi /etc/sysconfig/jenkins</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">jenkins端口配置</span></span><br><span class="line">JENKINS_PORT="8080"</span><br><span class="line"><span class="meta">#</span><span class="bash">启动jenkins的用户，最好使用root，否则会出现权限不够等问题</span></span><br><span class="line">JENKINS_USER="jenkins"</span><br><span class="line"><span class="meta">#</span><span class="bash">jenkins的项目路径，建议将其改成 `/data/jenkins` 放在大空间的路径下，避免出现空间不足等问题</span></span><br><span class="line">JENKINS_HOME="/var/lib/jenkins"</span><br></pre></td></tr></table></figure>
-
-<p> 若修改了JENKINS_HOME 配置，则需执行 <code>cp -r 原路径 目标路径</code> 命令，其中 <code>-r</code> 参数表示若给出的源文件是一个目录文件，此时将复制该目录下所有的子目录和文件.</p>
-<p> 根据上文将<code>/var/lib/jenkins/</code>路径修改为 <code>/data/jenkins</code>,则执行的命令为 <code>cp -r /var/lib/jenkins/* /data/jenkins/</code> </p>
-<p> 退出vi编辑模式并保存</p>
-<p>然后设置jenkins服务开机自启动: <code>systemctl enable jenkins.service</code></p>
-<p>启动jenkins: <code>systemtl start jenkins.service</code> ，将<code>start</code>改为<code>restart</code>、<code>stop</code>分别为重启、停止jenkins</p>
-<p>如果启动时报错 <strong>Starting Jenkins -bash: /usr/bin/java: No such file or directory</strong>，则需要编辑文件 <code>vim /etc/init.d/jenkins</code>，将<strong>/usr/bin/java</strong>改为自己java的地址，自己java地址的查看命令 <code>which java</code></p>
-<p>启动jenkins后，浏览器访问  <a href="http://ip:端口">http://ip:端口</a>  </p>
-<p>第一次登录Jenkins会要求解锁，复制红色标记中的路径，执行命令 <code>cat 红色标记的路径</code>，将返回的密码填入浏览器页面中，点击continue继续<br><img src="/images/jenkins-install/jenkins-1.png" alt="jenkins-1"><br><img src="/images/jenkins-install/jenkins-2.png" alt="jenkins-2"><br><img src="/images/jenkins-install/jenkins-3.png" alt="jenkins-3"></p>
-<p>输入完成后会提示安装自定义插件还是推荐插件，<strong>此处我选择左边的推荐插件</strong>，安装过程可能由于网络原因导致失败，后续失败的可以在系统设置-插件管理里面卸载或者重新安装即可，<strong>也可以在插件安装完成后选择retry重新安装失败的插件</strong>，尝试多几次即可。<br><img src="/images/jenkins-install/jenkins-4.png" alt="jenkins-4"></p>
-<p>创建用户并登陆<br><img src="/images/jenkins-install/jenkins-5.png" alt="jenkins-5"></p>
-<p>看到以下界面则代表jenkins已安装成功，到这里linux下安装配置jenkins教程就结束了<br><img src="/images/jenkins-install/jenkins-6.png" alt="jenkins-6"></p>
-<h3 id="卸载Jenkins"><a href="#卸载Jenkins" class="headerlink" title="卸载Jenkins"></a>卸载Jenkins</h3><p>依次执行以下命令彻底卸载Jenkins</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">service jenkins stop</span><br><span class="line">yum clean all</span><br><span class="line">yum -y remove jenkins</span><br><span class="line">rm -rf /var/cache/jenkins</span><br><span class="line"><span class="meta">#</span><span class="bash">请修改为自身机器的jenkins的路径</span></span><br><span class="line">rm -rf /var/lib/jenkins/</span><br></pre></td></tr></table></figure>
-
+<p><strong>2、启动私服</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name registry -tid --privileged=true --restart=always --net=host -v /home/docker/repository:/var/lib/registry registry</span><br></pre></td></tr></table></figure>
+<p>这里使用的是V2版本的私服仓库,<code>/var/lib/registry</code>是私服仓库存储上传镜像的路径，把它挂载到宿主机上避免因为容器坏损丢失私服仓库的镜像存储</p>
+<p><strong>3、标记镜像</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">命令：docker tag [OPTIONS] IMAGE[:TAG] [REGISTRYHOST/][USERNAME/]NAME[:TAG]</span><br><span class="line">例子：docker tag mtex-admin 192.168.1.131:5000/mtex-admin</span><br></pre></td></tr></table></figure>
+<p>这里以镜像名：<code>mtex-admin</code>为例，标记镜像将其归入某一仓库,再次查看镜像列表</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images</span><br></pre></td></tr></table></figure>
+<p>能够看见出现了<code>192.168.1.131:5000/mtex-admin</code>镜像名称，细心点会发现它的镜像ID和<code>mtex-admin</code>是一样的<br><img src="/images/docker-registry/registry-1.png" alt="registry-1"><br>也就是说，两个镜像名称都映射到同一个镜像ID上，如何避免这种情况呢？</p>
+<p>可以执行tag命令之后，删除原来的旧镜像名称，只保留一个名称映射</p>
+<p>也可以在创建镜像时，镜像名称以<code>[私服IP:端口/名称]</code>命名,不必在执行tag命令</p>
+<p><strong>4、上传私服</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker push 192.168.1.131:5000/mtex-admin</span><br></pre></td></tr></table></figure>
+<p><img src="/images/docker-registry/registry-2.png" alt="registry-2"><br>可以看到上传成功了，使用<code>192.168.1.134</code>试一下拉取镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull 192.168.1.131:5000/mtex-admin</span><br></pre></td></tr></table></figure>
+<p><img src="/images/docker-registry/registry-3.png" alt="registry-3"><br><strong>5、配置解析</strong></p>
+<p>考虑到记住IP比较麻烦，可以在<code>/etc/hosts</code>中增加本地仓库的域名解析</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo "192.168.1.131 docker-registry" &gt;&gt; /etc/hosts</span><br></pre></td></tr></table></figure>
+<p>这时候再执行<code>cat /etc/hosts</code>能够看到，已经增加进去了<br><img src="/images/docker-registry/registry-4.png" alt="registry-4"></p>
+<p><strong>6、查看私服镜像</strong></p>
+<p>可以通过浏览器打开<code>http://192.168.1.131:5000/v2/_catalog</code>查看</p>
+<p><strong>7、删除私服镜像</strong></p>
+<p>上面已经将私服的镜像内容挂载到宿主机<code>/home/docker/repository</code>路径中，只需要进入对应路径删除镜像即可<br>路径目录是<code>/home/docker/repository/docker/registry/v2/repositories</code></p>
+<h4 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h4><p>Docker自从1.3.X之后<code>docker registry</code>交互默认使用的是HTTPS，但是搭建私有镜像默认使用的是HTTP服务，所以与私有镜像交互时可能会出现以下错误</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Get https://192.168.1.131:5000/v2/: http: server gave HTTP response to HTTPS client</span><br></pre></td></tr></table></figure>
+<p>docker版本1.2以上的，在<code>/etc/docker/daemon.json</code>文件中增加以下内容</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">必须要增加在第一行</span></span><br><span class="line">&#123; "insecure-registries":["192.168.1.131:5000"]</span><br></pre></td></tr></table></figure>
+<p>然后重启docker，重启registry</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart docker.service</span><br></pre></td></tr></table></figure>
+<p>查看docker版本的命令<code>docker -v</code>，低于1.2的版本可以升级版本，也可以上网寻找解决方法.</p>
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年05月20日 17:41</p>
-        <p>原始链接： <a class="post-url" href="/2020/05/20/jenkins-install/" title="&#39;jenkins 安装及卸载&#39;">https://midkuro.github.io/2020/05/20/jenkins-install/</a></p>
+        <p>最后更新： 2020年05月21日 20:10</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/21/docker-registry/" title="&#39;docker 安装私服仓库&#39;">https://midkuro.github.io/2020/05/21/docker-registry/</a></p>
         <footer>
             <a href="https://midkuro.github.io">
                 <img src="/images/logo.png" alt="Kuro">
@@ -256,7 +246,7 @@
     <div class="post-share-list" id="share-list">
         <ul class="share-icons">
           <li>
-            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/20/jenkins-install/&title=《'jenkins 安装及卸载'》 — Kuro's Blog&pic=images/jenkins.png" data-title="微博">
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/21/docker-registry/&title=《'docker 安装私服仓库'》 — Kuro's Blog&pic=images/Docker.jpg" data-title="微博">
               <i class="fa fa-weibo"></i>
             </a>
           </li>
@@ -266,22 +256,22 @@
             </a>
           </li>
           <li>
-            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/20/jenkins-install/&title=《'jenkins 安装及卸载'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/21/docker-registry/&title=《'docker 安装私服仓库'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
               <i class="fa fa-qq"></i>
             </a>
           </li>
           <li>
-            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/20/jenkins-install/" data-title="Facebook">
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/21/docker-registry/" data-title="Facebook">
               <i class="fa fa-facebook"></i>
             </a>
           </li>
           <li>
-            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'jenkins 安装及卸载'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/20/jenkins-install/&via=https://midkuro.github.io" data-title="Twitter">
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'docker 安装私服仓库'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/21/docker-registry/&via=https://midkuro.github.io" data-title="Twitter">
               <i class="fa fa-twitter"></i>
             </a>
           </li>
           <li>
-            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/20/jenkins-install/" data-title="Google+">
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/21/docker-registry/" data-title="Google+">
               <i class="fa fa-google-plus"></i>
             </a>
           </li>
@@ -291,7 +281,7 @@
 <div class="post-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;" id="wxShare-close">×</a>
     <p>扫一扫，分享到微信</p>
-    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/20/jenkins-install/" alt="微信分享二维码">
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/21/docker-registry/" alt="微信分享二维码">
 </div>
 
 <div class="mask"></div>
@@ -305,7 +295,7 @@
       
     <a href="/tags/DevOps/" class="color2">DevOps</a>
       
-    <a href="/tags/Jenkins/" class="color3">Jenkins</a>
+    <a href="/tags/Docker/" class="color2">Docker</a>
       
   </li>
 
@@ -318,30 +308,25 @@
 
     <aside class="post-toc-pos post-toc-top" id="post-toc">
         <nav class="post-toc-wrap">
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装JDK"><span class="post-toc-text">安装JDK</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装Jenkins"><span class="post-toc-text">安装Jenkins</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#卸载Jenkins"><span class="post-toc-text">卸载Jenkins</span></a></li></ol>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#docker私服仓库"><span class="post-toc-text">docker私服仓库</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#私服仓库的搭建"><span class="post-toc-text">私服仓库的搭建</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#常见问题"><span class="post-toc-text">常见问题</span></a></li></ol></li></ol>
         </nav>
     </aside>
     
 
 <nav id="article-nav">
   
-    <a href="/2020/05/20/jenkins-use/" id="article-nav-newer" class="article-nav-link-wrap">
-
-      <span class="article-nav-title">
-        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
-        
-          &#39;jenkins 搭建简单的构建&#39;
-        
-      </span>
-    </a>
   
+    <a href="/2020/05/21/docker-dockfile/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;docker 执行DockerFile创建镜像&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
   
 </nav>
 
 
 
     
-        <div id="SOHUCS" sid="jenkins-install" ></div>
+        <div id="SOHUCS" sid="docker-registry" ></div>
 <script type="text/javascript">
     (function(){
         var appid = 'cyuQBWutQ';
