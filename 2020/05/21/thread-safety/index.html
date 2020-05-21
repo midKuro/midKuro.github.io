@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Java 线程安全性&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="线程安全性什么是线程安全性多线程访问某个类时，不管运行环境采用何种调度方式或者这些线程将如何交替执行，并且在主调代码中不需要任何额外的同步或者异步，这个类都能表现出正确的行为，那么就称这个类是线程安全的。 示例：一个无状态的Servlet 123456&#x2F;&#x2F;Servlet容器是一个单例多线程的容器对象public class StatelessServlet implements Servlet &amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Java 线程安全性&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/21/thread-safety/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="线程安全性什么是线程安全性多线程访问某个类时，不管运行环境采用何种调度方式或者这些线程将如何交替执行，并且在主调代码中不需要任何额外的同步或者异步，这个类都能表现出正确的行为，那么就称这个类是线程安全的。 示例：一个无状态的Servlet 123456&#x2F;&#x2F;Servlet容器是一个单例多线程的容器对象public class StatelessServlet implements Servlet &amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-21T15:20:00.000Z">
+<meta property="article:modified_time" content="2020-05-21T16:03:25.175Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Thread">
+<meta name="twitter:card" content="summary">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-thread-safety" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Java 线程安全性&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Thread/">Thread</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-21
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h2 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h2><h3 id="什么是线程安全性"><a href="#什么是线程安全性" class="headerlink" title="什么是线程安全性"></a>什么是线程安全性</h3><p>多线程访问某个类时，不管运行环境采用何种调度方式或者这些线程将如何交替执行，并且在主调代码中不需要任何额外的同步或者异步，这个类都能表现出正确的行为，那么就称这个类是线程安全的。</p>
+<p>示例：一个无状态的Servlet</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Servlet容器是一个单例多线程的容器对象</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StatelessServlet</span> <span class="keyword">implements</span> <span class="title">Servlet</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">service</span><span class="params">(String param)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//多线程调度该方法</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>StatelessServlet</code>是无状态的，它既不包含任何域，也不包含任何对其他类中域的引用。计算过程中的临时状态存储在线程栈帧的局部变量表中，并且只能由正在执行的线程访问。</strong></p>
+<p>访问<code>StatelessServlet</code>的线程不会影响另一个访问<code>StatelessServlet</code>的线程计算结果。由于线程访问无状态对象的行为并不会影响其他线程中操作的正确性，因此，<strong>无状态对象一定是线程安全的。</strong></p>
+<h3 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h3><p>当我们在无状态对象中增加一个状态时，会出现什么情况？假设我们希望增加一个 “命中计数器” 来统计所处理的请求数量。一种直观的方法是增加一个<code>long</code>类型的域，并且每次处理一个请求就将这个值加1。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@NotThreadSafe</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UnsafeCountingServlet</span> <span class="keyword">implements</span> <span class="title">Servlet</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> count = <span class="number">0</span>;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">service</span><span class="params">(String param)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//执行方法逻辑</span></span><br><span class="line">        ++count;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>不幸的是，<code>UnsafeContingServlet</code>并非线程安全的，尽管它在单线程环境中能够正确运行，这个类可能会丢失一些更新操作，<strong><code>++count</code>并非原子的</strong>，它包含了三个独立的操作 ：读取<code>count</code>值，将值加1，然后将计算结果写入<code>count</code>。这是一个 “<strong>读取-修改-写入</strong>” 的操作，并且其结果状态依赖于之前的状态。</p>
+<p>上述例子给出了两个线程在没有同步的情况下，同时对一个计数器执行递增操作时发生的情况。如果计数器的初始值为9，那么在某些情况下，每个线程读到的值都为9，接着执行递增操作，并且都将计数器的值设置为10。命中计数器的值就讲偏差1。</p>
+<h4 id="竟态条件"><a href="#竟态条件" class="headerlink" title="竟态条件"></a>竟态条件</h4><p>在并发编程中，这种由于不恰当的执行时序而出现不正确的结果是一种非常重要的情况，它有一个正式的名字：<strong>竟态条件（Race Condition）</strong>。</p>
+<p>最常见的竟态条件类型就是 “<strong>先检查后执行(Check-then-Act)</strong>” 操作，即通过一个可能失效的观测结果来决定下一步的动作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@NotThreadSafe</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyInitRace</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Object instance = <span class="keyword">null</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(instance == <span class="keyword">null</span>)</span><br><span class="line">            instance = <span class="keyword">new</span> Object();</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>LazyInitRace</code>中包含一个竟态条件，它可能会破坏这个类的正确性。假定 线程A 和 线程B 同时执行<code>getInstance</code>，A看到<code>instance</code>为空，因而创建一个新的<code>Object</code>实例，B同样需要判断<code>instance</code>是否为空，此时的<code>instance</code>是否为空，取决于不可预测的时序，包括线程的调度方式，以及A需要花多长时间来初始化<code>Object</code>并设置<code>instance</code>，如果当B检查时，<code>instance</code>为空，那么两次调用<code>getInstance</code>时可能会得到不同的结果。</p>
+<p>在<code>UnsafeCountingServlet</code>的统计命中计数器中存在另一种竟态条件。在 “<strong>读取-修改-写入</strong>” 操作中，基于对象之前的状态来定义对象状态的转换，要递增一个计数器，你必须知道它之前的值，并确保在执行更新的过程中没有其他线程会修改或使用这个值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ThreadSafe</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CountingServlet</span> <span class="keyword">implements</span> <span class="title">Servlet</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> AtomicLong count = <span class="keyword">new</span> AtomicLong(<span class="number">0</span>);</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">service</span><span class="params">(String param)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//执行方法逻辑</span></span><br><span class="line">        count.incrementAndGet();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>java.util.concurrent.atomic</code>包中包含一些原子变量类，通过用<code>AtomicLong</code>来代替<code>long</code>类型的计数器，能够确保所有对计数器状态的访问都是原子的。</p>
+<h4 id="内置锁"><a href="#内置锁" class="headerlink" title="内置锁"></a>内置锁</h4><p>Java提供了一种内置的锁机制来支持原子性：同步代码块(<code>Synchronized Block</code>)，<strong>同步代码块包括两个部分：一个作为锁的对象引用，一个作为由这个锁保护的代码块。</strong></p>
+<p>以关键字<code>synchronized</code>来修饰方法就是一种横跨整个方法体的同步代码快，其中该同步代码块的锁就是方法调用所在的对象。静态的<code>synchronized</code>方法以Class对象作为锁。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">    <span class="comment">//访问或者修改由锁保护的共享状态</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每个Java对象都可以用作一个实现同步的锁，这些锁被称为内置锁或监视器锁。线程在进入同步代码块之前会自动获得锁，并且在退出同步代码块时自动释放锁。</p>
+<p>Java的内置锁相当于一种互斥锁，最多只有一个线程能够持有这种锁，当 线程A 尝试获取一个由 线程B 持有的锁时，线程A 必须等待或者阻塞，直到 线程B 释放这个锁，如果B永远不释放锁，那么A也将永远地等下去。</p>
+<h4 id="重入"><a href="#重入" class="headerlink" title="重入"></a>重入</h4><p>当某个线程请求一个由其他线程持有的锁时，发出的请求的线程就会阻塞。<strong>然而，由于内置锁是可重入的</strong>，因此如果某个线程试图获得一个已经由它持有的锁，那么这个请求就会成功。</p>
+<p><strong>“重入”获取锁的操作粒度是“线程”</strong>，重入的实现方法是，为每一个锁关联一个获取计数值和一个所有者线程。当计数值为0时，这个锁就被认为是没有被任何线程持有，当线程请求一个未被持有的锁时，JVM将几下锁的持有者，并且将获取计数值置为1，如果同一个线程再次获取这个锁，计数值将递增，而当线程退出同步代码快时，计数器会相应递减，当计数值为0时，这个锁将被释放。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span> </span>&#123;</span><br><span class="line"> 	   <span class="comment">//逻辑       </span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Son</span> <span class="keyword">extends</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"calling"</span>);</span><br><span class="line">        <span class="keyword">super</span>.method();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>子类改写了父类的<code>synchronized</code>方法，然后调用父类中的方法，由于<code>Father</code>和<code>Son</code>都是<code>synchronized</code>方法，因此每个<code>method</code>方法在执行前都会获取<code>Father</code>上的锁，然而如果内置锁不是可重入的，那么在调用<code>super.method()</code>时将无法获得<code>Father</code>上的锁。</p>
+<h3 id="对象的共享"><a href="#对象的共享" class="headerlink" title="对象的共享"></a>对象的共享</h3><h4 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@NotThreadSafe</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MutableInteger</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> value;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">get</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> value;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(<span class="keyword">int</span> value)</span> </span>&#123;<span class="keyword">this</span>.value = value;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    MutableInteger object = <span class="keyword">new</span> MutableInteger();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">        Thread thread = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                    <span class="keyword">int</span> i = object.get();</span><br><span class="line">                    System.out.println(i + <span class="string">"-"</span> + <span class="keyword">new</span> Date().toString());</span><br><span class="line">                    <span class="keyword">if</span> (i == <span class="number">100</span>) &#123;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        thread.start();</span><br><span class="line">    &#125;</span><br><span class="line">    object.set(<span class="number">100</span>);</span><br><span class="line">    System.out.println(<span class="keyword">new</span> Date().toString());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">100-Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">0-Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">100-Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">100-Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">0-Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">100-Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">100-Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">100-Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">100-Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">设置Value时间:Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">100-Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">0-Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">100-Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">0-Thu Apr 16 16:17:04 CST 2020</span><br><span class="line">100-Thu Apr 16 16:17:04 CST 2020</span><br></pre></td></tr></table></figure>
+
+<p><code>MutableInteger</code>不是线程安全的，因为 get 和 set 都是在没同步的情况下访问 value 的，如果某个线程调用了set，那么另一个正在调用 get 的线程可能会看到更新后的 value 值，也可能看不到。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ThreadSafe</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SynchronizedInteger</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> value;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">int</span> <span class="title">get</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> value;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(<span class="keyword">int</span> value)</span> </span>&#123;<span class="keyword">this</span>.value = value;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="Volatile变量"><a href="#Volatile变量" class="headerlink" title="Volatile变量"></a>Volatile变量</h4><p><code>volatile</code>变量用来确保将变量的更新操作通知到其他线程，当把变量申明为<code>volatile</code>类型后，编译器与运行时都会注意到这个变量是共享的，<strong>因此不会将该变量上的操作与其他内存操作一起重排序</strong>，因此在读取<code>volatile</code>类型的变量时总会返回最新写入的值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ThreadSafe</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VolatileInteger</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">int</span> value;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">get</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> value;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(<span class="keyword">int</span> value)</span> </span>&#123;<span class="keyword">this</span>.value = value;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然而在访问<code>volatile</code>时不会执行加锁操作，因此也就不会使执行线程阻塞，因此<code>volatile</code>变量是一种比<code>synchronized</code>关键字更轻量级的同步机制。</p>
+<p>从内存的可见性角度来看，写入<code>volatile</code>变量相当于退出同步代码块，而读取<code>volatile</code>变量就相当于进入同步代码块，但并不建议过度依赖<code>volatile</code>变量提供的可见性，如果在代码中依赖<code>volatile</code>变量来控制状态的可见性，通常比使用锁的代码更脆弱，更难以理解。</p>
+<p><strong>尽管<code>volatile</code>只能确保可见性，在复合操作情况下，无法确保其正确性，如<code>count++</code>，具备了”读取-修改-写入”的复合操作</strong>。</p>
+<p>加锁机制既可以确保可见性又可以确保原子性，而<code>volatile</code>变量只能确保可见性。</p>
+<p>当且仅当满足以下所有条件时，才应该使用<code>volatile</code>变量：</p>
+<ul>
+<li>对变量的写入操作不依赖变量的当前值，或者你能确保只有单个线程更新变量的值。</li>
+<li>该变量不会与其他状态变量一起纳入不变性条件中。</li>
+<li>在访问变量时不需要加锁。</li>
+</ul>
+<h4 id="逸出"><a href="#逸出" class="headerlink" title="逸出"></a>逸出</h4><p>提供一个对象的引用给作用域之外的代码，我们称做发布该对象。如果在对象构造完成之前就发布该对象，就会破坏线程安全性，当某个不应该发布的对象被发布时，这种情况被称为逸出。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThisEscape</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ThisEscape</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Thread thread = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="comment">//多线程代码</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        thread.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>ThisEscape</code>中给出了一个this引用在构造函数中逸出的示例。<strong>this引用逸出的一个常见错误是，在构造函数中启动一个线程</strong>，当对象在其构造函数中创建一个线程时，this引用都会被新创建的线程共享，在对象未完全构造之前，新的线程就可以看见它。在构造函数创建线程并没有错误，但最好不要立即启动它。</p>
+<p>当且仅当对象的构造函数返回时，对象才处于可预测和一致的状态。当从构造函数中发布对象时，只是发布了一个尚未构造完成的对象，即使发布语句位于构造函数的最后一行，那么这种对象被认为是不正确构造。</p>
+<p><strong>不要再构造过程中使this引用逸出。</strong></p>
+<h4 id="线程封闭"><a href="#线程封闭" class="headerlink" title="线程封闭"></a>线程封闭</h4><p>当访问共享的可变数据时，通常需要使用同步，一种避免使用同步的方式就是不共享数据。如果仅在单线程内访问数据，就不需要同步。这种技术被称为线程封闭（<code>Thread Confinement</code>），它是实现线程安全性的最简单方式之一。</p>
+<p>栈封闭是线程封闭的一种特例，在栈封闭中，只能通过局部变量才能访问对象，局部变量固有属性就是封闭在执行线程中，他们位于执行线程的栈中，其他线程无法访问这个栈。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">execute</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    List&lt;Object&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时只有一个引用指向集合list，这个引用被封闭在局部变量中，因此也被封闭在执行线程中，然而如果发布了对集合list（或者该对象中的任何内部数据）的引用，那么封闭性呗破坏，并导致对象list逸出。</p>
+<h4 id="不变性"><a href="#不变性" class="headerlink" title="不变性"></a>不变性</h4><p><strong>如果某个对象在被创建后其状态就不能被修改，那么这个对象就称为不可变对象。</strong>线程安全性是不可变对象的固有属性之一，他们的不变性条件是由构造函数创建的，<strong>不可变对象一定是线程安全的。</strong></p>
+<p><strong>不可变性不等于将对象所有域都声明为<code>final</code>类型</strong>，即使对象中所有域都是<code>final</code>类型的，这个对象也仍然是可变的，因为<code>final</code>类型的域中可以保存对可变对象的引用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">MutableClass</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> List&lt;String&gt; lists = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setValue</span><span class="params">(String value)</span> </span>&#123;</span><br><span class="line">        lists.add(value);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当满足以下条件时，对象才是不可变的：</p>
+<ul>
+<li>对象创建以后其状态就不能修改。</li>
+<li>对象的所有域都是<code>final</code>类型。</li>
+<li>对象是正确创建的（在对象的创建期间，this引用没有逸出）</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ImmutableClass</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> List&lt;String&gt; lists = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ImmutableClass</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        lists.add(<span class="string">"apple"</span>);</span><br><span class="line">        lists.add(<span class="string">"banana"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isContains</span><span class="params">(String value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> lists.contains(value);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>即使对象是可变的，通过将对象的某些域声明为<code>final</code>类型，仍然可以简化对状态的判断，相当于限制了该对象可能的状态变化。</p>
+<p><strong>除非需要更高的可见性，否则应将所有域都声明为私有域是一个良好的变成习惯，除非需要某个域是可变的，否则应将其声明为<code>final</code>域，也是一个良好的变成习惯。</strong></p>
+<p>要安全地发布一个对象，对象的引用以及对象的状态必须同时对其他线程可见，一个正确构造的对象可以通过以下方式来安全地发布：</p>
+<ul>
+<li>在静态初始化函数中初始化一个对象引用。</li>
+<li>将对象的引用保存到<code>valatile</code>类型的域或者<code>AtomicReferance</code>对象中</li>
+<li>将对象的引用保存到某个正确的构造对象的<code>final</code>类型域中。</li>
+<li><strong>将对象的引用保存到一个由锁保护的域中</strong>。</li>
+</ul>
+<p>在线程安全容器内部同步意味着，将对象放到某个容器，例如<code>Vector</code>或者<code>synchronizedList</code>时将满足上述最后一条需求。</p>
+<p>线程安全库中的容器提供了以下的安全发布保证：</p>
+<ul>
+<li>通过将一个键或者值放入<strong><code>Hashtable</code>、<code>synchronizedMap</code></strong>或者<strong><code>ConcurrentMap</code></strong>中，可以安全将它发布给任何从这些容器中访问它的线程。</li>
+<li>通过将某个元素放入<strong><code>Vector</code>、<code>CopyOnWriteArrayList</code>、<code>CopyOnWriteArraySet</code>、<code>SynchronizedList</code></strong>或者<strong><code>synchronizedSet</code></strong>中，可以将该元素安全地发布到任何从这些队列中访问该元素的线程。</li>
+</ul>
+<h4 id="事实不可变对象"><a href="#事实不可变对象" class="headerlink" title="事实不可变对象"></a>事实不可变对象</h4><p><strong>如果对象从技术上来说事可变的，但其状态在发布后不会再改变，那么把这种对象称之为事实不可变对象。</strong>这些对象不需要满足不可变性的严格定义，在这些对象发布后，程序只需将它们视为不可变对象即可。</p>
+<p><strong>在没有额外的同步的情况下，任何线程都可以安全地使用被安全发布的事实不可变对象。</strong></p>
+<h4 id="可变对象"><a href="#可变对象" class="headerlink" title="可变对象"></a>可变对象</h4><p>如果对象在构造后可以修改，那么安全发布只能确保 “发布当时” 状态的可见性<strong>，对于可变对象，不仅在发布对象时需要使用同步，而且每次对象访问时同样需要使用同步来确保后续修改操作的可见性。要安全地共享可变对象，这些对象就必须被安全地发布，并且必须是线程安全的或者由某个锁保护起来。</strong></p>
+<p>对象发布需求取决于它的可变性：</p>
+<ul>
+<li>不可变对象可以通过任意机制来发布。</li>
+<li>事实不可变对象必须通过安全方式来发布。</li>
+<li><strong>可变对象必须通过安全方式来发布，并且必须是线程安全的或者由某个锁保护起来的。</strong></li>
+</ul>
+<hr>
+<blockquote>
+<p>“本篇文章主要摘自《JAVA 并发编程实战》”</p>
+</blockquote>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月22日 00:03</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/21/thread-safety/" title="&#39;Java 线程安全性&#39;">https://midkuro.github.io/2020/05/21/thread-safety/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/21/thread-safety/&title=《'Java 线程安全性'》 — Kuro's Blog&pic=images/java.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/21/thread-safety/&title=《'Java 线程安全性'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/21/thread-safety/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Java 线程安全性'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/21/thread-safety/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/21/thread-safety/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/21/thread-safety/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Java/" class="color5">Java</a>
+      
+    <a href="/tags/Thread/" class="color2">Thread</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#线程安全性"><span class="post-toc-text">线程安全性</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#什么是线程安全性"><span class="post-toc-text">什么是线程安全性</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#原子性"><span class="post-toc-text">原子性</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#竟态条件"><span class="post-toc-text">竟态条件</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#内置锁"><span class="post-toc-text">内置锁</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#重入"><span class="post-toc-text">重入</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#对象的共享"><span class="post-toc-text">对象的共享</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#可见性"><span class="post-toc-text">可见性</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Volatile变量"><span class="post-toc-text">Volatile变量</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#逸出"><span class="post-toc-text">逸出</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#线程封闭"><span class="post-toc-text">线程封闭</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#不变性"><span class="post-toc-text">不变性</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#事实不可变对象"><span class="post-toc-text">事实不可变对象</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#可变对象"><span class="post-toc-text">可变对象</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/05/21/thread-containers/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Java 线程同步容器&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/05/21/garbage-collector/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Java 垃圾收集器&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="thread-safety" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 10px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 16px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 16px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MQ/" style="font-size: 10px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 10px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 12px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 10px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 16px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 16px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MQ/" style="font-size: 10px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 10px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 12px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
