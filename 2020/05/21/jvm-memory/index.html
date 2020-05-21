@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Java 运行时数据区域&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="运行时数据区域Java 虚拟机在执行 Java 程序过程中会把它所管理的内存划分为若干个不同的数据区域。这些区域都有各自的用途，以及创建和销毁的时间，有的区域随虚拟机进程的启动而存在，有的区域则依赖用户线程的启动和结束而建立和销毁。  程序计数器程序计数器（Program Counter Register）是一块较小的内存空间，它可以看作是当前线程所执行的字节码的行号指示器。 由于 Java 虚拟">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Java 运行时数据区域&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/21/jvm-memory/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="运行时数据区域Java 虚拟机在执行 Java 程序过程中会把它所管理的内存划分为若干个不同的数据区域。这些区域都有各自的用途，以及创建和销毁的时间，有的区域随虚拟机进程的启动而存在，有的区域则依赖用户线程的启动和结束而建立和销毁。  程序计数器程序计数器（Program Counter Register）是一块较小的内存空间，它可以看作是当前线程所执行的字节码的行号指示器。 由于 Java 虚拟">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-1.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-2.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-3.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-4.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-5.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-6.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-7.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-8.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-9.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-10.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-11.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-12.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-13.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-14.png">
+<meta property="og:image" content="https://midkuro.github.io/images/jvm-memory/memory-15.png">
+<meta property="article:published_time" content="2020-05-21T14:20:00.000Z">
+<meta property="article:modified_time" content="2020-05-21T14:58:17.614Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/jvm-memory/memory-1.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro" target="_blank" href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-jvm-memory" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Java 运行时数据区域&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/JVM/">JVM</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-21
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h2 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h2><p><strong>Java 虚拟机在执行 Java 程序过程中会把它所管理的内存划分为若干个不同的数据区域。这些区域都有各自的用途，以及创建和销毁的时间，有的区域随虚拟机进程的启动而存在，有的区域则依赖用户线程的启动和结束而建立和销毁。</strong></p>
+<p><img src="/images/jvm-memory/memory-1.png" alt="memory-1"></p>
+<h3 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h3><p>程序计数器（<code>Program Counter Register</code>）是一块较小的内存空间，它可以看作是当前线程所执行的字节码的行号指示器。</p>
+<p><strong>由于 Java 虚拟机的多线程是通过线程轮流切换并分配处理器执行时间的方式来实现的，在任何一个确定的时刻，一个处理器内核都只会执行一条线程中的指令。</strong></p>
+<p>因此，为了线程切换后能恢复到正确的执行位置，每条线程都需要有一个独立的程序计数器，各条线程之间计数器互不影响，独立存储，我们称这类内存区域为<strong>“线程私有”</strong>的内存。</p>
+<p>如果线程正在执行的是一个 Java 方法，这个计数器记录的是正在执行的虚拟机字节码指令的地址；如果正在执行的是 <code>Native</code> 方法，这个计数器值则为空（<code>Undefined</code>）。此内存区域是唯一一个在 Java 虚拟机规范中没有规定任何<code>OutOfMemoryError</code> 情况的区域。</p>
+<h3 id="Java虚拟机栈"><a href="#Java虚拟机栈" class="headerlink" title="Java虚拟机栈"></a>Java虚拟机栈</h3><p>与程序计数器一样，Java 虚拟机栈（<code>Java Virtual Machine Stacks</code>）也是线程私有的，它的生命周期与线程相同。</p>
+<p><strong>虚拟机栈描述的是Java方法执行的内存模型：每个方法执行的同时都会创建一个栈帧（<code>Stack Frame</code>）用于存储局部变量表、操作数栈、动态链接、方法出口等信息。</strong></p>
+<p>每一个方法从调用直至执行完成的过程，就对应着一个栈帧在虚拟机中入栈到出栈的过程。</p>
+<p>经常有人把Java内存区分为<strong>堆内存</strong>（<code>Heap</code>）和<strong>栈内存</strong>（<code>Stack</code>），这种划分方式的流行只能说明大多数程序员最关注的、域对象内存分配关系最密切的内存区是这两块。Java 内存区域的划分实际上远比这复杂。</p>
+<p>其中所指的“<strong>栈</strong>”就是虚拟机栈，或者说是虚拟机栈中的局部变量表。<br><img src="/images/jvm-memory/memory-2.png" alt="memory-2"></p>
+<h4 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h4><p>局部变量表存放了编译期可知的各种基本数据类型、对象引用和returnAddress类型。</p>
+<p>基本数据类型：<code>boolean、byte、char、short、int、float、long、double</code></p>
+<p>对象引用：<code>reference</code>类型，它不等同于对象本身，可能是个对象起始地址的引用指针，也可能是指向一个代表对象的句柄或其他于此对象相关的位置</p>
+<p><code>returnAddress</code>类型：指向了一条字节码指令的地址</p>
+<p>其中64位长度的 <code>long</code> 和 <code>double</code> 类型的数据会占用2个局部变量空间（<code>Slot</code>），其余的数据类型只占用1个。<code>Slot</code>是栈帧中的局部变量表的最小单位。</p>
+<p>局部变量表所需的内存空间在编译期完成分配，当进入一个方法时，这个方法需要在栈帧中分配多大的局部变量空间是完全确定的，在方法运行期间不会改变局部变量表的大小。</p>
+<p>虚拟机栈规定了两种异常情况：</p>
+<ul>
+<li>如果线程请求的栈深度大于虚拟机所允许的深度，将抛出<code>StackOverflowError</code>异常。</li>
+<li>如果虚拟机栈可以动态扩展，在扩展时无法申请到足够的内存，将抛出<code>OutOfMemoryError</code>(<code>OOM</code>)异常。</li>
+</ul>
+<h4 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h4><p>Java 虚拟机的解释执行引擎被称为“ 基于栈的执行引擎 ”，其中所指的栈就是指－操作数栈。 <strong>操作数栈也常被称为操作栈</strong>，<strong>它是一个后入先出栈</strong>。</p>
+<p>和局部变量表一样，操作数栈也是被组织成一个以字长为单位的数组。但是和前者不同的是，它不是通过索引来访问，而是通过标准的栈操作 <strong>压栈和出栈</strong> 来访问的。</p>
+<p>比如，如果某个指令把一个值压入到操作数栈中，稍后另一个指令就可以弹出这个值来使用。</p>
+<p>虚拟机在操作数栈中存储数据的方式和在局部变量表中是一样的。</p>
+<p>虚拟机把操作数栈作为它的工作区，大多数指令都要从这里弹出数据，执行运算，然后把结果压回操作数栈。</p>
+<p>举例来说，在JVM中执行 <code>a = b + c</code>的字节码执行过程中操作数栈以及局部变量表的变化如下图所示。</p>
+<p>局部变量表中存储着 <code>a、b、c</code> 三个局部变量，首先将 <code>b</code> 和 <code>c</code> 分别压入栈中<br><img src="/images/jvm-memory/memory-3.png" alt="memory-3"><br>将栈顶的两个数<strong>出栈执行求和操作，并将结果再次压入栈顶中</strong>，之后将栈顶的数出栈赋值给 <code>a</code><br><img src="/images/jvm-memory/memory-4.png" alt="memory-4"></p>
+<p>看一个比较经典的例子</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IncrementTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">1</span>;</span><br><span class="line">        i = i++;</span><br><span class="line">        <span class="keyword">int</span> j = i++;</span><br><span class="line">        <span class="keyword">int</span> k = i + ++i * i++;</span><br><span class="line">        System.out.println(<span class="string">"i = "</span> + i);</span><br><span class="line">        System.out.println(<span class="string">"j = "</span> + j);</span><br><span class="line">        System.out.println(<span class="string">"k = "</span> + k);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>答案：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">i = <span class="number">4</span></span><br><span class="line">j = <span class="number">1</span></span><br><span class="line">k = <span class="number">11</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>代码分析：</strong></p>
+<p><img src="/images/jvm-memory/memory-5.png" alt="memory-5"></p>
+<p>代码 <code>i = i++</code>，自增操作是在局部变量中的，而不是在操作数栈中。</p>
+<ul>
+<li>把局部变量表中的 <code>i</code> 的值 <strong>1</strong> 压入操作数栈中</li>
+<li>把局部变量表中的 <code>i</code> 变量自增 <strong>1</strong>，此时 <code>i</code> 的值为 <strong>2</strong></li>
+<li>把操作数栈中的值 <code>1</code> 赋值给局部变量表中的 <code>i</code> 变量，此时 <code>i</code> 的值又变为了 <strong>1</strong></li>
+</ul>
+<p><img src="/images/jvm-memory/memory-6.png" alt="memory-6"></p>
+<p>代码 <code>int j = i++</code>，赋值操作发生在自增前。</p>
+<ul>
+<li>把局部变量表中的 <code>i</code> 的值 <strong>1</strong> 压入操作数栈中</li>
+<li>把操作数栈中的值 <code>1</code> 赋值给局部变量表中的 <code>j</code> 变量，此时 <code>j</code> 的值为 <strong>1</strong></li>
+<li>把局部变量表中的 <code>i</code> 变量自增 <strong>1</strong>，此时 <code>i</code> 的值为 <strong>2</strong></li>
+</ul>
+<p><img src="/images/jvm-memory/memory-7.png" alt="memory-7"></p>
+<p>代码 <code>int k = i + ++i * i++</code></p>
+<ul>
+<li>把局部变量表中的 <code>i</code> 的值 <strong>2</strong> 压入操作数栈中</li>
+<li>把局部变量表中的 <code>i</code> 变量自增 <strong>1</strong>，此时 <code>i</code> 的值为 <strong>3</strong></li>
+<li>把局部变量表中的 <code>i</code> 的值 <strong>3</strong> 压入操作数栈中（<code>++i</code>），此时 <code>i</code> 的值为 <strong>3</strong></li>
+<li>再把局部变量表中的 <code>i</code> 的值 <strong>3</strong> 压入操作数栈中（<code>i++</code>），此时 <code>i</code> 的值为 <strong>3</strong></li>
+</ul>
+<p><img src="/images/jvm-memory/memory-8.png" alt="memory-8"></p>
+<ul>
+<li>把局部变量表中的 <code>i</code> 变量自增 <strong>1</strong>，此时 <code>i</code>的值为 <strong>4</strong></li>
+<li>把操作数栈中前两个弹出求乘积<strong>（3 * 3 = 9）</strong>，将结果再次压入操作数栈中</li>
+<li>把操作数栈中前两个弹出求和<strong>（9 + 2 = 11）</strong>，将结果再次压入操作数栈中</li>
+<li>将操作数栈中的值 <strong>11</strong> 赋值给局部变量表中的 <code>k</code> 变量，此时 <code>k</code> 的值为 <strong>11</strong></li>
+</ul>
+<p><strong>总结：</strong></p>
+<ul>
+<li>赋值 =，最后计算</li>
+<li>= 右边的从左到右加载值依次压入操作数栈</li>
+<li>根据运算符的优先级判断先算哪个</li>
+<li><strong>自增和自减操作都是直接修改变量的值，不经过操作数栈</strong></li>
+<li>最后赋值之前，临时结果都是保存在操作数栈中的</li>
+</ul>
+<p>值得提醒的是，<code>i++</code>和<code>++i</code>都不是原子操作，因为它并不会作为一个不可分割的操作来执行，实际上它包含三个独立的操作：</p>
+<ul>
+<li>读取<code>i</code>的值</li>
+<li>将值加<code>1</code></li>
+<li>然后将计算结果写入<code>i</code><br>这是一个<strong>读取-修改-写入</strong>的操作序列，并且其结果状态依赖于之前的状态。</li>
+</ul>
+<p>即使使用 <code>volatile</code> 修饰，保证了多个线程多<code>i</code>的可见性，每次从局部变量表读取的都是最新的值，也不是线程安全的。</p>
+<p>如果假设 <strong>i=9</strong>，在某些情况下，多个线程读到的值都为 <strong>9</strong>，接着执行递增操作，并且都将<code>i</code>设置成 <strong>10</strong> ，显然不是线程安全的。</p>
+<h4 id="动态链接"><a href="#动态链接" class="headerlink" title="动态链接"></a>动态链接</h4><p>每个栈帧中包含一个在常量池中对当前方法的引用， 目的是支持方法调用过程的动态连接。</p>
+<p>Class 文件中存放了大量的符号引用，这些符号引用一部分会在类加载阶段或第一次使用时转化为直接引用，这种转化称为静态解析，如静态方法、私有方法等等，另一部分将在每一次运行期间转化为直接引用，这部分称为动态连接。<br><strong>栈帧中保存了一个引用，指向该方法在运行时常量池中的位置，通过运行时常量池的符号引用（指向堆），完成将符号引用转化为直接引用</strong>。</p>
+<h4 id="方法返回地址"><a href="#方法返回地址" class="headerlink" title="方法返回地址"></a>方法返回地址</h4><p>方法执行时有两种退出情况：</p>
+<ul>
+<li>正常退出，即正常执行到任何方法的返回字节码指令，如 <code>return</code>等</li>
+<li>异常退出，即某些指令导致了 Java 虚拟机抛出异常并且没有处理</li>
+</ul>
+<p>无论何种退出情况，都将返回至方法当前被调用的位置。方法退出的过程相当于弹出当前栈帧，退出可能有三种方式：</p>
+<ul>
+<li>返回值压入上层调用栈帧。</li>
+<li>异常信息抛给能够处理的栈帧。</li>
+<li>PC计数器指向方法调用后的下一条指令。</li>
+</ul>
+<p>当方法执行正常退出时，当前栈帧承担着恢复调用者状态的责任，包括恢复调用者的局部变量表和操作数栈，以及正确递增程序计数器、跳过刚才执行的方法调用指令等。调用者的代码在被调用方法的返回值压入调用者栈帧的操作数栈后，会继续正常执行。</p>
+<h3 id="本地方法栈"><a href="#本地方法栈" class="headerlink" title="本地方法栈"></a>本地方法栈</h3><p>本地方法栈（<code>Native Method Stack</code>）与虚拟机栈所发挥的作用是非常相似的，它们之间的区别不过是虚拟机栈为虚拟机执行 Java 方法（也就是字节码）服务，而本地方法栈则为虚拟机使用到的 <code>Native</code> 方法服务。<code>Sun HotSpot</code>虚拟机直接就把本地方法栈和虚拟机栈合二为一。</p>
+<p>与虚拟机栈一样，本地方法栈区域也会抛出 <code>StackOverflowError</code> 和 <code>OutOfMemoryError</code> 异常。</p>
+<h3 id="Java堆"><a href="#Java堆" class="headerlink" title="Java堆"></a>Java堆</h3><p>对于大多数应用来说，Java 堆（<code>Java Heap</code>）是 Java 虚拟机所管理的内存中最大的一块。Java 堆是被所有线程共享的一块内存区域，在虚拟机启动时创建。此内存区域的唯一目的就是存放对象实例，几乎所有的对象实例都在这里分配内存。</p>
+<p>Java 堆是垃圾收集器管理的主要区域，因此很多时候也被称做 “ <code>GC</code>堆 ”（<code>Garbage Collected Heap</code>）。从内存回收的角度来看，由于现在收集器基本都采用分代收集算法，所以 Java 堆中还可以细分为：新生代和老年代；再细致一点的有 <code>Eden</code> 空间、<code>From Survivor</code> 空间、<code>To Survivor</code> 空间等。</p>
+<p>从内存分配的角度来看，线程共享的 Java 堆中可能划分出多个线程私有的分配缓冲区（<code>Thread Local Allocation Buffer,TLAB</code>）。不过无论如何划分，都与存放的内容无关，无论哪个区域，存储的都是对象实例，进一步划分的目的是为了更好的回收内存，或者更快的分配内存。</p>
+<p>Java 堆可以处于物理上不连续的内存空间中，只要逻辑上是连续的即可，当前主流的虚拟机都是按照可扩展来实现的（通过 <code>-Xmx</code> 和 <code>-Xms</code> 控制）。如果在堆中没有内存完成实例分配，并且堆也无法再扩展时，将会抛出 <code>OutOfMemoryError</code>异常。</p>
+<p><img src="/images/jvm-memory/memory-9.png" alt="memory-9"></p>
+<h3 id="方法区"><a href="#方法区" class="headerlink" title="方法区"></a>方法区</h3><p>方法区（<code>Method Area</code>）与 Java 堆一样，<strong>是各个线程共享的内存区域，它用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码</strong>等数据。虽然<br><strong>Java 虚拟机规范把方法区描述为堆的一个逻辑部分</strong>，但是它却有一个别名叫做 <code>Non-Heap</code>（非堆），目的应该是与 Java 堆区分开来。</p>
+<p>Java 虚拟机规范对方法区的限制非常宽松，除了和 Java 堆一样不需要连续的内存和可以选择固定大小或者可扩展外，还可以选择不实现垃圾收集。垃圾收集行为在这个区域是比较少出现的，其内存回收目标主要是针对常量池的回收和对类型的卸载。当方法区无法满足内存分配需求时，将抛出 <code>OutOfMemoryError</code> 异常。</p>
+<h4 id="HotSpot-虚拟机"><a href="#HotSpot-虚拟机" class="headerlink" title="HotSpot 虚拟机"></a><code>HotSpot</code> 虚拟机</h4><p>它是<code>Sun JDK</code>和<code>OpenJDK</code>中所带的虚拟机，也是目前使用范围最广的 Java 虚拟机。<br>在2008年和2009年，Oracle公司分别收购了BEA公司和Sun公司，Oracle同时拥有了两款优秀的Java虚拟机：<code>JRockit VM</code>和<code>HotSpot VM</code>。<br><img src="/images/jvm-memory/memory-10.png" alt="memory-10"></p>
+<h4 id="永久代"><a href="#永久代" class="headerlink" title="永久代"></a>永久代</h4><p>对于习惯在<code>HotSpot</code> 虚拟机上开发、部署程序的开发者来说,<strong>很多人更愿意把方法区称为“永久代”(<code>Permanent Generation</code>)，本质上两者并不等价，仅仅是因为<code>HotSpot</code>虚拟机的设计团队把 <code>GC</code> 分代收集扩展至方法区，或者说，使用永久代来实现方法区而已。</strong></p>
+<p><strong>目的是为了方法区也可以用堆内存的 <code>GC</code> 垃圾回收器，而不用重新针对方法区做 <code>GC</code> 操作，所以称永久代是方法区的一个存储实现。</strong></p>
+<p>方法区只是 <code>JVM</code> 的一种规范，不同的虚拟机实现的原理不一样，只有<code>HotSpot</code>虚拟机才有永久代的概念。</p>
+<h3 id="常量池"><a href="#常量池" class="headerlink" title="常量池"></a>常量池</h3><h4 id="class常量池"><a href="#class常量池" class="headerlink" title="class常量池"></a>class常量池</h4><p>我们写的每一个 Java 类被编译后，就会形成一份<code>class</code> 文件。<code>class</code> 文件中除了包含类的<strong>版本、字段、方法、接口等描述信息外，还有一项信息就是常量池</strong>(<code>constant pool table</code>)，用于存放编译器生成的各种<strong>字面量</strong>(<code>Literal</code>)和<strong>符号引用</strong>(<code>Symbolic References</code>)。</p>
+<p>每个class文件都有一个class常量池。</p>
+<p>字面量包括：</p>
+<ul>
+<li>文本字符串</li>
+<li>八大基本类型的值</li>
+<li>被申明为<code>final</code>的常量</li>
+</ul>
+<p>符号引用包括：</p>
+<ul>
+<li>类和方法的全限定名</li>
+<li>字段的名称和描述符</li>
+<li>方法的名称和描述符</li>
+</ul>
+<h4 id="运行时常量池"><a href="#运行时常量池" class="headerlink" title="运行时常量池"></a>运行时常量池</h4><p>运行时常量池（<code>Runtime Constant Pool</code>）是方法区的一部分。<strong>class文件常量池将在类加载后进入方法区的运行时常量池中存放</strong>。</p>
+<p>一般来说，除了保存 <code>Class</code> 文件中描述的符号引用外，还会把翻译出来的直接引用也存储在运行时常量池中。</p>
+<p><strong>运行时常量池相对于 <code>Class</code> 文件常量池的另外一个重要特征是具备动态性</strong>，Java 语言并不要求常量一定只有编译期才能产生，也就是并非预置入 <code>Class</code> 文件中常量池的内容才能进入方法区运行时常量池，运行期间也可能将新的常量放入池中，这种特性被开发人员利用得比较多的便是 <code>String</code> 类的 <code>intern()</code> 方法。</p>
+<p>既然运行时常量池是方法区的一部分，自然受到方法区内存的限制，<strong>当常量池无法再申请到内存时会抛出 <code>OutOfMemoryError</code> 异常</strong>。</p>
+<ul>
+<li><h4 id="字符串常量池"><a href="#字符串常量池" class="headerlink" title="字符串常量池"></a>字符串常量池</h4></li>
+</ul>
+<p>在<code>HotSpot</code>虚拟机里实现的字符串常量池(<code>string pool</code>)功能的是一个<code>StringTable</code>类，它是一个<code>Hash</code>表，这个<code>StringTable</code>在每个<code>HotSpot</code>虚拟机的实例<strong>只有一份</strong>，被所有的类共享。字符串常量由一个一个字符组成，放在了<code>StringTable</code>上。</p>
+<h4 id="JDK版本变化"><a href="#JDK版本变化" class="headerlink" title="JDK版本变化"></a>JDK版本变化</h4><p><strong>JDK1.6及以前的版本，字符串常量池是存放在永久代中。</strong></p>
+<p><strong>在JDK1.7的版本中，字符串常量池从永久代移出到正常的Java 堆(Java Heap)中，原因是因为永久代空间太小，容易造成OOM。</strong></p>
+<p><strong>在JDK1.8的版本中，Hotspot虚拟机废除了永久代，开始使用元空间（Metaspace）实现方法区，字符串常量池依旧保留在堆内存中，其他内容移至元空间，元空间直接在本地内存分配，而不需要占用堆内存，所以不会造成OOM现象。</strong></p>
+<p><strong>值得注意的是，方法区只是Jvm的一种规范，Hotspot通过废除永久代，使用元空间实现方法区，并不存在废除方法区、方法区被元空间代替这种说法。</strong></p>
+<p><strong>为什么要使用元空间取代永久代的实现？</strong></p>
+<ul>
+<li>字符串存在永久代中，容易出现性能问题和内存溢出</li>
+<li>类及方法的信息等比较难确定其大小，因此对于永久代的大小指定比较困难，太小容易出现永久代溢出，太大则容易导致老年代溢出</li>
+<li>永久代会为 <code>GC</code> 带来不必要的复杂度，并且回收效率偏低</li>
+<li>将 <code>HotSpot</code> 与 <code>JRockit</code> 合二为一</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    String str = <span class="string">"String"</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; Integer.MAX_VALUE; i++) &#123;</span><br><span class="line">        str.intern();</span><br><span class="line">        str = str + str;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/jvm-memory/memory-11.png" alt="memory-11"><br>使用<strong>JDK1.7 或者 1.8</strong> 能够看到，往字符串常量池中无限增加，最终 <code>OOM</code> 的位置是在Java 堆（<code>Java heap</code>）中。</p>
+<p><strong><code>String.intern()</code>用来返回常量池中的某字符串，如果常量池中已经存在该字符串，则直接返回常量池中该对象的引用。否则，在常量池中加入该对象，然后返回引用。</strong></p>
+<p>看一道比较常见的面试题，在不考虑 <code>GC</code> 的情况下，下面的代码创建了多少个 <code>String</code> 对象，输出结果是什么？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">String str1 = <span class="keyword">new</span> String(<span class="string">"he"</span>) + <span class="keyword">new</span> String(<span class="string">"llo"</span>);</span><br><span class="line">String str2 = str1.intern();</span><br><span class="line">System.out.println(str1 == str2);</span><br></pre></td></tr></table></figure>
+<p><strong>答案：</strong></p>
+<ul>
+<li>在 JDK 1.6 下输出是 <strong><code>false</code></strong>，<strong>创建了 6 个对象</strong></li>
+<li>在 JDK 1.7 之后的版本输出是 <strong><code>true</code></strong>，<strong>创建了 5 个对象</strong></li>
+</ul>
+<p><strong>代码分析：</strong></p>
+<p>为什么输出会有这些变化呢？主要还是字符串池从永久代中脱离、移入堆区的原因， <code>intern()</code> 方法也相应发生了变化：</p>
+<ul>
+<li><p>在 <code>JDK 1.6</code> 中，调用 <code>intern()</code> 首先会在字符串池中寻找<code>equal()</code> 相等的字符串，假如字符串存在就返回该字符串在字符串池中的引用；假如字符串不存在，<strong>虚拟机会重新在永久代上创建一个实例</strong>，将 <code>StringTable</code> 的一个表项指向这个新创建的实例。<br><img src="/images/jvm-memory/memory-12.png" alt="memory-12"></p>
+</li>
+<li><p>在 <code>JDK 1.7</code> 中，由于字符串池不在永久代了，<code>intern()</code> 做了一些修改，更方便地利用堆中的对象。字符串存在时和 <code>JDK 1.6</code>一样，但是<strong>字符串不存在时不再需要重新创建实例，可以直接指向堆上的实例</strong>。<br><img src="/images/jvm-memory/memory-13.png" alt="memory-13"></p>
+</li>
+</ul>
+<p>我们基于JDK1.7版本，来看个例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">String str1 = <span class="keyword">new</span> String(<span class="string">"abc"</span>);</span><br><span class="line">String str2 = str1.intern();</span><br><span class="line">System.out.println(str1 == str2);   <span class="comment">//false</span></span><br></pre></td></tr></table></figure>
+<p>由于字符串常量池中已存在<code>abc</code>，所以返回了字符串常量池中的引用，如下图所示<br><img src="/images/jvm-memory/memory-14.png" alt="memory-14"></p>
+<p>再来看个例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">String str1 = <span class="keyword">new</span> String(<span class="string">"he"</span>) + <span class="keyword">new</span> String(<span class="string">"llo"</span>);</span><br><span class="line">str1.intern();</span><br><span class="line">String str2 = <span class="string">"hello"</span>;</span><br><span class="line">System.out.println(str1 == str2);   <span class="comment">//true</span></span><br></pre></td></tr></table></figure>
+<p>该结果等于<code>true</code>应该是能够理解的，不理解的可以查看上文针对该代码的实例分析图</p>
+<p>这里扩展一点，若是把<code>str1.intern();</code>代码注释掉，则产生的结果为<code>false</code>。</p>
+<p>其原因在于<code>str1</code>对象是通过<code>new</code>对象拼接产生的，字符串常量池中并不存在字符串<code>hello</code>，当调用<code>String str2=&quot;hello&quot;;</code>代码时字符串常量池中产生才该字符串，所以他们并不是同一个地址引用。</p>
+<h3 id="直接内存"><a href="#直接内存" class="headerlink" title="直接内存"></a>直接内存</h3><p><strong>直接内存（<code>Direct Memory</code>）并不是虚拟机运行时数据区的一部分，也不是 Java 虚拟机规范中定义的内存区域</strong>。</p>
+<p>在 <code>JDK 1.4</code> 中新加入了 <code>NIO</code>，引入了一种基于通道（<code>Channel</code>）与缓冲区（<code>Buffer</code>）的 <code>I/O</code> 方式，它可以使用 <code>Native</code> 函数库直接分配堆外内存，然后通过一个存储在 Java 堆中的 <code>DirectByteBuffer</code> 对象作为这块内存的引用进行操作。这样能在一些场景中显著提高性能，因为避免了在 Java 堆和 Native 堆中来回复制数据。</p>
+<p>显然，本机直接内存的分配不会受到 Java 堆大小的限制，但是，既然是内存，肯定还是会受到本机总内存（包括 RAM 以及 SWAP 区或者分页文件）大小以及处理器寻址空间的限制。服务器管理员在配置虚拟机参数时，会根据实际内存设置 <code>-Xmx</code> 等参数信息，但经常忽略直接内存，使得各个内存区域总和大于物理内存限制（包括物理的和操作系统级的限制），从而导致动态扩展时出现 <code>OutOfMemoryError</code> 异常。</p>
+<p><img src="/images/jvm-memory/memory-15.png" alt="memory-15"></p>
+<blockquote>
+<p>“本篇文章主要摘自《深入理解Java虚拟机_JVM高级特性与最佳实践 第2版》”</p>
+</blockquote>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月21日 22:58</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/21/jvm-memory/" title="&#39;Java 运行时数据区域&#39;">https://midkuro.github.io/2020/05/21/jvm-memory/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/21/jvm-memory/&title=《'Java 运行时数据区域'》 — Kuro's Blog&pic=images/jvm.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/21/jvm-memory/&title=《'Java 运行时数据区域'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/21/jvm-memory/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Java 运行时数据区域'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/21/jvm-memory/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/21/jvm-memory/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/21/jvm-memory/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/JVM/" class="color4">JVM</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#运行时数据区域"><span class="post-toc-text">运行时数据区域</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#程序计数器"><span class="post-toc-text">程序计数器</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Java虚拟机栈"><span class="post-toc-text">Java虚拟机栈</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#局部变量表"><span class="post-toc-text">局部变量表</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#操作数栈"><span class="post-toc-text">操作数栈</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#动态链接"><span class="post-toc-text">动态链接</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#方法返回地址"><span class="post-toc-text">方法返回地址</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#本地方法栈"><span class="post-toc-text">本地方法栈</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Java堆"><span class="post-toc-text">Java堆</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#方法区"><span class="post-toc-text">方法区</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#HotSpot-虚拟机"><span class="post-toc-text">HotSpot 虚拟机</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#永久代"><span class="post-toc-text">永久代</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#常量池"><span class="post-toc-text">常量池</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#class常量池"><span class="post-toc-text">class常量池</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#运行时常量池"><span class="post-toc-text">运行时常量池</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#字符串常量池"><span class="post-toc-text">字符串常量池</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#JDK版本变化"><span class="post-toc-text">JDK版本变化</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#直接内存"><span class="post-toc-text">直接内存</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/05/21/garbage-collection/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Java 垃圾回收机制&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/05/21/kubernetes-install/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;kubernetes 环境搭建&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="jvm-memory" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 17.5px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Jenkins/" style="font-size: 17.5px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12.5px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 17.5px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Jenkins/" style="font-size: 17.5px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12.5px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

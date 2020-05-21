@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Java 垃圾回收机制&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="垃圾回收机制想要了解垃圾收集策略，需要先了解 Java内存区域 说起垃圾收集（Garbage Collection，GC），经过半个多世纪的发展，目前的内存的动态分配与内存回收技术已经相当成熟，一切看起来都进入了 “ 自动化 ” 时代，那为什么还要去了解GC和内存分配呢？ 答案很简单：需要排查各种内存溢出、内存泄漏问题时，当垃圾收集称为系统达到更高并发量的瓶颈时，就需要对这些 “ 自动化 ” 的技">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Java 垃圾回收机制&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/21/garbage-collection/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="垃圾回收机制想要了解垃圾收集策略，需要先了解 Java内存区域 说起垃圾收集（Garbage Collection，GC），经过半个多世纪的发展，目前的内存的动态分配与内存回收技术已经相当成熟，一切看起来都进入了 “ 自动化 ” 时代，那为什么还要去了解GC和内存分配呢？ 答案很简单：需要排查各种内存溢出、内存泄漏问题时，当垃圾收集称为系统达到更高并发量的瓶颈时，就需要对这些 “ 自动化 ” 的技">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/garbage-collection/collection-1.png">
+<meta property="og:image" content="https://midkuro.github.io/images/garbage-collection/collection-2.png">
+<meta property="og:image" content="https://midkuro.github.io/images/garbage-collection/collection-3.png">
+<meta property="og:image" content="https://midkuro.github.io/images/garbage-collection/collection-4.png">
+<meta property="og:image" content="https://midkuro.github.io/images/garbage-collection/collection-5.png">
+<meta property="og:image" content="https://midkuro.github.io/images/garbage-collection/collection-6.png">
+<meta property="article:published_time" content="2020-05-21T14:30:00.000Z">
+<meta property="article:modified_time" content="2020-05-21T14:57:55.623Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/garbage-collection/collection-1.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro" target="_blank" href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-garbage-collection" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Java 垃圾回收机制&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/JVM/">JVM</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-21
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h2 id="垃圾回收机制"><a href="#垃圾回收机制" class="headerlink" title="垃圾回收机制"></a>垃圾回收机制</h2><p><strong>想要了解垃圾收集策略，需要先了解 <a href="https://midkuro.github.io/2020/01/20/jvm-memory/">Java内存区域</a></strong></p>
+<p><strong>说起垃圾收集（<code>Garbage Collection，GC</code>），经过半个多世纪的发展，目前的内存的动态分配与内存回收技术已经相当成熟，一切看起来都进入了 “ 自动化 ” 时代，那为什么还要去了解<code>GC</code>和内存分配呢？</strong></p>
+<p><strong>答案很简单：需要排查各种内存溢出、内存泄漏问题时，当垃圾收集称为系统达到更高并发量的瓶颈时，就需要对这些 “ 自动化 ” 的技术实施必要的监控和调节。</strong></p>
+<p><strong>上篇文章介绍了在内存运行时区域的各个部分，其中程序计数器、虚拟机栈、本地方法区随线程而生，随线程而灭，不需要过多考虑回收问题，因为方法结束或者线程结束时，内存自然就回收了，这里主要讨论的是 Java 堆和方法区，本章后续讨论中的 “ 内存 ”分配和回收也仅指着一部分内存。</strong></p>
+<p><code>GC</code>完成需要思考的三件事：</p>
+<ul>
+<li>哪些内存需要回收？</li>
+<li>什么时候回收？</li>
+<li>如何回收？</li>
+</ul>
+<h3 id="对象判断机制"><a href="#对象判断机制" class="headerlink" title="对象判断机制"></a>对象判断机制</h3><h4 id="引用计数法"><a href="#引用计数法" class="headerlink" title="引用计数法"></a>引用计数法</h4><p>引用计数法（<code>Reference Counting</code>）：给对象中添加一个引用计数器，每当有一个地方引用它时，计数器值就加1；当引用失效时，计数器值就减1；计数器为 0 时，对象就是不可能再被使用的。简单高效，<strong>缺点是无法解决对象之间相互循环引用的问题</strong>。</p>
+<p>举个简单的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReferenceTest</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> Object instance = <span class="keyword">null</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ReferenceTest objA = <span class="keyword">new</span> ReferenceTest();</span><br><span class="line">        ReferenceTest objB = <span class="keyword">new</span> ReferenceTest();</span><br><span class="line">        </span><br><span class="line">        objA.instance = objB;</span><br><span class="line">        objB.instance = objA;</span><br><span class="line"></span><br><span class="line">        objA = <span class="keyword">null</span>;</span><br><span class="line">        objB = <span class="keyword">null</span>;</span><br><span class="line">        </span><br><span class="line">        System.gc();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>很显然，在这种情况下，引用计数法是无法解决的，而虚拟机并没有因为这两个对象互相引用就不回收它们，这也从说明虚拟机并不是通过引用计数法来判断对象是否存活的。</p>
+<h4 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h4><p>可达性分析（<code>Reachability Analysis</code>），通过一系列的称为 “<code>GC Roots</code>”，从这些节点开始向下搜索，搜索所走过的路径称为引用链（<code>Reference Chain</code>），当一个对象到 <code>GC Roots</code> 没有任何引用链相连时，则证明此对象是不可用的。<br><img src="/images/garbage-collection/collection-1.png" alt="collection-1"></p>
+<p>在 Java 语言中，可作为 <code>GC Roots</code> 的对象包括下面几种：</p>
+<ul>
+<li><p>虚拟机栈（栈帧中的本地变量表）中引用的对象。</p>
+</li>
+<li><p>方法区中类静态属性引用的对象。</p>
+</li>
+<li><p>方法区中常量引用的对象。</p>
+</li>
+<li><p>本地方法栈中 <code>JNI</code>（<code>Native</code>方法）引用的对象</p>
+</li>
+</ul>
+<p>作为 <code>GC Roots</code> 的节点主要在全局性的引用与执行上下文中。要明确的是，<code>Tracing GC</code>必须以当前存活的对象集为 Roots，因此必须选取确定存活的引用类型对象。</p>
+<p><code>GC</code> 管理的区域是 Java 堆，虚拟机栈、方法区和本地方法栈不被 <code>GC</code> 所管理，因此选用这些区域内引用的对象作为 <code>GC Roots</code>，是不会被 <code>GC</code> 所回收的。</p>
+<p>其中虚拟机栈和本地方法栈都是线程私有的内存区域，只要线程没有终止，就能确保它们中引用的对象的存活。而方法区中类静态属性引用的对象是显然存活的。常量引用的对象在当前可能存活，因此，也可能是 <code>GC roots</code> 的一部分。</p>
+<h4 id="再谈引用"><a href="#再谈引用" class="headerlink" title="再谈引用"></a>再谈引用</h4><p><code>JDK1.2</code> 以前，一个对象只有被引用和没有被引用两种状态。</p>
+<p>后来，Java 对引用的概念进行了扩充，将引用分为强引用（<code>Strong Reference</code>）、软引用（<code>Soft Reference</code>）、弱引用（<code>Weak Reference</code>）、虚引用（<code>Phantom Reference</code>）4 种，这 4 种引用强度依次逐渐减弱。</p>
+<ul>
+<li><p>强引用：指在程序代码之中普遍存在的，类似 “ <code>Object obj=new Object()</code> ” 这类的引用，垃圾收集器永远不会回收存活的强引用对象。</p>
+</li>
+<li><p>软引用：还有用但并非必需的对象。在系统<strong>将要发生内存溢出异常之前</strong> ，将会把这些对象列进回收范围之中进行第二次回收。</p>
+</li>
+<li><p>弱引用：也是用来描述非必需对象的，被弱引用关联的对象 <strong>只能生存到下一次垃圾收集发生之前</strong> 。当垃圾收集器工作时，无论内存是否足够，都会回收掉只被弱引用关联的对象。</p>
+</li>
+<li><p>虚引用：是最弱的一种引用关系。 <strong>无法通过虚引用来取得一个对象实例</strong> 。为一个对象设置虚引用关联的唯一目的就是能在这个对象被收集器回收时收到一个系统通知。</p>
+</li>
+</ul>
+<p><img src="/images/garbage-collection/collection-2.png" alt="collection-2"></p>
+<h4 id="生存与死亡"><a href="#生存与死亡" class="headerlink" title="生存与死亡"></a>生存与死亡</h4><p>不可达的对象将暂时处于“ 缓刑 ”阶段，要真正宣告一个对象死亡，至少要经历两次标记过程：</p>
+<ul>
+<li><p>如果对象在进行可达性分析后发现没有与 <code>GC Roots</code> 相连接的引用链，那它将会被第一次标记并且进行一次筛选，筛选的条件是此对象是否有必要执行 <code>finalize()</code> 方法。</p>
+</li>
+<li><p>当对象没有覆盖 <code>finalize()</code> 方法，或者 <code>finalize()</code> 方法已经被虚拟机调用过，虚拟机将这两种情况都视为 “没有必要执行”，直接进行第二次标记。</p>
+</li>
+</ul>
+<p>如果这个对象被判定为有必要执行 <code>finalize()</code> 方法，那么这个对象将会放置在一个叫做 <code>F-Queue</code> 的队列之中，并在稍后由一个由虚拟机自动建立的、低优先级的 <code>Finalizer</code> 线程去执行它。</p>
+<p>这里所谓的 “ 执行 ” 是指虚拟机会触发这个方法，但并不承诺会等待它运行结束，因为如果一个对象在 <code>finalize()</code> 方法中执行缓慢，将很可能会一直阻塞 <code>F-Queue</code>队列，甚至导致整个内存回收系统崩溃。</p>
+<p>来看一段代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FinalizerTest</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> FinalizerTest object = <span class="keyword">null</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">isAlive</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"I'm alive"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">finalize</span><span class="params">()</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.finalize();</span><br><span class="line">        System.out.println(<span class="string">"method finalize is executed"</span>);</span><br><span class="line">        object = <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        object = <span class="keyword">new</span> FinalizerTest();</span><br><span class="line">        <span class="comment">// 第一次执行，finalize方法会自救</span></span><br><span class="line">        object = <span class="keyword">null</span>;</span><br><span class="line">        System.gc();</span><br><span class="line">        <span class="comment">// 因为Finalizer方法优先级低，所以暂停0.5秒等待它</span></span><br><span class="line">        Thread.sleep(<span class="number">500</span>);</span><br><span class="line">        <span class="keyword">if</span> (object != <span class="keyword">null</span>) &#123;</span><br><span class="line">            object.isAlive();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">"I'm dead"</span>);</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 下面代码和上面的完全一样，但是这次自救失败了</span></span><br><span class="line">        object = <span class="keyword">null</span>;</span><br><span class="line">        System.gc();</span><br><span class="line">        Thread.sleep(<span class="number">500</span>);</span><br><span class="line">        <span class="keyword">if</span> (object != <span class="keyword">null</span>) &#123;</span><br><span class="line">            object.isAlive();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">"I'm dead"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">method finalize is executed</span><br><span class="line">I&#39;m alive</span><br><span class="line">I&#39;m dead</span><br></pre></td></tr></table></figure>
+<p>如果不重写<code>finalize()方法</code>，输出将会是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">I&#39;m dead</span><br><span class="line">I&#39;m dead</span><br></pre></td></tr></table></figure>
+<p>值得注意的地方是，代码中有两段完全一样的代码片段，执行结果却是一次逃脱成功，一次失败，这是因为任何一个对象的<code>finalize()</code>方法都只会被系统自动调用一次，如果对象面临下一次回收，它的<code>finalize()</code>方法不会被再次执行。</p>
+<p><strong>应该尽量避免使用finalize()方法拯救对象，它的运行代价高昂，不确定性大，无法保证各个对象的调用顺序，<code>finalize()</code>能做的所有工作，使用<code>try-finally</code>或者其他方法能都可以做的更好、更及时。</strong></p>
+<h4 id="回收方法区"><a href="#回收方法区" class="headerlink" title="回收方法区"></a>回收方法区</h4><p><strong>永久代的垃圾收集主要回收两部分内容：废弃常量和无用的类</strong></p>
+<p>回收废弃常量与回收 Java 堆中的对象非常类似。以常量池中字面量的回收为例，假如一个字符串 “<code>abc</code>” 已经进入了常量池中，但是当前系统没有任何一个 <code>String</code> 对象引用它，也没有其他地方引用了这个字面量，如果这时发生内存回收，而且必要的话，这个 “<code>abc</code>” 常量就会被系统清理出常量池。常量池中的其他类（接口）、方法、字段的符号引用也与此类似。</p>
+<p>类需要满足下面3个条件才能算是<strong>无用的类</strong>：</p>
+<ul>
+<li>该类所有实例都已经被回收，也就是说 Java 堆中不存在该类的任何实例。</li>
+<li>加载该类的 <code>ClassLoader</code>已经被回收。</li>
+<li>该类对应的 <code>java.lang.Class</code>对象没有任何地方被引用，无法在任何地方通过反射访问该类的方法。</li>
+</ul>
+<p>虚拟机可以对满足上述 3 个条件的无用类进行回收，这里说的仅仅是 “ 可以 ” ，而并不是和对象一样，不使用了就必然会回收。</p>
+<p>在大量使用反射、动态代理、<code>CGLib</code> 等 <code>ByteCode</code> 框架、动态生成 <code>JSP</code> 以及 <code>OSGi</code> 这类频繁自定义 <code>ClassLoader</code> 的场景都需要虚拟机具备类卸载的功能，以保证永久代不会溢出。</p>
+<h3 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h3><h4 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记-清除算法"></a>标记-清除算法</h4><p>最基础的收集算法是 <strong>标记-清除</strong>（<code>Mark-Sweep</code>）算法，算法分为 “ 标记 ” 和 “ 清除 ”两个阶段：<strong>首先标记处所有需要回收的对象，在标记完成后统一回收所有被标记的对象。</strong></p>
+<p>它主要不足有两个：</p>
+<ul>
+<li>效率问题 ： 标记和清除两个过程都不高</li>
+<li>空间问题 ： 标记清除之后会产生大量不连续的内存碎片，空间碎片太多可能会导致以后在程序运行过程中需要分配较大对象时，无法找到足够的连续内存而不得不提前触发另一次垃圾收集动作。</li>
+</ul>
+<p>标记清除算法的执行过程如图所示：<br><img src="/images/garbage-collection/collection-3.png" alt="collection-3"></p>
+<h4 id="复制算法"><a href="#复制算法" class="headerlink" title="复制算法"></a>复制算法</h4><p>为了解决效率问题，一种称为 “ 复制 ”(<code>Copying</code>)的收集算法出现了，它<strong>将可用内存按容量划分为大小相等的两块，每次只是用其中的一块</strong>。当这块的内存用完了，就将还存活着的对象复制到另外一块上面，然后再把已使用过的内存空间一次性清理掉。</p>
+<p>这样使得每次都是对整个半区进行内存回收，内存分配时也就不用考虑内存碎片等复杂情况，只要一动堆顶指针，按顺序分配内存即可，实现简单，运行高效。<strong>只是这种算法的代价是将内存缩小为了原来的一半。</strong></p>
+<p>复制算法的执行过程如图所示：<br><img src="/images/garbage-collection/collection-4.png" alt="collection-4"></p>
+<p>现在的商业虚拟机都采用这种算法来回收新生代，IBM 研究指出<strong>新生代中的对象 98% 是 “朝生夕死” 的</strong>，所以并不需要按照 1:1 的比例来划分内存空间，而是将内存分为一块较大的 <code>Eden</code> 空间和两块较小的 <code>Survivor</code> 空间，每次使用 <code>Eden</code> 和其中一块 <code>Survivor</code> 。</p>
+<p>当回收时，将 <code>Eden</code> 和 <code>Survivor</code> 中还存活着的对象一次性地复制到另外一块 <code>Survivor</code> 空间上，最后清理掉 <code>Eden</code> 和刚才用过的 <code>Survivor</code> 空间。<strong><code>HotSpot</code> 虚拟机默认Eden:Survivor = 8:1，也就是每次新生代中可用内存空间为整个新生代容量的 90%（其中一块Survivor不可用），只有 10% 的内存会被“浪费”</strong>。</p>
+<p><img src="/images/garbage-collection/collection-5.png" alt="collection-5"></p>
+<p>当然，98%的对象可回收只是一般场景下的数据，我们没有办法保证每次回收都只有不多于 10% 的对象存活，当 <code>Survivor</code> 空间不够用时，需要依赖其他内存（这里指老年代）进行分配担保（<code>Handle Promotion</code>）。</p>
+<p>内存的分配担保就好比我们去银行借款，如果我们信誉很好，在 98% 的情况下都能按时偿还，于是银行可能会默认我们下一次也能按时按量地偿还贷款，只需要有一个担保人能保证如果我不能还款时，可以从他的账户扣钱，那银行就认为没有风险了。</p>
+<p>内存的分配担保也一样，如果另外一块 <code>Survivor</code> 空间没有足够空间存放上一次新生代收集下来的存活对象时，这些对象将直接通过分配担保机制进入老年代。关于对新生代进行分配担保的内容，在本章稍后在讲解垃圾收集器执行规则时还会再详细讲解。</p>
+<h4 id="标记-整理算法"><a href="#标记-整理算法" class="headerlink" title="标记-整理算法"></a>标记-整理算法</h4><p>复制算法在对象存活率较高时就要进行较多的复制操作，效率将会变低。更关键的是，如果不想浪费 50% 的空间，就需要有额外的空间进行分配担保，以应对被使用的内存中所有对象都 100% 存活的极端情况，所以在老年代一般不能直接选用这种算法。</p>
+<p>根据老年代的特点，有人提出了另外一种 “ 标记-整理 ”（<code>Mark-Compact</code>）算法，标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可回收对象进行清理，而是<strong>让所有存活的对象都向一端移动，然后直接清理掉端边界以外的内存</strong>。</p>
+<p>标记-整理算法的执行过程如图所示：<br><img src="/images/garbage-collection/collection-6.png" alt="collection-6"></p>
+<p>第一个过程和标记清除算法的第一个过程一样。然后是整理，最后在清除。</p>
+<p>标记整理算法的优缺点：</p>
+<ul>
+<li>优点：解决内存碎片问题。</li>
+<li>缺点：不仅要标记所有存活对象，还要移动所有存活对象的地址并更新被移动的对象相关的引用。从效率上来说，要低于复制算法。</li>
+</ul>
+<h4 id="分代收集策略"><a href="#分代收集策略" class="headerlink" title="分代收集策略"></a>分代收集策略</h4><p>当前商业虚拟机的垃圾收集都采用“分代收集”（<code>Generational Collection</code>）算法，根据对象存活周期的不同将内存划分为几块并采用不用的垃圾收集算法。</p>
+<p>一般是把 Java 堆分为新生代和老年代，这样就可以根据各个年代的特点采用最适当的收集算法。</p>
+<p>在<strong>新生代中，每次垃圾收集时都发现有大批对象死去，只有少量存活，那就选用复制算法</strong>，只需要付出少量存活对象的复制成本就可以完成收集。</p>
+<p><strong>而老年代中因为对象存活率高、没有额外空间对它进行分配担保，就必须使用“标记—清理”或者“标记—整理”算法来进行回收</strong>。</p>
+<h3 id="HotSpot的算法实现"><a href="#HotSpot的算法实现" class="headerlink" title="HotSpot的算法实现"></a>HotSpot的算法实现</h3><h4 id="枚举根节点"><a href="#枚举根节点" class="headerlink" title="枚举根节点"></a>枚举根节点</h4><p>以可达性分析中从 <code>GC Roots</code> 节点找引用链这个操作为例，可作为 <code>GC Roots</code> 的节点主要在全局性的引用（例如常量或类静态属性）与执行上下文（例如栈帧中的本地变量表）中，现在很多应用仅仅方法区就有数百兆，如果要逐个检查这里面的引用，那么必然会消耗很多时间。</p>
+<p>另外，可达性分析对执行时间的敏感还体现在 <code>GC</code> 停顿上，因为这项分析工作必须在一个能确保 <strong>一致性</strong> 的快照中进行。<strong>这里的 一致性 指的是整个分析期间整个执行系统看起来就像被冻结在某个时间点上，<br>不可以出现分析过程中对象引用关系还在不断变化的情况，否则分析结果准确性就无法得到保证。</strong></p>
+<p>这点是导致 <code>GC</code> 进行时<strong>必须停顿所有 Java 执行线程</strong>（Sun将这件事情称为”<code>Stop The World,STW</code>“）的其中一个重要原因，即使是在号称（几乎）不会发生停顿的 <code>CMS</code> 收集器中，枚举根节点时也是必须要停顿的。</p>
+<p>因此，目前的主流 Java 虚拟机使用的都是<strong>准确式 GC</strong>（即虚拟机可以知道内存中某个位置的数据具体是什么类型。），所以当执行系统停顿下来后，并不需要一个不漏地检查完所有执行上下文和全局的引用位置，虚拟机应当是有办法直接得知哪些地方存放着对象引用。</p>
+<p>在 <code>HotSpot</code> 的实现中，是使用一组称为 <code>OopMap</code> 的数据结构来达到枚举 <code>GC Roots</code>的目的，在类加载完成的时候，<code>HotSpot</code>就把对象内什么偏移量上是什么类型的数据计算出来，在 <code>JIT</code> 编译过程中，也会在特定的位置记录栈和寄存器中哪些位置是引用。这样， <code>GC</code> 在扫描时就可以直接得知这些信息了。</p>
+<h4 id="OopMap"><a href="#OopMap" class="headerlink" title="OopMap"></a>OopMap</h4><p>垃圾收集时，收集线程会对栈上的内存进行扫描，看看哪些位置存储了 <code>Reference</code> 类型。如果发现某个位置确实存的是 <code>Reference</code> 类型，就意味着它所引用的对象这一次不能被回收。</p>
+<p>但问题是，栈上的本地变量表里面只有一部分数据是 <code>Reference</code> 类型的（它们是 <code>GC</code> 所需要的），那些非 <code>Reference</code> 类型的数据对 <code>GC</code> 而言毫无用处，但 <code>GC</code> 还是不得不对整个栈全部扫描一遍，这是对时间和资源的一种浪费。</p>
+<p>一个很自然的想法是，能不能用空间换时间，在某个时候把栈上代表引用的位置全部记录下来，这样到真正 <code>GC</code> 的时候就可以直接读取，而不用再一点一点的扫描了。事实上，大部分主流的虚拟机也正是这么做的，比如 <code>HotSpot</code> ，它使用一种叫做 <code>OopMap</code> 的数据结构来记录这类信息。</p>
+<p><strong><code>OopMap</code> 记录了栈上本地变量到堆上对象的引用关系。</strong>枚举根节点时，递归遍历每个栈帧的 <code>OopMap</code> ，通过栈中记录的被引用对象的内存地址，即可找到这些对象（ <code>GC Roots</code> ）。</p>
+<h4 id="RememberedSet"><a href="#RememberedSet" class="headerlink" title="RememberedSet"></a>RememberedSet</h4><p><code>RememberedSet</code> 主要用来处理频繁的<strong>新生代 GC</strong>。</p>
+<p>目的：<strong>执行新生代 GC</strong>而不执行<strong>老年代 GC</strong></p>
+<p>背景：<br>一般来说，<code>GC</code> 的过程是先枚举根节点。根节点有可能在新生代中，也有可能在老年代中。这里由于我们只想回收新生代（换句话说，不想回收老年代），所以没有必要对位于老年代的 <code>GC Roots</code> 做全面的可达性分析。</p>
+<p>问题：可能存在位于老年代的某个 <code>GC Root</code>，它引用了新生代的某个对象，这个对象你是不能清除的。那怎么办呢？</p>
+<p>通过空间换时间的办法。事实上，对于位于不同年代对象之间的引用关系，虚拟机会在程序运行过程中给记录下来。对应上面所举的例子，<strong>“ 老年代对象引用新生代对象 ” 这种关系，会在引用关系发生时，在新生代边上专门开辟一块空间记录下来</strong>，这就是 <code>RememberedSet</code> 。</p>
+<p>所以<strong>新生代的 GC Roots</strong> + <strong>RememberedSet 存储的内容</strong>，才是新生代收集时真正的 <code>GC Roots</code> 。然后就可以以此为据，在新生代上做可达性分析，进行垃圾回收。</p>
+<h4 id="安全点"><a href="#安全点" class="headerlink" title="安全点"></a>安全点</h4><p>在 <code>OopMap</code> 的协助下，<code>HotSpot</code> 可以快速且准确地完成 <code>GC Roots</code> 枚举，但一个很现实的问题随之而来：可能导致引用关系变化，或者说 <code>OopMap</code> 内容变化的指令非常多，如果为每一条指令都生成对应的 <code>OopMap</code>，那将会需要大量的额外空间，这样 GC 的空间成本将会变得很高。</p>
+<p>实际上，<code>HotSpot</code> 也的确没有为每条指令都生成 <code>OopMap</code>，前面已经提到，只是在 “ 特定的位置 ” 记录了这些信息，这些位置称为<strong>安全点</strong>(<code>SafePoint</code>)，即程序执行时并非在所有地方都能停顿下来开始 <code>GC</code> ，只有在到达安全点时才能暂停。</p>
+<p><code>Safepoint</code> 的选定既不能太少以致于 <code>GC</code> 过少，也不能过于频繁以致于过分增大运行时的负荷。</p>
+<p>对于 <code>Safepoint</code>，另一个需要考虑的问题是如何在 <code>GC</code> 发生时让所有线程都 “跑” 到最近的安全点上再停顿下来。这里有两种方案可供选择：</p>
+<ul>
+<li>抢先式中断（<code>Preemptive Suspension</code>）</li>
+<li>主动式中断（<code>Voluntary Suspension</code>）。</li>
+</ul>
+<p>其中抢先式中断不需要线程的执行代码主动去配合，在 <code>GC</code> 发生时，首先把所有线程全部中断，如果发现有线程中断的地方不在安全点上，就恢复线程，让它 “跑” 到安全点上。现在几乎没有虚拟机实现采用抢先式中断来暂停线程从而响应 <code>GC</code> 事件。</p>
+<p>而<strong>主动式中断的思想是当 <code>GC</code> 需要中断线程的时候，不直接对线程操作，仅仅简单地设置一个标志，各个线程执行时主动去轮询这个标志，发现中断标志为真时就自己中断挂起。</strong>轮询标志的地方和安全点是重合的，另外再加上创建对象需要分配内存的地方。</p>
+<p>一个线程意味着一个栈，一个栈由多个栈帧组成，一个栈帧对应着一个方法，一个方法里面可能有多个安全点。 <code>GC</code> 发生时，程序首先运行到最近的一个安全点停下来，然后更新自己的 <code>OopMap</code> ，记下栈上哪些位置代表着引用。</p>
+<h4 id="安全区域"><a href="#安全区域" class="headerlink" title="安全区域"></a>安全区域</h4><p>使用 <code>Safepoint</code> 似乎已经完美地解决了如何进入 <code>GC</code> 的问题，但实际情况却并不一定。<code>Safepoint</code> 机制保证了程序执行时，在不太长的时间内就会遇到可进入 <code>GC</code> 的<code>Safepoint</code>。但是，程序“不执行”的时候呢？</p>
+<p>所谓的程序不执行就是没有分配 <code>CPU</code> 时间，典型的例子就是线程处于 <code>Sleep</code> 状态或者 <code>Blocked</code> 状态，这时候线程无法响应 <code>JVM</code> 的中断请求，“走”到安全的地方去中断挂起，<code>JVM</code> 也显然不太可能等待线程重新被分配 <code>CPU</code> 时间。对于这种情况，就需要安全区域（<code>Safe Region</code>）来解决。</p>
+<p><strong>安全区域是指在一段代码片段之中，引用关系不会发生变化。</strong></p>
+<p>在这个区域中的任意地方开始 <code>GC</code> 都是安全的。我们也可以把 <code>Safe Region</code> 看做是被扩展了的 <code>Safepoint</code>。在线程执行到 <code>Safe Region</code> 中的代码时，首先标识自己已经进入了 <code>Safe Region</code>，那样，当在这段时间里 <code>JVM</code> 要发起 <code>GC</code> 时，就不用管标识自己为 <code>Safe Region</code>状态的线程了。</p>
+<p>在线程要离开 <code>Safe Region</code> 时，它要检查系统是否已经完成了根节点枚举（或者是整个 <code>GC</code> 过程），如果完成了，那线程就继续执行，否则它就必须等待直到收到可以安全离开 <code>Safe Region</code> 的信号为止。</p>
+<blockquote>
+<p>“本篇文章主要摘自《深入理解Java虚拟机_JVM高级特性与最佳实践 第2版》”</p>
+</blockquote>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月21日 22:57</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/21/garbage-collection/" title="&#39;Java 垃圾回收机制&#39;">https://midkuro.github.io/2020/05/21/garbage-collection/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/21/garbage-collection/&title=《'Java 垃圾回收机制'》 — Kuro's Blog&pic=images/jvm.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/21/garbage-collection/&title=《'Java 垃圾回收机制'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/21/garbage-collection/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Java 垃圾回收机制'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/21/garbage-collection/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/21/garbage-collection/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/21/garbage-collection/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/JVM/" class="color4">JVM</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#垃圾回收机制"><span class="post-toc-text">垃圾回收机制</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#对象判断机制"><span class="post-toc-text">对象判断机制</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#引用计数法"><span class="post-toc-text">引用计数法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#可达性分析算法"><span class="post-toc-text">可达性分析算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#再谈引用"><span class="post-toc-text">再谈引用</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#生存与死亡"><span class="post-toc-text">生存与死亡</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#回收方法区"><span class="post-toc-text">回收方法区</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#垃圾收集算法"><span class="post-toc-text">垃圾收集算法</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#标记-清除算法"><span class="post-toc-text">标记-清除算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#复制算法"><span class="post-toc-text">复制算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#标记-整理算法"><span class="post-toc-text">标记-整理算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#分代收集策略"><span class="post-toc-text">分代收集策略</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#HotSpot的算法实现"><span class="post-toc-text">HotSpot的算法实现</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#枚举根节点"><span class="post-toc-text">枚举根节点</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#OopMap"><span class="post-toc-text">OopMap</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#RememberedSet"><span class="post-toc-text">RememberedSet</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#安全点"><span class="post-toc-text">安全点</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#安全区域"><span class="post-toc-text">安全区域</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/05/21/garbage-collector/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Java 垃圾收集器&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/05/21/jvm-memory/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Java 运行时数据区域&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="garbage-collection" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 17.5px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Jenkins/" style="font-size: 17.5px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12.5px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 17.5px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Jenkins/" style="font-size: 17.5px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12.5px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

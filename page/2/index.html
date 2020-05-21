@@ -107,6 +107,225 @@
       <div class="outer">
         <section id="main" class="body-wrap">
   
+    <article id="post-software-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/05/20/software-install/"  >&#39;linux 下安装nginx redis&#39;</a>
+    </h1>
+  
+
+          
+              <span class="header-cate">
+                <i class="fa fa-map-marker"></i>
+                  
+                  <a href="/categories/Nginx/">Nginx</a>
+                  
+                  <a href="/categories/Redis/">Redis</a>
+                  
+              </span>
+          
+      </header>
+    
+    <div class="article-entry " itemprop="articleBody">
+      
+        <div class="article-img">
+            <a href="/2020/05/20/software-install/" >
+                
+                <img src="/images/redis.jpg" alt="'linux 下安装nginx redis'" title="'linux 下安装nginx redis'">
+                
+            </a>
+        </div>
+        <div class="article-feed">
+            <p>
+                安装nginx1.下载安装包nginx-1.14.1.tar.gz  其他版本请自行下载 官网地址
+2.上传并解压安装包
+1tar -zxvf nginx-1.14.1.tar.gz
+
+3.设置配置信息
+1./configure --prefix=/usr/local/nginx  (安装后的...
+            </p>
+        </div>
+      
+        
+    </div>
+    <footer class="article-footer">
+        
+        <ul class="article-footer-menu">
+            
+                <li><i class="fa fa-calendar"></i>2020-05-20</li>
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Linux/" class="color1">Linux</a>
+      
+    <a href="/tags/Nginx/" class="color1">Nginx</a>
+      
+    <a href="/tags/Redis/" class="color1">Redis</a>
+      
+  </li>
+
+        </ul>
+        
+            <a href="/2020/05/20/software-install/#more" class="article-more-link" >more&gt;&gt;</a>
+        
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article id="post-systemctl-use" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/05/20/systemctl-use/"  >&#39;centos7 设置应用程序为系统服务&#39;</a>
+    </h1>
+  
+
+          
+              <span class="header-cate">
+                <i class="fa fa-map-marker"></i>
+                  
+                  <a href="/categories/Systemctl/">Systemctl</a>
+                  
+              </span>
+          
+      </header>
+    
+    <div class="article-entry " itemprop="articleBody">
+      
+        <div class="article-img">
+            <a href="/2020/05/20/systemctl-use/" >
+                
+                <img src="/images/linux.jpg" alt="'centos7 设置应用程序为系统服务'" title="'centos7 设置应用程序为系统服务'">
+                
+            </a>
+        </div>
+        <div class="article-feed">
+            <p>
+                centos7使用systemctl以下的 xxx为服务名称，需根据自身需求修改
+1.进入目录
+1cd /usr/lib/systemd/system/
+
+2.创建xxx.service文件
+1vi xxx.service
+
+3.赋予xxx.service文件权限
+1chmod 754 xxx...
+            </p>
+        </div>
+      
+        
+    </div>
+    <footer class="article-footer">
+        
+        <ul class="article-footer-menu">
+            
+                <li><i class="fa fa-calendar"></i>2020-05-20</li>
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Linux/" class="color1">Linux</a>
+      
+    <a href="/tags/Systemctl/" class="color5">Systemctl</a>
+      
+  </li>
+
+        </ul>
+        
+            <a href="/2020/05/20/systemctl-use/#more" class="article-more-link" >more&gt;&gt;</a>
+        
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article id="post-firewalld-use" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/05/20/firewalld-use/"  >&#39;linux 开放防火墙端口&#39;</a>
+    </h1>
+  
+
+          
+              <span class="header-cate">
+                <i class="fa fa-map-marker"></i>
+                  
+                  <a href="/categories/Firewall/">Firewall</a>
+                  
+              </span>
+          
+      </header>
+    
+    <div class="article-entry " itemprop="articleBody">
+      
+        <div class="article-img">
+            <a href="/2020/05/20/firewalld-use/" >
+                
+                <img src="/images/firewall.jpg" alt="'linux 开放防火墙端口'" title="'linux 开放防火墙端口'">
+                
+            </a>
+        </div>
+        <div class="article-feed">
+            <p>
+                centos7开放防火墙端口启动防火墙
+1systemctl start firewalld
+
+停止防火墙
+1systemctl stop firewalld
+
+查看防火墙状态
+1firewall-cmd --state
+
+查看防火墙启动状态详情
+1systemctl status firew...
+            </p>
+        </div>
+      
+        
+    </div>
+    <footer class="article-footer">
+        
+        <ul class="article-footer-menu">
+            
+                <li><i class="fa fa-calendar"></i>2020-05-20</li>
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Linux/" class="color1">Linux</a>
+      
+    <a href="/tags/Firewall/" class="color4">Firewall</a>
+      
+  </li>
+
+        </ul>
+        
+            <a href="/2020/05/20/firewalld-use/#more" class="article-more-link" >more&gt;&gt;</a>
+        
+    </footer>
+  </div>
+</article>
+
+
+  
     <article id="post-jenkins-param" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -133,7 +352,7 @@
         <div class="article-img">
             <a href="/2020/05/20/jenkins-param/" >
                 
-                <img src="https://midkuro.github.io/images/jenkins.png" alt="'jenkins 参数化构建'" title="'jenkins 参数化构建'">
+                <img src="/images/jenkins.jpg" alt="'jenkins 参数化构建'" title="'jenkins 参数化构建'">
                 
             </a>
         </div>
@@ -198,7 +417,7 @@
         <div class="article-img">
             <a href="/2020/05/20/jenkins-upstream/" >
                 
-                <img src="https://midkuro.github.io/images/jenkins.png" alt="'jenkins 上下游与持续集成构建'" title="'jenkins 上下游与持续集成构建'">
+                <img src="/images/jenkins.jpg" alt="'jenkins 上下游与持续集成构建'" title="'jenkins 上下游与持续集成构建'">
                 
             </a>
         </div>
@@ -263,7 +482,7 @@
         <div class="article-img">
             <a href="/2020/05/20/jenkins-use/" >
                 
-                <img src="https://midkuro.github.io/images/jenkins.png" alt="'jenkins 搭建简单的构建'" title="'jenkins 搭建简单的构建'">
+                <img src="/images/jenkins.jpg" alt="'jenkins 搭建简单的构建'" title="'jenkins 搭建简单的构建'">
                 
             </a>
         </div>
@@ -329,7 +548,7 @@
         <div class="article-img">
             <a href="/2020/05/20/jenkins-install/" >
                 
-                <img src="https://midkuro.github.io/images/jenkins.png" alt="'jenkins 安装及卸载'" title="'jenkins 安装及卸载'">
+                <img src="/images/jenkins.jpg" alt="'jenkins 安装及卸载'" title="'jenkins 安装及卸载'">
                 
             </a>
         </div>
@@ -426,10 +645,10 @@ apache-maven-3.6.0-bin.tar.gz   下载地址    ...
 <div class="sidebar-menu-box" id="sidebar-menu-box">
     <div class="sidebar-menu-box-container">
         <div id="sidebar-menu-box-categories">
-            <a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a>
+            <a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a>
         </div>
         <div id="sidebar-menu-box-tags">
-            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 17.5px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/Jenkins/" style="font-size: 17.5px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12.5px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 17.5px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Jenkins/" style="font-size: 17.5px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12.5px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
         </div>
     </div>
     <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
@@ -462,7 +681,7 @@ apache-maven-3.6.0-bin.tar.gz   下载地址    ...
     <div class="mobile-header-tag-container">
         <span class="title">Tags</span>
         <div id="mobile-header-container-tags">
-            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 17.5px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/Jenkins/" style="font-size: 17.5px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12.5px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 17.5px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 15px;">JVM</a> <a href="/tags/Jenkins/" style="font-size: 17.5px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12.5px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
         </div>
     </div>
 </div>
