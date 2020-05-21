@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;kubernetes 基础概念&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="Docker基本概念什么是DockerDocker是使用 Google公司推出的Go 语言进行开发实现，基于Linux 内核的cgroup、namespace、以及AUFS类的Union FS等技术，对进程进行封装隔离，属于操作系统层面的虚拟化技术，由于隔离的进程独立于宿主和其它的隔离的进程，因此也称其为容器。 Docker在容器的基础上，进行了进一步的封装，从文件系统、网络互联到进程隔离等等，极">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;kubernetes 基础概念&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/21/kubernetes-introduction/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Docker基本概念什么是DockerDocker是使用 Google公司推出的Go 语言进行开发实现，基于Linux 内核的cgroup、namespace、以及AUFS类的Union FS等技术，对进程进行封装隔离，属于操作系统层面的虚拟化技术，由于隔离的进程独立于宿主和其它的隔离的进程，因此也称其为容器。 Docker在容器的基础上，进行了进一步的封装，从文件系统、网络互联到进程隔离等等，极">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/k8s-introduction/introduction-1.png">
+<meta property="og:image" content="https://midkuro.github.io/images/k8s-introduction/introduction-2.png">
+<meta property="og:image" content="https://midkuro.github.io/images/k8s-introduction/introduction-3.png">
+<meta property="og:image" content="https://midkuro.github.io/images/k8s-introduction/introduction-4.png">
+<meta property="og:image" content="https://midkuro.github.io/images/k8s-introduction/introduction-5.png">
+<meta property="og:image" content="https://midkuro.github.io/images/k8s-introduction/introduction-6.png">
+<meta property="article:published_time" content="2020-05-21T13:50:00.000Z">
+<meta property="article:modified_time" content="2020-05-21T12:32:26.834Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="DevOps">
+<meta property="article:tag" content="Kubernetes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/k8s-introduction/introduction-1.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro" target="_blank" href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-kubernetes-introduction" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;kubernetes 基础概念&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Kubernetes/">Kubernetes</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-21
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h3 id="Docker基本概念"><a href="#Docker基本概念" class="headerlink" title="Docker基本概念"></a>Docker基本概念</h3><h4 id="什么是Docker"><a href="#什么是Docker" class="headerlink" title="什么是Docker"></a>什么是Docker</h4><p><code>Docker</code>是使用 Google公司推出的<code>Go 语言</code>进行开发实现，基于<code>Linux 内核</code>的cgroup、namespace、以及AUFS类的Union FS等技术，对进程进行封装隔离，属于操作系统层面的<strong>虚拟化技术</strong>，由于隔离的进程独立于宿主和其它的隔离的进程，因此也称其为容器。</p>
+<p><code>Docker</code>在容器的基础上，进行了进一步的封装，从文件系统、网络互联到进程隔离等等，极大的简化了容器的创建和维护。使得<code>Docker</code>技术比虚拟机技术更为轻便、快捷。下面的图片比较了<code>Docker</code>和传统虚拟化方式的不同之处。</p>
+<p>传统虚拟机技术是虚拟出一套硬件后，在其上运行一个完整操作系统，在该系统上再运行所需应用进程。</p>
+<p>而容器内的应用进程直接运行于宿主的内核，容器内没有自己的内核，而且也没有进行硬件虚拟。因此容器要比 传统虚拟机更为轻便。</p>
+<p><img src="/images/k8s-introduction/introduction-1.png" alt="introduction-1"><br><img src="/images/k8s-introduction/introduction-2.png" alt="introduction-2"></p>
+<h4 id="为什么要使用Docker"><a href="#为什么要使用Docker" class="headerlink" title="为什么要使用Docker"></a>为什么要使用Docker</h4><p>作为一种新兴的虚拟化方式，<code>Docker</code>跟传统的虚拟化方式相比具有众多的优势。</p>
+<ul>
+<li><p>更高效的利用系统资源：<br>由于容器不需要进行硬件虚拟以及运行完整操作系统等额外开销，<code>Docker</code>对系统资源的利用率更高。</p>
+</li>
+<li><p>更快速的启动时间：</p>
+<p><code>Docker</code>容器应用，由于直接运行于宿主内核，无需启动完整的操作系统，因此可以做到秒级、甚至毫秒级的启动时间。大大的节约了开发、测试、部署的时间</p>
+</li>
+<li><p>一致的运行环境：</p>
+<p><code>Docker</code>的镜像提供了除内核外完整的运行时环境，确保了应用运行环境一致性，从而不会再出现<strong>这段代码在我机器上没问题啊</strong>这类问题。</p>
+</li>
+<li><p>持续交付和部署：</p>
+<p><code>Docker</code>可以通过定制应用镜像来实现持续集成、持续交付、部署。可以通过<code>Dockerfile</code>来进行镜像构建，结合持续集成系统进行集成测试、自动部署。</p>
+</li>
+<li><p>更轻松的迁移：</p>
+<p>由于<code>Docker</code>确保了执行环境的一致性，使得应用的迁移更加容易，而不用担心运行环境的变化导致应用无法正常运行的情况。</p>
+</li>
+<li><p>更轻松的维护和扩展：</p>
+<p><code>Docker</code>使用的分层存储以及镜像的技术，使得应用重复部分的复用更为容易，也使得应用的维护更新更加简单，基于基础镜像进一步扩展镜像也变得非常简单。此外，<code>Docker</code>团队提供了一大批高质量的官方镜像，既可以直接使用，又可以作为基础进一步定制，大大的降低了应用服务的镜像制作成本。</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>容器</th>
+<th>虚拟机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>启动</td>
+<td>秒级</td>
+<td>分钟级</td>
+</tr>
+<tr>
+<td>硬盘使用</td>
+<td>一般为 MB</td>
+<td>一般为 GB</td>
+</tr>
+<tr>
+<td>性能</td>
+<td>接近原生</td>
+<td>弱于</td>
+</tr>
+<tr>
+<td>系统支持量</td>
+<td>单机支持上千个容器</td>
+<td>一般几十个</td>
+</tr>
+</tbody></table>
+<h4 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h4><p><strong>镜像<code>Image</code></strong></p>
+<p>镜像是一个特殊的文件系统，除了提供容器运行时所需的程序、库、资源、配置等文件外，还包含了一些为运行时准备的一些配置参数（如匿名卷、环境变量、用户等）。镜像 不包含任何动态数据，其内容在构建之后也不会被改变。</p>
+<p><code>Docker</code>设计时，将其设计为分层存储的架构。镜像构建时，会一层层构建，前一层是后一层的基础。每一层构建完就不会再发生改变，后一层上的任何改变只发生在自己这一层。比如，删除前一层文件的操作，实际不是真的删除 前一层的文件，而是仅在当前层标记为该文件已删除。分层存储的特征使得镜像的复用、定制变的更为容易。</p>
+<p><strong>容器<code>Container</code></strong></p>
+<p>镜像和容器的关系，<strong>就像是面向对象程序设计中的类和实例一样</strong>，镜像是静态的定义，容器是镜像运行时的实体。容器可以被创建、启动、停止、删除、暂停等。</p>
+<p>容器的实质是进程，但与直接在宿主执行的进程不同，容器进程运行于属于自己的独立的命名空间。因此容器可以拥有自己的<code>root</code>文件系统、自己的网络配置、自己的进程空间，甚至自己的用户ID空间。容器内的进程是运行在一个隔离的环境里，使用起来，就好像是在一个独立于宿主的系统下操作一样。容器也具备分层存储的特征。</p>
+<h3 id="Kubernetes"><a href="#Kubernetes" class="headerlink" title="Kubernetes"></a>Kubernetes</h3><h4 id="什么是Kubernetes"><a href="#什么是Kubernetes" class="headerlink" title="什么是Kubernetes"></a>什么是Kubernetes</h4><p><code>Kubernetes</code>是一个完备的分布式系统支撑平台。<code>Kubernetes</code>具有完备的集群管理能力，包括多层次的安全防护和准入机制、多租户应用支撑能力、透明的服务注册和服务发现机制、内建的智能负载均衡器、强大的故障发现和自我修复能力、服务滚动升级和在线扩容能力、可扩展的资源自动调度机制，以及多粒度的资源配额管理能力。同时，<code>Kubernetes</code>提供了完善的管理工具，这些工具涵盖了包括开发、部署测试、运维监控在内的各个环节。因此，<code>Kubernetes</code>是一个全新的基于容器技术的分布式架构解决方案，并且是一个一站式的完备的分布式系统开发和支撑平台。</p>
+<p><code>Kubernetes</code>英文中字母K和S中间有8个英文，所以也简称为K8S。</p>
+<h4 id="为什么要使用Kubernetes"><a href="#为什么要使用Kubernetes" class="headerlink" title="为什么要使用Kubernetes"></a>为什么要使用Kubernetes</h4><ul>
+<li><p>轻装上阵地开发复杂系统</p>
+</li>
+<li><p>可以全面拥抱微服务架构</p>
+</li>
+<li><p>可以随时随地迁移系统</p>
+</li>
+<li><p>拥有横向弹性扩容机制</p>
+</li>
+</ul>
+<h3 id="Kubernetes基本概念"><a href="#Kubernetes基本概念" class="headerlink" title="Kubernetes基本概念"></a>Kubernetes基本概念</h3><p><code>Kubernetes</code>中的大部分概念如<code>Node、Pod、Replication Controller、Service</code>等都可以被看作一种资源对象，几乎所有资源对象都可以通过<code>Kubernetes</code>提供的<code>kubectl</code>工具（或者API编程调用）执行增、删、改、查等操作并将其保存在<code>etcd</code>中持久化存储。从这个角度来看，<code>Kubernetes</code>其实是一个高度自动化的资源控制系统，它通过跟踪对比etcd库里保存的“资源期望状态”与当前环境中的“实际资源状态”的差异来实现自动控制和自动纠错的高级功能。</p>
+<h4 id="Master"><a href="#Master" class="headerlink" title="Master"></a>Master</h4><p>Kubernetes里的<code>Master</code>指的是集群控制节点，在每个Kubernetes集群里都需要有一个<code>Master</code>来负责整个集群的管理和控制，基本上Kubernetes的所有控制命令都发给它，它负责具体的执行过程，我们后面执行的所有命令基本都是在<code>Master</code>上运行的。<code>Master</code>通常会占据一个独立的服务器（高可用部署建议用3台服务器），主要原因是它太重要了，是整个集群的“首脑”，如果它宕机或者不可用，那么对集群内容器应用的管理都将失效。</p>
+<p>在<code>Master</code>上运行着以下关键进程:</p>
+<ul>
+<li><p><code>Kubernetes API Server（kube-apiserver）</code></p>
+<p>提供了HTTP Rest接口的关键服务进程，是Kubernetes里所有资源的增、删、改、查等操作的唯一入口，也是集群控制的入口进程。</p>
+</li>
+<li><p><code>Kubernetes Controller Manager（kube-controller-manager）</code></p>
+<p>Kubernetes里所有资源对象的自动化控制中心，可以将其理解为资源对象的<strong>大总管</strong>。</p>
+</li>
+<li><p><code>Kubernetes Scheduler（kube-scheduler）</code></p>
+<p>负责资源调度（Pod调度）的进程，相当于公交公司的<strong>调度室</strong>，在<code>Master</code>上通常还需要部署<code>etcd</code>服务，因为Kubernetes里的所有资源对象的数据都被保存在<code>etcd</code>中。</p>
+</li>
+</ul>
+<h4 id="Node"><a href="#Node" class="headerlink" title="Node"></a>Node</h4><p>除了Master，Kubernetes集群中的其他机器被称为<code>Node</code>，在较早的版本中也被称为Minion。与Master一样，<code>Node</code>可以是一台物理主机，也可以是一台虚拟机。<code>Node</code>是Kubernetes集群中的工作负载节点，每个<code>Node</code>都会被<code>Master</code>分配一些工作负载（Docker容器），当某个<code>Node</code>宕机时，其上的工作负载会被<code>Master</code>自动转移到其他节点上。</p>
+<p>在每个<code>Node</code>上都运行着以下关键进程:</p>
+<ul>
+<li><p><code>kubelet</code></p>
+<p>负责Pod对应的容器的创建、启停等任务，同时与Master密切协作，实现集群管理的基本功能。</p>
+</li>
+<li><p><code>kube-proxy</code></p>
+<p>实现Kubernetes Service的通信与负载均衡机制的重要组件。</p>
+</li>
+<li><p><code>Docker Engine（docker）</code></p>
+<p>Docker引擎，负责本机的容器创建和管理工作。</p>
+</li>
+</ul>
+<p><code>Node</code>可以在运行期间动态增加到Kubernetes集群中，前提是在这个节点上已经正确安装、配置和启动了上述关键进程，在默认情况下<code>kubelet</code>会向<code>Master</code>注册自己，这也是Kubernetes推荐的<code>Node</code>管理方式。</p>
+<p>一旦<code>Node</code>被纳入集群管理范围，<code>kubelet</code>进程就会定时向<code>Master</code>汇报自身的情报，例如操作系统、Docker版本、机器的CPU和内存情况，以及当前有哪些Pod在运行等，这样Master就可以获知每个<code>Node</code>的资源使用情况，并实现高效均衡的资源调度策略。</p>
+<p>而某个<code>Node</code>在超过指定时间不上报信息时，会被<code>Master</code>判定为“失联”，<code>Node</code>的状态被标记为不可用（Not Ready），随后<code>Master</code>会触发“工作负载大转移”的自动流程。</p>
+<p>我们可以执行下述命令查看在集群中有多少个<code>Node</code>：<br><img src="/images/k8s-introduction/introduction-3.png" alt="introduction-3"></p>
+<p>然后可以通过<code>kubectl describe node &lt;node_name&gt;</code>查看某个Node的详细信息:<br><img src="/images/k8s-introduction/introduction-4.png" alt="introduction-4"></p>
+<h4 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h4><p><code>Pod</code>是Kubernetes最重要的基本概念，下图所示是<code>Pod</code>的组成示意图，我们看到每个<code>Pod</code>都有一个特殊的被称为<strong>根容器</strong>的Pause容器。Pause容器对应的镜像属于Kubernetes平台的一部分，除了Pause容器，每个Pod还包含一个或多个紧密相关的用户业务容器。</p>
+<p><img src="/images/k8s-introduction/introduction-5.png" alt="introduction-5"></p>
+<p>为什么Kubernetes会设计出一个全新的Pod的概念并且<code>Pod</code>有这样特殊的组成结构？</p>
+<p>原因之一：在一组容器作为一个单元的情况下，我们难以简单地对“整体”进行判断及有效地行动。比如，一个容器死亡了，此时算是整体死亡么？是N/M的死亡率么？引入业务无关并且不易死亡的Pause容器作为<code>Pod</code>的根容器，以它的状态代表整个容器组的状态，就简单、巧妙地解决了这个难题。</p>
+<p>原因之二：<code>Pod</code>里的多个业务容器共享Pause容器的IP，共享Pause容器挂接的Volume，这样既简化了密切关联的业务容器之间的通信问题，也很好地解决了它们之间的文件共享问题。</p>
+<p>Kubernetes为每个<code>Pod</code>都分配了唯一的IP地址，称之为<code>Pod IP</code>，一个<code>Pod</code>里的多个容器共享<code>Pod IP</code>地址。Kubernetes要求底层网络支持集群内任意两个<code>Pod</code>之间的TCP/IP直接通信，这通常采用虚拟二层网络技术来实现，例如<code>Flannel、Open vSwitch</code>等</p>
+<p>因此我们需要牢记一点：在Kubernetes里，一个<code>Pod</code>里的容器与另外主机上的<code>Pod</code>容器能够直接通信，同一个<code>Pod</code>里的容器之间仅需通过localhost就能互相通信。</p>
+<p><code>Pod</code>、容器与<code>Node</code>的关系:<br><img src="/images/k8s-introduction/introduction-6.png" alt="introduction-6"></p>
+<p>一个Pod中的应用容器共享同一组资源：</p>
+<ul>
+<li><p>PID命名空间：Pod中的不同应用程序可以看到其他应用程序的进程ID</p>
+</li>
+<li><p>网络命名空间：Pod中的多个容器能够访问同一个IP和端口范围</p>
+</li>
+<li><p>IPC命名空间：Pod中的多个容器能够使用SystemV IPC或POSIX消息队列进行通信</p>
+</li>
+<li><p>UTS命名空间：Pod中的多个容器共享一个主机名</p>
+</li>
+<li><p>Volumes（共享存储卷）：Pod中的各个容器可以访问在Pod级别定义的Volumes</p>
+</li>
+</ul>
+<p>Pod的生命周期通过<code>Replication Controller</code>来管理；通过模板进行定义，然后分配到一个<code>Node</code>上运行，在<code>Pod</code>所包含容器运行结束后，<code>Pod</code>结束。</p>
+<p>Kubernetes为<code>Pod</code>设计了一套独特的网络配置，包括：为每个<code>Pod</code>分配一个IP地址，使用<code>Pod</code>名作为容器间通信的主机名等。</p>
+<h4 id="Label"><a href="#Label" class="headerlink" title="Label"></a>Label</h4><p><code>Label</code>（标签）是Kubernetes系统中另外一个核心概念。一个<code>Label</code>是一个key=value的键值对，其中key与value由用户自己指定。<code>Label</code>可以被附加到各种资源对象上，例如<code>Node、Pod、Service、RC</code>等，一个资源对象可以定义任意数量的<code>Label</code>，同一个<code>Label</code>也可以被添加到任意数量的资源对象上。<code>Label</code>通常在资源对象定义时确定，也可以在对象创建后动态添加或者删除。</p>
+<p>我们可以通过给指定的资源对象捆绑一个或多个不同的<code>Label</code>来实现多维度的资源分组管理功能，以便灵活、方便地进行资源分配、调度、配置、部署等管理工作。</p>
+<p><code>Label</code>相当于我们熟悉的“标签”。给某个资源对象定义一个<code>Label</code>，就相当于给它打了一个标签，随后可以通过<code>Label Selector</code>（标签选择器）查询和筛选拥有某些<code>Label</code>的资源对象，Kubernetes通过这种方式实现了类似SQL的简单又通用的对象查询机制。</p>
+<h4 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h4><p>在Kubernetes的世界里，虽然每个Pod都会被分配一个单独的IP地址，但这个IP地址会随着<code>Pod</code>的销毁而消失，这就引出一个问题：如果有一组<code>Pod</code>组成一个集群来提供服务，那么如何来访问它呢？<code>Service</code>！</p>
+<p>一个<code>Service</code>可以看作一组提供相同服务的<code>Pod</code>的对外访问接口，<code>Service</code>作用于哪些<code>Pod</code>是通过<code>Label Selector</code>来定义的。</p>
+<ul>
+<li><p>拥有一个指定的名字（比如my-mysql-server）</p>
+</li>
+<li><p>拥有一个虚拟IP（Cluster IP、Service IP或VIP）和端口号，销毁之前不会改变，只能内网访问</p>
+</li>
+<li><p>能够提供某种远程服务能力</p>
+</li>
+<li><p>被映射到了提供这种服务能力的一组容器应用上</p>
+</li>
+<li><p>如果<code>Service</code>要提供外网服务，需指定公共IP和NodePort，或外部负载均衡器</p>
+</li>
+</ul>
+<p><code>Service</code>可以通过配置<code>NodePort</code>，在Node上打开一个主机的真实端口，这样，能够访问<code>Node</code>的客户端就能通过这个端口访问到内部的<code>Service</code>了</p>
+<h4 id="Replication-Controller"><a href="#Replication-Controller" class="headerlink" title="Replication Controller"></a>Replication Controller</h4><p><code>Replication Controller</code>（简称RC）是Kubernetes系统中的核心概念之一，简单来说，它其实定义了一个期望的场景，即声明某种<code>Pod</code>的副本数量在任意时刻都符合某个预期值</p>
+<ul>
+<li>目标Pod的定义</li>
+<li>目标Pod需要运行的副本数量</li>
+<li>要监控的目标Pod标签（Label）</li>
+</ul>
+<p>Kubernetes通过RC中定义的<code>Label</code>筛选出对应的<code>Pod</code>实例，并实时监控其状态和数量，如果实例数量少于定义的副本数量（Replicas），则会根据RC中定义的Pod模板来创建一个新的<code>Pod</code>，然后将此<code>Pod</code>调度到合适的<code>Node</code>上启动运行，直到<code>Pod</code>实例数量达到预定目标。</p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月21日 20:32</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/21/kubernetes-introduction/" title="&#39;kubernetes 基础概念&#39;">https://midkuro.github.io/2020/05/21/kubernetes-introduction/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/21/kubernetes-introduction/&title=《'kubernetes 基础概念'》 — Kuro's Blog&pic=images/kubernetes.png" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/21/kubernetes-introduction/&title=《'kubernetes 基础概念'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/21/kubernetes-introduction/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'kubernetes 基础概念'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/21/kubernetes-introduction/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/21/kubernetes-introduction/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/21/kubernetes-introduction/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/DevOps/" class="color2">DevOps</a>
+      
+    <a href="/tags/Kubernetes/" class="color1">Kubernetes</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Docker基本概念"><span class="post-toc-text">Docker基本概念</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#什么是Docker"><span class="post-toc-text">什么是Docker</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#为什么要使用Docker"><span class="post-toc-text">为什么要使用Docker</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#基本概念"><span class="post-toc-text">基本概念</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Kubernetes"><span class="post-toc-text">Kubernetes</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#什么是Kubernetes"><span class="post-toc-text">什么是Kubernetes</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#为什么要使用Kubernetes"><span class="post-toc-text">为什么要使用Kubernetes</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Kubernetes基本概念"><span class="post-toc-text">Kubernetes基本概念</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Master"><span class="post-toc-text">Master</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Node"><span class="post-toc-text">Node</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Pod"><span class="post-toc-text">Pod</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Label"><span class="post-toc-text">Label</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Service"><span class="post-toc-text">Service</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Replication-Controller"><span class="post-toc-text">Replication Controller</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/05/21/kubernetes-install/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;kubernetes 环境搭建&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/05/21/docker-registry/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;docker 安装私服仓库&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="kubernetes-introduction" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 17.5px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/Jenkins/" style="font-size: 17.5px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12.5px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 17.5px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/Jenkins/" style="font-size: 17.5px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12.5px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

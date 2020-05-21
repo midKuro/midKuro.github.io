@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;kubernetes 环境搭建&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="K8S的安装方式最简单的方法是使用yum install kubernetes命令安装Kubernetes集群，但仍需修改各组件的启动参数，才能完成对Kubernetes集群的配置，整个过程比较复杂，也容易出错。但是对于新手来说是一个熟悉k8s的一个过程，可以适当借鉴学习。 Kubernetes从1.4版本开始引入了命令行工具kubeadm，致力于简化集群的安装过程，并解决Kubernetes集群">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;kubernetes 环境搭建&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/21/kubernetes-install/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="K8S的安装方式最简单的方法是使用yum install kubernetes命令安装Kubernetes集群，但仍需修改各组件的启动参数，才能完成对Kubernetes集群的配置，整个过程比较复杂，也容易出错。但是对于新手来说是一个熟悉k8s的一个过程，可以适当借鉴学习。 Kubernetes从1.4版本开始引入了命令行工具kubeadm，致力于简化集群的安装过程，并解决Kubernetes集群">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/img/in-post/kubernetes-install/kubernetes-1.png">
+<meta property="og:image" content="https://midkuro.github.io/img/in-post/kubernetes-install/kubernetes-2.png">
+<meta property="og:image" content="https://midkuro.github.io/img/in-post/kubernetes-install/kubernetes-3.png">
+<meta property="article:published_time" content="2020-05-21T14:00:00.000Z">
+<meta property="article:modified_time" content="2020-05-21T12:30:28.408Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="DevOps">
+<meta property="article:tag" content="Kubernetes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/img/in-post/kubernetes-install/kubernetes-1.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro" target="_blank" href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-kubernetes-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;kubernetes 环境搭建&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Kubernetes/">Kubernetes</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-21
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h3 id="K8S的安装方式"><a href="#K8S的安装方式" class="headerlink" title="K8S的安装方式"></a>K8S的安装方式</h3><p><strong>最简单的方法是使用yum install kubernetes命令安装Kubernetes集群，但仍需修改各组件的启动参数，才能完成对Kubernetes集群的配置，整个过程比较复杂，也容易出错。但是对于新手来说是一个熟悉k8s的一个过程，可以适当借鉴学习。</strong></p>
+<p><strong>Kubernetes从1.4版本开始引入了命令行工具kubeadm，致力于简化集群的安装过程，并解决Kubernetes集群的高可用问题。在Kubernetes 1.13版本中，kubeadm工具进入GA阶段，宣称已经为生产环境应用准备就绪。比较推荐使用这种方式，安装便捷并且容错率高</strong></p>
+<p><strong>本节先讲解基于 yum install kubernetes命令安装</strong></p>
+<p><strong>Master节点：192.168.1.132</strong></p>
+<p><strong>Node节点：192.168.1.134</strong></p>
+<h3 id="K8S基于yum的安装"><a href="#K8S基于yum的安装" class="headerlink" title="K8S基于yum的安装"></a>K8S基于yum的安装</h3><p>安装前先关闭防火墙</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop firewalld</span><br></pre></td></tr></table></figure>
+<p>修改系统文件<code>/etc/sysconfig/selinux</code>，将<code>SELINUX=enforcing</code>修改成<code>SELINUX=disabled</code>，然后重启Linux。<br>或者执行以下命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setenforce 0</span><br></pre></td></tr></table></figure>
+
+<p>编辑<code>/etc/sysctl.conf</code>添加以下内容</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="line">net.bridge.bridge-nf-call-iptables = 1</span><br><span class="line">net.ipv4.ip_forward=1</span><br><span class="line">vm.swappiness = 0</span><br><span class="line">fs.inotify.maxuserwatches = 24576</span><br><span class="line">vm.max_map_count=655360</span><br></pre></td></tr></table></figure>
+<p>然后执行命令 <code>sysctl -p</code>,如果报错，执行命令<code>modprobe br_netfilter</code></p>
+<h4 id="安装Master节点"><a href="#安装Master节点" class="headerlink" title="安装Master节点"></a>安装Master节点</h4><p><strong>1、安装Docker</strong></p>
+<p><a href="https://midkuro.github.io/2019/03/08/docker-install/">安装docker教程</a></p>
+<p><strong>2、Master节点安装etcd</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install etcd -y</span><br></pre></td></tr></table></figure>
+<p>etcd用于K8S的数据存储，原生支持做集群，修改<code>/etc/etcd/etcd.conf</code>配置,指向Master节点</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost /]# vim /etc/etcd/etcd.conf</span><br><span class="line">6 行：ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"</span><br><span class="line">22行：ETCD_ADVERTISE_CLIENT_URLS="http://192.168.1.132:2379"</span><br></pre></td></tr></table></figure>
+<p>启动etcd服务并且设置开机自启</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost /]# systemctl start etcd.service</span><br><span class="line">[root@localhost /]# systemctl enable etcd.service</span><br></pre></td></tr></table></figure>
+<p>检查</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost /]# netstat -lntup|grep 2379</span><br><span class="line">tcp6       0      0 :::2379                 :::*                    LISTEN      117472/etcd</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">检查健康状态</span></span><br><span class="line">[root@localhost /]# etcdctl -C http://192.168.1.132:2379 cluster-health</span><br><span class="line">member 8e9e05c52164694d is healthy: got healthy result from http://192.168.1.132:2379</span><br><span class="line">cluster is healthy</span><br></pre></td></tr></table></figure>
+<p>测试</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 插入数据 键（目录）值（123456）</span></span><br><span class="line">[root@localhost /]# etcdctl set /test/word 123456    </span><br><span class="line">123456</span><br><span class="line">[root@localhost /]# etcdctl ls /</span><br><span class="line">/test</span><br><span class="line">[root@localhost /]# etcdctl ls /test</span><br><span class="line">/test/word</span><br><span class="line">[root@localhost /]# etcdctl get /test/word    # 查看值</span><br><span class="line">123456</span><br><span class="line">[root@localhost /]#etcdctl rm /test/word      # 删除键值对</span><br><span class="line">[root@localhost /]#etcdctl rmdir /test	  # 删除目录</span><br></pre></td></tr></table></figure>
+
+<p><strong>3、Master节点<code>192.168.1.132</code>安装K8S</strong></p>
+<p>以下命令根据需求二选一即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">安装Master节点和Node节点的服务，适用于服务器数量不够时共用同一台服务器</span></span><br><span class="line">yum install kubernetes -y</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">安装Master节点需要的服务，适用于服务器数量充足分离Master和Node节点</span></span><br><span class="line">yum install kubernetes-master.x86_64 -y</span><br></pre></td></tr></table></figure>
+<p>本人<code>Master</code>节点<code>[192.168.1.132]</code>也安装了<code>Node</code>节点服务,可以用于测试两个不同宿主机上<code>Node</code>节点通信。</p>
+<p><code>kubelet</code>默认把数据存放在<code>/var/lib/kubelet</code>下面，如果根目录下空间太小，可能会把磁盘撑爆。可以将数据挂载在充足空间的盘上</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /home/kubelet</span><br><span class="line">cp -r /var/lib/kubelet /home/</span><br><span class="line">rm -rf /var/lib/kubelet</span><br><span class="line">ln -sf /home/kubelet /var/lib/kubelet</span><br></pre></td></tr></table></figure>
+
+<p><strong>4、修改apiserver配置文件</strong></p>
+<p>安装好了后进入<code>/etc/kubernetes/</code>配置目录修改相关配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost /]# vim /etc/kubernetes/apiserver</span><br><span class="line"><span class="meta">#</span><span class="bash">服务的监听地址</span></span><br><span class="line">8 行: KUBE_API_ADDRESS="--insecure-bind-address=0.0.0.0"</span><br><span class="line"><span class="meta">#</span><span class="bash">服务监听的端口</span></span><br><span class="line">11行：KUBE_API_PORT="--port=8080"</span><br><span class="line"><span class="meta">#</span><span class="bash">通过10250端口控制kubelet</span></span><br><span class="line">14行：KUBELET_PORT="--kubelet-port=10250" </span><br><span class="line"><span class="meta">#</span><span class="bash">APIserver是通过那个地址和端口连接etcd数据</span></span><br><span class="line">17行：KUBE_ETCD_SERVERS="--etcd-servers=http://192.168.1.132:2379"</span><br><span class="line"><span class="meta">#</span><span class="bash">K8S创建service服务的网段配置 </span></span><br><span class="line">20行：KUBE_SERVICE_ADDRESSES="--service-cluster-ip-range=10.254.0.0/16"</span><br><span class="line"><span class="meta">#</span><span class="bash">默认的管理控制插件---将后面的ServiceAccount去掉</span></span><br><span class="line">23行：KUBE_ADMISSION_CONTROL="--admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ResourceQuota"</span><br></pre></td></tr></table></figure>
+
+<p><strong>5、修改通用的配置文件<code>config</code></strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost kubernetes]# vim /etc/kubernetes/config</span><br><span class="line"><span class="meta">#</span><span class="bash">通过那个地址端口找到API服务</span></span><br><span class="line">22行：KUBE_MASTER="--master=[http://192.168.1.132:8080]</span><br></pre></td></tr></table></figure>
+
+<p><strong>6、启动服务并设置开启自启</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable kube-apiserver.service</span><br><span class="line">systemctl start kube-apiserver.service</span><br><span class="line">systemctl enable kube-controller-manager.service</span><br><span class="line">systemctl start kube-controller-manager.service</span><br><span class="line">systemctl enable kube-scheduler.service</span><br><span class="line">systemctl start kube-scheduler.service</span><br></pre></td></tr></table></figure>
+
+<p><strong>7、测试集群是否正常</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost /]# kubectl get componentstatus</span><br><span class="line">NAME                 STATUS    MESSAGE             ERROR</span><br><span class="line">etcd-0               Healthy   &#123;"health":"true"&#125;   </span><br><span class="line">controller-manager   Healthy   ok                  </span><br><span class="line">scheduler            Healthy   ok</span><br></pre></td></tr></table></figure>
+
+<h4 id="安装Node节点"><a href="#安装Node节点" class="headerlink" title="安装Node节点"></a>安装Node节点</h4><p><strong>1、Node节点<code>192.168.1.134</code>安装K8S</strong></p>
+<p>如果没有第二台服务器，<code>Master</code>节点和<code>Node</code>节点同一台服务器时跳过安装步骤</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install kubernetes-node.x86_64 -y   (自动会安装docker)</span><br></pre></td></tr></table></figure>
+<p>值得一提的是，如果<code>Master</code>节点也安装了<code>Node</code>节点的服务，<code>Master</code>节点机器也需要修改以下的所有相关配置</p>
+<p><strong>2、修改<code>kube-proxy</code>服务配置文件</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# vim /etc/kubernetes/config</span><br><span class="line">22行：KUBE_MASTER="--master=[http://192.168.1.132:8080]</span><br></pre></td></tr></table></figure>
+
+<p><strong>3、修改<code>kubelet</code>服务配置文件</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# vim /etc/kubernetes/kubelet</span><br><span class="line"><span class="meta">#</span><span class="bash"> 监听的地址</span></span><br><span class="line">5行：KUBELET_ADDRESS="--address=0.0.0.0"</span><br><span class="line"><span class="meta">#</span><span class="bash">kubelet端口 </span></span><br><span class="line">8行：KUBELET_PORT="--port=10250"</span><br><span class="line"><span class="meta">#</span><span class="bash"> 给自己定义唯一的名字 不能冲突 IP地址或者主机名（各自节点改各自节点的IP）</span></span><br><span class="line">11行：KUBELET_HOSTNAME="--hostname-override=192.168.1.134"</span><br><span class="line"><span class="meta">#</span><span class="bash"> Master节点的连接api的地址</span></span><br><span class="line">14行：KUBELET_API_SERVER="--api-servers=[http://192.168.1.132:8080]</span><br><span class="line"><span class="meta">#</span><span class="bash"> 节点的DNS配置</span></span><br><span class="line">KUBELET_ARGS="--cluster-dns=192.168.1.1 --cluster-domain=cluster.local"</span><br></pre></td></tr></table></figure>
+<p>如果不知道DNS配置，可以执行下列命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost kubernetes]# cat /etc/resolv.conf</span><br><span class="line"><span class="meta">#</span><span class="bash"> Generated by NetworkManager</span></span><br><span class="line">nameserver 192.168.1.1</span><br><span class="line">nameserver 114.114.114.114</span><br><span class="line">search localdomain</span><br></pre></td></tr></table></figure>
+<p>如果没有任何信息显示，<code>vim /etc/resolv.conf</code>并增加以下内容<code>nameserver 114.114.114.114</code>然后把该DNS增加到<code>kubelet</code>文件配置中</p>
+<p><strong>4、修改服务通用的配置文件<code>config</code></strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost kubernetes]# vim /etc/kubernetes/config</span><br><span class="line"><span class="meta">#</span><span class="bash">通过那个地址端口找到API服务</span></span><br><span class="line">22行：KUBE_MASTER="--master=[http://192.168.1.132:8080]</span><br></pre></td></tr></table></figure>
+
+<p><strong>5、启动服务并设置开机自启</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">systemctl  start  kubelet.service </span><br><span class="line">systemctl enable kubelet.service </span><br><span class="line"></span><br><span class="line">systemctl start kube-proxy.service</span><br><span class="line">systemctl enable kube-proxy.service</span><br></pre></td></tr></table></figure>
+
+<p><strong>6、在<code>Master</code>节点测试是否有节点加入集群</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost /]# kubectl get node</span><br><span class="line">NAME            STATUS    AGE</span><br><span class="line">192.168.1.132   Ready     8d</span><br><span class="line">192.168.1.134   Ready     9d</span><br></pre></td></tr></table></figure>
+
+<h4 id="安装flanneld网络通讯"><a href="#安装flanneld网络通讯" class="headerlink" title="安装flanneld网络通讯"></a>安装flanneld网络通讯</h4><p>由于K8S创建的Service、Pod服务均是生成的虚拟IP，两台Node节点之间的Pod通信需要通过第三方插件实现.<strong><code>Master</code>节点和<code>Node</code>节点都需要安装和配置</strong></p>
+<p><strong>1、安装flanneld</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install flannel -y</span><br></pre></td></tr></table></figure>
+
+<p><strong>2、修改flanneld配置文件</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i 's#http://127.0.0.1:2379#http://192.168.1.132:2379#g' /etc/sysconfig/flanneld</span><br></pre></td></tr></table></figure>
+<p>多网卡的话需要在<code>LANNEL_ETCD_ENDPOINTS</code>项中增加<code>--iface=网卡名</code></p>
+<p>这里<code>/etc/sysconfig/flanneld</code>可以设置密钥验证，详情请自行百度!</p>
+<p><strong>3、Master节点配置etcd中关于flanneld的Key</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">etcdctl mk /atomic.io/network/config  '&#123; "Network": "172.16.0.0/16" &#125;'</span><br><span class="line">etcdctl get /atomic.io/network/config</span><br></pre></td></tr></table></figure>
+<p>这里的<code>/atomic.io/network</code>需要和<code>/etc/sysconfig/flanneld</code>里的<code>FLANNEL_ETCD_PREFIX</code>配置对应。</p>
+<p><strong>4、设置flanneld启动配置</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost /]# vim /usr/lib/systemd/system/flanneld.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=Flanneld overlay address etcd agent</span><br><span class="line">After=network.target</span><br><span class="line">After=network-online.target</span><br><span class="line">Wants=network-online.target</span><br><span class="line">After=etcd.service</span><br><span class="line">Before=docker.service</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=notify</span><br><span class="line">EnvironmentFile=/etc/sysconfig/flanneld</span><br><span class="line">EnvironmentFile=-/etc/sysconfig/docker-network</span><br><span class="line">ExecStart=/usr/bin/flanneld-start $FLANNEL_OPTIONS</span><br><span class="line">ExecStartPost=/usr/libexec/flannel/mk-docker-opts.sh -k DOCKER_NETWORK_OPTIONS -d /run/flannel/docker</span><br><span class="line">Restart=on-failure</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line">WantedBy=docker.service</span><br></pre></td></tr></table></figure>
+
+<p><strong>5、设置Docker启动配置</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost /]# vim /usr/lib/systemd/system/docker.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=Docker Application Container Engine</span><br><span class="line">Documentation=http://docs.docker.com</span><br><span class="line">After=network.target</span><br><span class="line">Wants=docker-storage-setup.service</span><br><span class="line">Requires=docker-cleanup.timer</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=notify</span><br><span class="line">NotifyAccess=main</span><br><span class="line">EnvironmentFile=/run/flannel/subnet.env  #增加该行配置</span><br><span class="line">EnvironmentFile=-/etc/sysconfig/docker</span><br><span class="line">EnvironmentFile=-/etc/sysconfig/docker-storage</span><br><span class="line">EnvironmentFile=-/etc/sysconfig/docker-network</span><br><span class="line">Environment=GOTRACEBACK=crash</span><br><span class="line">Environment=DOCKER_HTTP_HOST_COMPAT=1</span><br><span class="line">Environment=PATH=/usr/libexec/docker:/usr/bin:/usr/sbin</span><br><span class="line"><span class="meta">#</span><span class="bash">更改启动方式 如果没有更改过docker存储路径，不需要配置 --graph /home/docker</span></span><br><span class="line">ExecStart=/usr/bin/dockerd  --graph /home/docker $DOCKER_NETWORK_OPTIONS</span><br><span class="line"><span class="meta">#</span><span class="bash">增加docker启动的防火墙拦截允许配置</span></span><br><span class="line">ExecStartPost=/sbin/iptables -I FORWARD -s 0.0.0.0/0 -j ACCEPT</span><br><span class="line">ExecReload=/bin/kill -s HUP $MAINPID</span><br><span class="line">LimitNOFILE=1048576</span><br><span class="line">LimitNPROC=1048576</span><br><span class="line">LimitCORE=infinity</span><br><span class="line">TimeoutStartSec=0</span><br><span class="line">Restart=on-abnormal</span><br><span class="line">KillMode=process</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p><strong>6、启动flanneld</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl start flanneld.service</span><br><span class="line">systemctl enable flanneld.service</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">重启Master节点服务</span></span><br><span class="line">systemctl restart docker</span><br><span class="line">systemctl restart kube-apiserver</span><br><span class="line">systemctl restart kube-controller-manager</span><br><span class="line">systemctl restart kube-scheduler</span><br><span class="line">systemctl restart kubelet</span><br><span class="line">systemctl restart kube-proxy</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">重启Node节点服务</span></span><br><span class="line">systemctl restart docker</span><br><span class="line">systemctl restart kubelet</span><br><span class="line">systemctl restart kube-proxy</span><br></pre></td></tr></table></figure>
+
+<p><strong>7、测试网段</strong></p>
+<p><strong>以上的一系列操作，主要是为了让flanneld和docker创建的网络处于同一个网段，先通过设置etcd设置flanneld的网段范围，再配置docker启动前加载flanneld的配置</strong><br><img src="/img/in-post/kubernetes-install/kubernetes-1.png" alt="kubernetes-1"><br>从图中能够看到<code>docker0</code>和<code>flannel0</code>都处于同一个网段<code>172.16.0.0</code>中,可以用一个轻巧的容器测试一下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">docker拉取网络镜像</span></span><br><span class="line">[root@localhost /]# docker pull docker.io/busybox</span><br><span class="line"><span class="meta">#</span><span class="bash">分别在Master节点及Node节点执行命令</span></span><br><span class="line">[root@localhost /]# docker run -it docker.io/busybox:latest</span><br></pre></td></tr></table></figure>
+<p><img src="/img/in-post/kubernetes-install/kubernetes-2.png" alt="kubernetes-2"><br><img src="/img/in-post/kubernetes-install/kubernetes-3.png" alt="kubernetes-3"><br>从图中可以看到，创建了两个容器，IP分别是<code>172.16.43.6</code>和<code>172.16.43.4</code>互相能够Ping通。</p>
+<p>如果不能Ping通，则在每个<code>Node</code>节点上都配置相应的静态路由项</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">Master节点 <span class="comment">#172.16.9.0 为Node节点的flannel0的IP</span></span></span><br><span class="line">[root@localhost ~]# route add -net 172.16.9.0 netmask 255.255.255.0 gw 192.168.1.134    </span><br><span class="line"><span class="meta">#</span><span class="bash">Node节点 <span class="comment">#172.16.43.0 为Master节点的flannel0的IP</span></span></span><br><span class="line">[root@localhost ~]# route add -net 172.16.43.0 netmask 255.255.255.0 gw 192.168.1.132</span><br></pre></td></tr></table></figure>
+<p>这意味着，每一个新部署的容器都将使用这个Node（docker0的网桥IP）作为它的默认网关。而这些Node（类似路由器）都有其他docker0的路由信息，这样它们就能够相互连通了。</p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月21日 20:30</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/21/kubernetes-install/" title="&#39;kubernetes 环境搭建&#39;">https://midkuro.github.io/2020/05/21/kubernetes-install/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/21/kubernetes-install/&title=《'kubernetes 环境搭建'》 — Kuro's Blog&pic=images/kubernetes.png" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/21/kubernetes-install/&title=《'kubernetes 环境搭建'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/21/kubernetes-install/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'kubernetes 环境搭建'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/21/kubernetes-install/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/21/kubernetes-install/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/21/kubernetes-install/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/DevOps/" class="color2">DevOps</a>
+      
+    <a href="/tags/Kubernetes/" class="color1">Kubernetes</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#K8S的安装方式"><span class="post-toc-text">K8S的安装方式</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#K8S基于yum的安装"><span class="post-toc-text">K8S基于yum的安装</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#安装Master节点"><span class="post-toc-text">安装Master节点</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#安装Node节点"><span class="post-toc-text">安装Node节点</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#安装flanneld网络通讯"><span class="post-toc-text">安装flanneld网络通讯</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/05/21/kubernetes-introduction/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;kubernetes 基础概念&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="kubernetes-install" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 17.5px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/Jenkins/" style="font-size: 17.5px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12.5px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 17.5px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/Jenkins/" style="font-size: 17.5px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12.5px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
