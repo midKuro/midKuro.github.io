@@ -1471,10 +1471,11 @@ body {
   opacity: 0;
 }
 .post-toc-wrap {
+  overflow: auto;
   position: fixed;
   border-radius: 3px;
   width: 200px;
-  max-height: 400px;
+  max-height: 455px;
   color: #313131;
 }
 .post-toc-wrap.fixed {
@@ -1512,7 +1513,6 @@ body {
   height: 7px;
   content: '';
   border-radius: 50%;
-  background-color: #0cc;
 }
 .post-toc-child {
   padding-left: 10px;
