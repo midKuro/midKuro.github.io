@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   
-  <title>&#39;docker 安装私服仓库&#39; | Kuro&#39;s Blog</title>
+  <title>&#39;docker（四） 安装私服仓库&#39; | Kuro&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
   <meta name="description" content="docker私服仓库docker的私服仓库存储不像maven私服有完整独立的应用，它是通过docker获取私服仓库镜像，并根据镜像创建私服仓库容器 说白了，docker的私服仓库的搭建就是拉取镜像、创建容器、上传镜像的过程 宿主机环境IP：192.168.1.131 私服仓库的搭建1、拉取私服镜像 1docker pull registry:2  2、启动私服 1docker run --name">
 <meta property="og:type" content="article">
-<meta property="og:title" content="&#39;docker 安装私服仓库&#39;">
+<meta property="og:title" content="&#39;docker（四） 安装私服仓库&#39;">
 <meta property="og:url" content="https://midkuro.github.io/2020/05/21/docker-registry/index.html">
 <meta property="og:site_name" content="Kuro&#39;s Blog">
 <meta property="og:description" content="docker私服仓库docker的私服仓库存储不像maven私服有完整独立的应用，它是通过docker获取私服仓库镜像，并根据镜像创建私服仓库容器 说白了，docker的私服仓库的搭建就是拉取镜像、创建容器、上传镜像的过程 宿主机环境IP：192.168.1.131 私服仓库的搭建1、拉取私服镜像 1docker pull registry:2  2、启动私服 1docker run --name">
@@ -20,7 +20,7 @@
 <meta property="og:image" content="https://midkuro.github.io/images/docker-registry/registry-3.png">
 <meta property="og:image" content="https://midkuro.github.io/images/docker-registry/registry-4.png">
 <meta property="article:published_time" content="2020-05-21T13:00:00.000Z">
-<meta property="article:modified_time" content="2020-05-21T12:15:54.606Z">
+<meta property="article:modified_time" content="2020-05-26T03:57:38.966Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="DevOps">
 <meta property="article:tag" content="Docker">
@@ -121,7 +121,7 @@
         
   
     <h1 class="post-title" itemprop="name">
-      &#39;docker 安装私服仓库&#39;
+      &#39;docker（四） 安装私服仓库&#39;
     </h1>
     <div class="post-title-bar">
       <ul>
@@ -188,8 +188,8 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年05月21日 20:15</p>
-        <p>原始链接： <a class="post-url" href="/2020/05/21/docker-registry/" title="&#39;docker 安装私服仓库&#39;">https://midkuro.github.io/2020/05/21/docker-registry/</a></p>
+        <p>最后更新： 2020年05月26日 11:57</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/21/docker-registry/" title="&#39;docker（四） 安装私服仓库&#39;">https://midkuro.github.io/2020/05/21/docker-registry/</a></p>
         <footer>
             <a href="https://midkuro.github.io">
                 <img src="/images/logo.png" alt="Kuro">
@@ -246,7 +246,7 @@
     <div class="post-share-list" id="share-list">
         <ul class="share-icons">
           <li>
-            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/21/docker-registry/&title=《'docker 安装私服仓库'》 — Kuro's Blog&pic=images/docker.jpg" data-title="微博">
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/21/docker-registry/&title=《'docker（四） 安装私服仓库'》 — Kuro's Blog&pic=images/docker.jpg" data-title="微博">
               <i class="fa fa-weibo"></i>
             </a>
           </li>
@@ -256,7 +256,7 @@
             </a>
           </li>
           <li>
-            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/21/docker-registry/&title=《'docker 安装私服仓库'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/21/docker-registry/&title=《'docker（四） 安装私服仓库'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
               <i class="fa fa-qq"></i>
             </a>
           </li>
@@ -266,7 +266,7 @@
             </a>
           </li>
           <li>
-            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'docker 安装私服仓库'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/21/docker-registry/&via=https://midkuro.github.io" data-title="Twitter">
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'docker（四） 安装私服仓库'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/21/docker-registry/&via=https://midkuro.github.io" data-title="Twitter">
               <i class="fa fa-twitter"></i>
             </a>
           </li>
@@ -320,14 +320,14 @@
       <span class="article-nav-title">
         <i class="fa fa-hand-o-left" aria-hidden="true"></i>
         
-          &#39;kubernetes 基础概念&#39;
+          &#39;kubernetes（一） 基础概念&#39;
         
       </span>
     </a>
   
   
     <a href="/2020/05/21/docker-dockfile/" id="article-nav-older" class="article-nav-link-wrap">
-      <span class="article-nav-title">&#39;docker 执行DockerFile创建镜像&#39;</span>
+      <span class="article-nav-title">&#39;docker（三） 执行DockerFile创建镜像&#39;</span>
       <i class="fa fa-hand-o-right" aria-hidden="true"></i>
     </a>
   
@@ -401,7 +401,7 @@
             <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
         </div>
         <div id="sidebar-menu-box-tags">
-            <a href="/tags/ActiveMQ/" style="font-size: 10px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 16px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 16px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MQ/" style="font-size: 10px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 10px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 12px;">Thread</a>
+            <a href="/tags/ActiveMQ/" style="font-size: 10px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 16px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 16px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MQ/" style="font-size: 10px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 14px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 12px;">Thread</a>
         </div>
     </div>
     <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
@@ -434,7 +434,7 @@
     <div class="mobile-header-tag-container">
         <span class="title">Tags</span>
         <div id="mobile-header-container-tags">
-            <a href="/tags/ActiveMQ/" style="font-size: 10px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 16px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 16px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MQ/" style="font-size: 10px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 10px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 12px;">Thread</a>
+            <a href="/tags/ActiveMQ/" style="font-size: 10px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 16px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 16px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MQ/" style="font-size: 10px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 14px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 12px;">Thread</a>
         </div>
     </div>
 </div>

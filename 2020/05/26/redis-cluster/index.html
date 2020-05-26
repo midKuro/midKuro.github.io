@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Redis（三） Redis 集群&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="Redis集群Redis复制(Master&#x2F;Slave)Redis的复制，也就是我们所说的主从复制，主机数据更新后根据配置和策略，自动同步到备机的master&#x2F;slaver机制，Master以写为主，Slave以读为主的策略。主要用来读写分离和容灾恢复。 配从(库)不配主(库)，配置主从复制，只需要把从库指向一个主库，实现对主库的复制即可，不需要主库做任何操作。 可以通过命令配置达到效果，但是每次">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Redis（三） Redis 集群&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/26/redis-cluster/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Redis集群Redis复制(Master&#x2F;Slave)Redis的复制，也就是我们所说的主从复制，主机数据更新后根据配置和策略，自动同步到备机的master&#x2F;slaver机制，Master以写为主，Slave以读为主的策略。主要用来读写分离和容灾恢复。 配从(库)不配主(库)，配置主从复制，只需要把从库指向一个主库，实现对主库的复制即可，不需要主库做任何操作。 可以通过命令配置达到效果，但是每次">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-25.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-26.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-27.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-28.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-29.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-30.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-31.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-32.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-33.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-34.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-35.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-36.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-37.png">
+<meta property="article:published_time" content="2020-05-26T03:00:00.000Z">
+<meta property="article:modified_time" content="2020-05-26T04:03:33.059Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="NoSql">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/nosql-redis/redis-25.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-redis-cluster" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Redis（三） Redis 集群&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Redis/">Redis</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-26
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Redis集群"><a href="#Redis集群" class="headerlink" title="Redis集群"></a>Redis集群</h1><h2 id="Redis复制-Master-Slave"><a href="#Redis复制-Master-Slave" class="headerlink" title="Redis复制(Master/Slave)"></a>Redis复制(Master/Slave)</h2><p>Redis的复制，也就是我们所说的主从复制，主机数据更新后根据配置和策略，自动同步到备机的<code>master/slaver</code>机制，<strong><code>Master</code>以写为主，<code>Slave</code>以读为主的策略。主要用来读写分离和容灾恢复</strong>。</p>
+<p><strong>配从(库)不配主(库)</strong>，配置主从复制，只需要把从库指向一个主库，实现对主库的复制即可，不需要主库做任何操作。</p>
+<p>可以通过命令配置达到效果，但是<strong>每次与<code>master</code>断开之后，都需要重新执行命令连接，除非配置进<code>redis.conf</code>文件</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">slaveof</span> <span class="string">主库IP 主库端口</span></span><br></pre></td></tr></table></figure>
+
+<p>建议配置时拷贝多个<code>redis.conf</code>文件，通过<code>redis-server</code>启动时指定启动的配置文件即可。配置文件需要修改相应的配置：</p>
+<ol>
+<li>开启守护线程后台运行</li>
+<li>修改<code>PID</code>文件名称</li>
+<li>修改指定端口</li>
+<li>修改<code>Log</code>文件名称</li>
+<li>修改<code>dump.rdb</code>名称</li>
+</ol>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#redis.conf配置</span></span><br><span class="line"><span class="attr">slaveof</span> <span class="string">&lt;masterip&gt; &lt;masterport&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="一主二仆"><a href="#一主二仆" class="headerlink" title="一主二仆"></a>一主二仆</h3><p><img src="/images/nosql-redis/redis-25.png" alt="redis-25"></p>
+<p>可以看到从库（6380端口）配置了主库（6379端口）后，能够看到他的<code>role</code>标识为<code>slave</code>。</p>
+<p><img src="/images/nosql-redis/redis-26.png" alt="redis-26"></p>
+<p>可以看到主库的<code>role</code>标识为<code>master</code>，其中<code>connected_slaves</code>连接的<code>salve</code>是1个。</p>
+<p>当有多个<code>slave</code>时，他们配置的<code>master</code>都是同一个，即所有<code>salve</code>都直接和<code>master</code>进行数据同步策略。</p>
+<h3 id="薪火相传"><a href="#薪火相传" class="headerlink" title="薪火相传"></a>薪火相传</h3><p>上一个<code>slave</code>可以是下一个<code>slave</code>的<code>master</code>，<code>slave</code>同样可以接收其他<code>slaves</code>的连接和同步请求，那么该<code>slave</code>作为了链条中下一个的<code>master</code>,可以有效减轻master的写压力。</p>
+<p>就好比如<code>slave1</code>（6380端口）配置了主库<code>master</code>（6379），然后<code>salve2</code>（6381端口）配置了<code>slave1</code>做<code>master</code>，那么当6379端口的主库修改了数据时，会先同步到<code>slave1</code>，然后再由<code>slave1</code>同步到<code>slave2</code>。</p>
+<p>中途变更转向:会清除之前的数据，重新建立拷贝最新的。</p>
+<h3 id="反客为主"><a href="#反客为主" class="headerlink" title="反客为主"></a>反客为主</h3><p><strong>当主库<code>master</code>故障时，从库<code>slave</code>是不会自动上位成<code>master</code>，将依旧保持<code>slave</code>从库</strong>，这并不是我们想要的结果，可以<strong>通过手动将从库转换成主库，并修改其他从库的<code>master</code>配置</strong>，使当前数据库停止与其他数据库的同步，转成主数据库</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">SLAVEOF</span> <span class="string">no one</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="复制原理"><a href="#复制原理" class="headerlink" title="复制原理"></a>复制原理</h3><p><code>slave</code>启动成功连接到<code>master</code>后会发送一个<code>sync</code>命令,<code>master</code>接到命令启动后台的存盘进程，同时收集所有接收到的用于修改数据集命令，在后台进程执行完毕之后，<code>master</code>将传送整个数据文件到<code>slave</code>,以完成一次<strong>完全同步。</strong></p>
+<p>全量复制：而<code>slave</code>服务在接收到数据库文件数据后，将其存盘并加载到内存中。</p>
+<p>增量复制：<code>master</code>继续将新的所有收集到的修改命令依次传给<code>slave</code>,完成增量同步。</p>
+<p><strong>但是只要是重新连接<code>master</code>,一次完全同步（全量复制)将被自动执行</strong></p>
+<h2 id="哨兵模式"><a href="#哨兵模式" class="headerlink" title="哨兵模式"></a>哨兵模式</h2><p><strong>哨兵模式是反客为主的自动版，能够后台监控主机是否故障，如果故障了根据投票数自动将从库转换为主库</strong></p>
+<p>通过创建<code>sentinel.conf</code>配置文件，并新增监控机器的配置，<strong>一组sentinel能同时监控多个Master</strong>。</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># sentinel monitor 自定义的名称 127.0.0.1 6379 1</span></span><br><span class="line"><span class="comment">#上面最后一个数字1，表示主机挂掉后salve投票看让谁接替成为主机，得票数多的成为主机</span></span><br><span class="line"><span class="attr">sentinel</span> <span class="string">monitor host6379 127.0.0.1 6379 1</span></span><br><span class="line"><span class="attr">sentinel</span> <span class="string">monitor host6380 127.0.0.1 6380 1</span></span><br><span class="line"><span class="attr">sentinel</span> <span class="string">monitor host6381 127.0.0.1 6381 1</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/nosql-redis/redis-27.png" alt="redis-27"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">linux系统执行命令</span></span><br><span class="line">redis-sentinel sentinel.conf</span><br><span class="line"><span class="meta">#</span><span class="bash">window系统执行命令</span></span><br><span class="line">redis-server.exe sentinel.conf --sentinel</span><br></pre></td></tr></table></figure>
+
+<p>通过执行启动哨兵，当<code>master</code>节点挂了后，哨兵模式会自动从<code>salve</code>中投票选举出新的<code>master</code>，原来的<code>master</code>节点重新加入时，将会变成<code>salve</code>节点。哨兵模式最低限度能够达到仅剩一台<code>slave</code>时，将之升级为<code>master</code>，即支持当<code>master</code>机器没有<code>slave</code>节点时，依旧能够正常工作。</p>
+<p>由于所有的写操作都是先在<code>master</code>上操作，然后同步更新到<code>slave</code>上，所以<strong>从<code>master</code>同步到<code>slave</code>机器有一定的延迟</strong>，当系统很繁忙的时候，延迟问题会更加严重，<code>slave</code>机器数量的增加也会使这个问题更加严重。</p>
+<h2 id="Redis-Cluster"><a href="#Redis-Cluster" class="headerlink" title="Redis-Cluster"></a>Redis-Cluster</h2><p>自从<code>redis 3.0</code>版本开始支持<code>redis-cluster</code>集群，<code>redis-cluster</code>采用无中心结构，每个节点保存数据和整个集群的状态，每个节点都和其他所有节点连接。</p>
+<p><img src="/images/nosql-redis/redis-28.png" alt="redis-28"></p>
+<p>无需<code>proxy</code>代理，客户端直接与<code>redis</code>集群的每个节点连接，根据同样的<code>hash</code>算法计算出<code>key</code>对应的<code>slot</code>，然后直接在<code>slot</code>对应的<code>redis</code>节点上执行命令。</p>
+<p>在<code>redis</code>看来，响应时间是最苛刻的条件，增加一层带来的开销是<code>redis</code>不能接受的。因此，<code>redis</code>实现了客户端对节点的直接访问，<strong>为了去中心化，节点之间通过<code>gossip</code>协议交换互相的状态，以及探测新加入的节点信息</strong>。<code>redis</code>集群支持动态加入节点，动态迁移<code>slot</code>，以及自动故障转移。</p>
+<h3 id="数据分片"><a href="#数据分片" class="headerlink" title="数据分片"></a>数据分片</h3><p><strong><code>redis</code> 集群使用数据分片（<code>sharding</code>）而非一致性哈希（<code>consistency hashing</code>）来实现，Redis Cluster 采用的是虚拟槽分区算法，这个槽是用来存放缓存信息的单位，一个<code>redis</code> 集群包含 16384 个哈希槽（<code>hash slot</code>），槽的范围是 0 -16383，数据库中的每个键都属于这 16384 个哈希槽的其中一个。</strong></p>
+<p><strong>集群使用公式 <code>CRC16(key) % 16384</code> 来计算键<code>key</code>属于哪个槽， 其中 <code>CRC16(key)</code> 语句用于计算键 <code>key</code> 的 <code>CRC16</code> 校验和 。集群中的每个节点负责处理一部分哈希槽。</strong></p>
+<p> 举个例子， 一个集群可以有三个节点， 其中：</p>
+<ul>
+<li>节点 A 负责处理 0 号至 5500 号哈希槽。</li>
+<li>节点 B 负责处理 5501 号至 11000 号哈希槽。</li>
+<li>节点 C 负责处理 11001 号至 16383 号哈希槽。</li>
+</ul>
+<p>此时 <code>Redis Client</code> 需要根据一个<code>Key</code>获取对应的 <code>Value</code> 的数据，首先通过 <code>CRC16(key)%16384</code> 计算出 Slot 的值，假设计算的结果是 5000，将这个数据传送给 <code>Redis Cluster</code>，集群接收到以后会到一个对照表中查找这个 <code>Slot=5000</code> 属于那个缓存节点。发现属于“节点 A ”负责，于是顺着红线的方向调用节点 A中存放的 <code>Key-Value</code> 的内容并且返回给 <code>Redis Client</code>。</p>
+<p>这种将哈希槽分布到不同节点的做法使得用户可以很容易地向集群中添加或者删除节点。 比如说：</p>
+<ul>
+<li>如果用户将新节点 D 添加到集群中， 那么集群只需要将节点 A 、B 、 C 中的某些槽移动到节点 D 就可以了。</li>
+<li>如果用户要从集群中移除节点 A ， 那么集群只需要将节点 A 中的所有哈希槽移动到节点 B 和节点 C ， 然后再移除空白（不包含任何哈希槽）的节点 A 就可以了。</li>
+</ul>
+<p><strong>因为将一个哈希槽从一个节点移动到另一个节点不会造成节点阻塞，且成本很低， 所以无论是添加新节点还是移除已存在节点， 又或者改变某个节点包含的哈希槽数量， 都不会造成集群下线</strong>。</p>
+<h3 id="数据访问"><a href="#数据访问" class="headerlink" title="数据访问"></a>数据访问</h3><p>客户端在初始化的时候只需要知道一个节点的地址即可，客户端会先尝试向这个节点执行命令，比如<code>“get key”</code>，如果key所在的<code>slot</code>刚好在该节点上，则能够直接执行成功。如果<code>slot</code>不在该节点，则节点会返回MOVED错误，同时把该slot对应的节点告诉客户端。客户端可以去该节点执行命令。</p>
+<p><img src="/images/nosql-redis/redis-29.png" alt="redis-29"></p>
+<p>集群支持<strong><code>hash tags</code></strong>功能，即可以把一类key定位到同一个slot，tag的标识目前不支持配置，只能使用{}，redis处理hash tag的逻辑也很简单，redis只计算从第一次出现{，到第一次出现}的substring的hash值，substring为空，则仍然计算整个key的值，这样对于foo{}{bar}、{foo}{bar}、foo这些冲突的{}，也能取出tag值。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; CLUSTER KEYSLOT foo&#123;hash_tag&#125;</span><br><span class="line">(integer) 2515</span><br><span class="line">127.0.0.1:6379&gt; CLUSTER KEYSLOT fooadfasdf&#123;hash_tag&#125;</span><br><span class="line">(integer) 2515</span><br><span class="line">127.0.0.1:6379&gt; CLUSTER KEYSLOT fooaaasdf&#123;hash_tag&#125;</span><br><span class="line">(integer) 2515</span><br></pre></td></tr></table></figure>
+
+<p>我们都知道，<code>redis</code>单机支持<code>mutl-key</code>操作（<code>mget</code>、<code>mset</code>）。<code>redis cluster</code>对<code>mutl-key</code>命令的支持，<strong>只能支持多key都在同一个<code>slot</code>上，即使多个<code>slot</code>在同一个节点上也不行</strong>。通过<code>hash tag</code>可以很好的做到这一点。</p>
+<h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><p><code>Redis Cluster</code>中的每个节点都保存了集群的配置信息，并且存储在<code>clusterState</code>中，结构如下：</p>
+<p><img src="/images/nosql-redis/redis-30.png" alt="redis-30"></p>
+<p>上图的各个变量语义如下:</p>
+<ul>
+<li><code>clusterState</code> 记录了从集群中某个节点视角，来看集群配置状态；</li>
+<li><code>currentEpoch</code> 表示整个集群中最大的版本号，集群信息每变更一次，改版本号都会自增。</li>
+<li><code>nodes</code> 是一个列表，包含了本节点所感知的，集群所有节点的信息（<code>clusterNode</code>），也包含自身的信息。</li>
+<li><code>clusterNode</code> 记录了每个节点的信息，其中包含了节点本身的版本 <code>Epoch</code>；自身的信息描述：节点对应的数据分片范围（<code>slot</code>）、为<code>master</code>时的<code>slave</code>列表、为<code>slave</code>时的<code>master</code>等。</li>
+</ul>
+<p><strong>每个节点包含一个全局唯一的<code>NodeId</code></strong>。</p>
+<p>当集群的数据分片信息发生变更（数据在节点间迁移时），<code>Redis Cluster</code>仍然保持对外服务。</p>
+<p>当集群中某个master出现宕机时，<code>Redis Cluster</code> 会自动发现，并触发故障转移的操作。会将<code>master</code>的某个<code>slave</code>晋升为新的 <code>master</code>。</p>
+<p>由此可见，每个节点都保存着<code>Node</code>视角的集群结构。它描述了数据的分片方式，节点主备关系，并通过<code>Epoch</code>作为版本号实现集群结构信息的一致性，同时也控制着数据迁移和故障转移的过程。</p>
+<h3 id="节点通信"><a href="#节点通信" class="headerlink" title="节点通信"></a>节点通信</h3><p>在<code>Redis Cluste</code>r中，这个配置信息交互通过<code>Redis Cluster Bus</code>来完成（<code>独立端口</code>）。<code>Redis Cluster Bus</code>上交互的信息结构如下：</p>
+<p><img src="/images/nosql-redis/redis-31.png" alt="redis-31"></p>
+<p><code>clusterMsg</code> 中的<code>type</code>指明了消息的类型，配置信息的一致性主要依靠<code>PING/PONG</code>。每个节点向其他节点频繁的周期性的发送<code>PING/PONG</code>消息。对于消息体中的<code>Gossip</code>部分，包含了<code>sender/receiver</code> 所感知的其他节点信息，接受者根据这些<code>Gossip</code> 跟新对集群的认识。</p>
+<p>对于大规模的集群，如果每次<code>PING/PONG</code> 都携带着所有节点的信息，则网络开销会很大。此时<code>Redis Cluster</code> 在每次<code>PING/PONG</code>，只包含了随机的一部分节点信息。由于交互比较频繁，短时间的几次交互之后，集群的状态也会达成一致。</p>
+<h3 id="一致性"><a href="#一致性" class="headerlink" title="一致性"></a>一致性</h3><p>当<code>Cluster</code> 结构不发生变化时，各个节点通过<code>gossip</code> 协议在几轮交互之后，便可以得知<code>Cluster</code>的结构信息，达到一致性的状态。但是当集群结构发生变化时（故障转移/分片迁移等），优先得知变更的节点通过Epoch变量，将自己的最新信息扩散到<code>Cluster</code>，并最终达到一致。</p>
+<p><code>clusterNode</code> 的<code>Epoch</code>描述的单个节点的信息版本；<br><code>clusterState</code> 的<code>currentEpoch</code> 描述的是集群信息的版本，它可以辅助<code>Epoch</code> 的自增生成。因为<code>currentEpoch</code> 是维护在每个节点上的，在集群结构发生变更时，<code>Cluster</code> 在一定的时间窗口控制更新规则，来保证每个节点的<code>currentEpoch</code>都是最新的。<br>更新规则如下：</p>
+<p>当某个节点率先知道了变更时，将自身的<code>currentEpoch</code> 自增，并使之成为集群中的最大值。再用自增后的<code>currentEpoch</code> 作为新的<code>Epoch</code> 版本；</p>
+<ul>
+<li>当某个节点收到了比自己大的<code>currentEpoch</code>时，更新自己的<code>currentEpoch</code>；</li>
+<li>当收到的<code>Redis Cluster Bus</code> 消息中的某个节点的<code>Epoch</code> &gt; 自身的时，将更新自身的内容；</li>
+<li>当<code>Redis Cluster Bus</code> 消息中，包含了自己没有的节点时，将其加入到自身的配置中。</li>
+</ul>
+<p>上述的规则保证了信息的更新都是单向的，最终朝着<code>Epoch</code>更大的信息收敛。同时<code>Epoch</code>也随着<code>currentEpoch</code>的增加而增加，最终将各节点信息趋于稳定。</p>
+<p>为了使得集群在一部分节点下线或者无法与集群的大多数（<code>majority</code>）节点进行通讯的情况下， 仍然可以正常运作， <code>Redis</code> 集群对节点使用了主从复制功能： 集群中的每个节点都有 1 个至 N 个复制品（<code>replica</code>）， 其中一个复制品为主节点（<code>master</code>）， 而其余的 N-1 个复制品为从节点（<code>slave</code>）。</p>
+<p><strong>集群间节点支持主从关系</strong>，复制的逻辑基本复用了单机版的实现。不过还是有些地方需要注意。</p>
+<ul>
+<li>首先集群间节点建立主从关系不再使用原有的<code>SLAVEOF</code>命令和<code>SLAVEOF</code>配置，而是通过<code>cluster replicate</code>命令，这保证了主从节点需要先完成握手，才能建立主从关系。</li>
+<li>集群是不能组成链式主从关系的，也就是说从节点不能有自己的从节点。不过对于集群外的没开启集群功能的节点，<code>redis</code>并不干预这些节点去复制集群内的节点，但是在集群故障转移时，这些集群外的节点，集群不会处理。</li>
+<li>集群内节点想要复制另一个节点，需要保证本节点不再负责任何<code>slot</code>，不然<code>redis</code>也是不允许的。</li>
+<li>集群内的从节点在与其他节点通信的时候，传递的消息中数据分布表和<code>epoch</code>是<code>master</code>的值。</li>
+</ul>
+<p><strong>集群主节点出现故障，发生故障转移，其他主节点会把故障主节点的从节点自动提为主节点，原来的主节点恢复后，自动成为新主节点的从节点</strong>。</p>
+<p>这里先说明，把一个<code>master</code>和它的全部<code>slave</code>描述为一个<code>group</code>，故障转移是以<code>group</code>为单位的，集群故障转移的方式跟sentinel的实现很类似。</p>
+<p><img src="/images/nosql-redis/redis-32.png" alt="redis-32"></p>
+<h3 id="均衡集群"><a href="#均衡集群" class="headerlink" title="均衡集群"></a>均衡集群</h3><p>在集群运行过程中，有的<code>master</code>的<code>slave</code>宕机，导致了该<code>master</code>成为孤儿<code>master</code>（<code>orphaned masters</code>），而有的<code>master</code>有很多<code>slave</code>。</p>
+<p>此处孤儿<code>master</code>的定义是那些本来有<code>slave</code>，但是全部离线的<code>master</code>，对于那些原来就没有<code>slave</code>的<code>master</code>不能认为是孤儿<code>master</code>。</p>
+<p><code>redis</code>集群支持均衡<code>slave</code>功能，官方称为<code>Replica migration</code>，而我觉得均衡集群的<code>slave</code>更好理解该概念。集群能把某个<code>slave</code>较多的<code>group</code>上的<code>slave</code>迁移到那些孤儿<code>master</code>上，该功能通过<code>cluster-migration-barrier</code>参数配置，默认为1。</p>
+<p><code>slave</code>在每次定时任务都会检查是否需要迁移<code>slave</code>，即把自己变成孤儿<code>master</code>的<code>slave</code>。 满足以下条件，<code>slave</code>就会成为孤儿<code>master</code>的<code>slave</code>：</p>
+<ul>
+<li>自己所在的<code>group</code>是<code>slave</code>最多的<code>group</code>。</li>
+<li>目前存在孤儿<code>master</code>。</li>
+<li>自己所在的<code>group</code>的<code>slave</code>数目至少超过2个，只有自己一个的话迁移到其他<code>group</code>，自己原来的<code>group</code>的<code>master</code>又成了孤儿<code>master</code>。</li>
+<li>自己所在的<code>group</code>的<code>slave</code>数量大于<code>cluster-migration-barrier</code>配置。</li>
+<li>与<code>group</code>内的其他<code>slave</code>基于<code>memcmp</code>比较<code>node id</code>，自己的<code>node id</code>最小。这个可以防止多个<code>slave</code>并发复制孤儿<code>master</code>，从而原来的<code>group</code>失去过多的<code>slave</code>。</li>
+</ul>
+<h3 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h3><ol start="2">
+<li>去中心化，集群最大可增加1000个节点，性能随节点增加而线性扩展。</li>
+<li>解耦 <strong>数据</strong> 和 <strong>节点</strong> 之间的关系，简化了节点 <strong>扩容</strong> 和 <strong>收缩</strong> 难度。</li>
+<li><strong>节点自身</strong> 维护槽的 <strong>映射关系</strong>，不需要 <strong>客户端</strong> 或者 <strong>代理服务</strong> 维护 <strong>槽分区元数据</strong>。</li>
+</ol>
+<h3 id="劣势"><a href="#劣势" class="headerlink" title="劣势"></a>劣势</h3><ol>
+<li><code>key</code> <strong>批量操作</strong> 支持有限。类似 <code>mset</code>、<code>mget</code> 操作，目前只支持对具有相同 <code>slot</code> 值的<code>key</code> 执行 <strong>批量操作</strong>。对于 <strong>映射为不同</strong> <code>slot</code> 值的<code>key</code> 由于执行 <code>mget</code>、<code>mget</code> 等操作可能存在于多个节点上，因此不被支持。</li>
+<li>只支持 <strong>多</strong> <code>key</code> 在 <strong>同一节点上</strong> 的 <strong>事务操作</strong>，当多个 <code>key</code> 分布在 <strong>不同</strong> 的节点上时 <strong>无法</strong> 使用事务功能。</li>
+<li><code>key</code> 作为 <strong>数据分区</strong> 的最小粒度，不能将一个 <strong>大的键值</strong> 对象如 <code>hash</code>、<code>list</code> 等映射到 <strong>不同的节点</strong>。</li>
+<li>不支持<strong>多数据库空间</strong>，<strong>单机</strong>下的<code>Redis</code>可以支持 16 个数据库（db0 ~ db15），<strong>集群模式</strong>下只能使用<strong>一个</strong> 数据库空间，即 db0。</li>
+<li><strong>复制结构</strong> 只支持一层，<strong>从节点</strong> 只能复制 <strong>主节点</strong>，不支持 <strong>嵌套树状复制</strong> 结构。</li>
+</ol>
+<h3 id="集群搭建"><a href="#集群搭建" class="headerlink" title="集群搭建"></a>集群搭建</h3><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#redis.conf相关集群配置</span></span><br><span class="line"><span class="comment">#配置为cluster模式</span></span><br><span class="line"><span class="meta">cluster-enabled</span> <span class="string">yes</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#集群节点配置信息，包括nodeid，集群信息。此文件非常关键，要确保故障转移或者重启的时候此文件还在，所以如果在docker环境下要外挂到外部存储</span></span><br><span class="line"><span class="meta">cluster-config-file</span> <span class="string">nodes-6379.conf</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#节点连接超时，如果集群规模小，都在同一个网络环境下，可以配置的短些，更快的做故障转移</span></span><br><span class="line"><span class="meta">cluster-node-timeout</span> <span class="string">2000</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#慢查询日志，用于性能分析，生产环境可设置为1000（毫秒）</span></span><br><span class="line"><span class="meta">slowlog-log-slower-than</span> <span class="string">1000</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#保存慢查询的队列长度 ，设置为1000</span></span><br><span class="line"><span class="meta">slowlog-max-len</span> <span class="string">1000</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置为0，默认为10如果master slave都挂掉，slave跟master失联又超过这个数值*timeout的数值，就不会发起选举了。</span></span><br><span class="line"><span class="comment">#如果设置为0，就是永远都会尝试发起选举，尝试从slave变为mater</span></span><br><span class="line"><span class="meta">cluster-slave-validity-factor</span> <span class="string">10</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置为no，默认为yes，故障发现到自动完成转移期间整个集群是不可用状态，对于大多数业务无法容忍这种情况</span></span><br><span class="line"><span class="comment">#因此要设置为no，当主节点故障时只影 响它负责槽的相关命令执行，不会影响其他主节点的可用性</span></span><br><span class="line"><span class="meta">cluster-require-full-coverage</span> <span class="string">yes</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#分别修改不同的redis.conf，注意，不同的redis.conf分开文件夹</span></span><br><span class="line"><span class="comment">#端口分别为6301~6306</span></span><br><span class="line"><span class="attr">port</span> <span class="string">6301</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#dir ./ 修改成每个conf的路径</span></span><br><span class="line"><span class="attr">dir</span> <span class="string">/usr/local/redis1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#cluster-enabled yes 开启集群模式</span></span><br><span class="line"><span class="meta">cluster-enabled</span> <span class="string">yes</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#打开配置集群结点信息文件(6301~6306)</span></span><br><span class="line"><span class="meta">cluster-config-file</span> <span class="string">nodes-6301.conf</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#打开结点超时配置</span></span><br><span class="line"><span class="meta">cluster-node-timeout</span> <span class="string">15000</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 持久化配置</span></span><br><span class="line"><span class="attr">appendonly</span> <span class="string">yes</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#修改`PID`文件名称</span></span><br><span class="line"><span class="attr">pidfile</span> <span class="string">/var/run/redis-6301.pid</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#修改`Log`文件名称</span></span><br><span class="line"><span class="attr">logfile</span> <span class="string">redis-6301.log</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#修改`dump.rdb`名称</span></span><br><span class="line"><span class="attr">dbfilename</span> <span class="string">dump-6301.rdb</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">--cluster-replicas 1表示给每个master分配一个slave，系统会自动分配master和salve</span></span><br><span class="line">redis-cli --cluster create --cluster-replicas 1 127.0.0.1:6301 127.0.0.1:6302 127.0.0.1:6303 127.0.0.1:6304 127.0.0.1:6305 127.0.0.1:6306</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">查看集群状态</span></span><br><span class="line">redis-cli -p 6301 cluster info</span><br><span class="line"><span class="meta">#</span><span class="bash">查看集群节点状态</span></span><br><span class="line">redis-cli -p 6301 cluster nodes</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">使用redis-cli连接到集群，指定-c参数</span></span><br><span class="line">redis-cli -p 6001 -c</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/nosql-redis/redis-33.png" alt="redis-33"></p>
+<p><img src="/images/nosql-redis/redis-34.png" alt="redis-34"></p>
+<p><img src="/images/nosql-redis/redis-35.png" alt="redis-35"></p>
+<p>当访问的<code>slot</code>在当前机器时，直接返回，当数据在其他<code>master</code>管理的<code>slot</code>中时，会自动重定位到负责该<code>slot</code>的<code>master</code>机器</p>
+<p><img src="/images/nosql-redis/redis-36.png" alt="redis-36"></p>
+<p>可以看到当我把6303端口的<code>master</code>停止后，6304端口的<code>slave</code>上位成<code>master</code>。</p>
+<p><img src="/images/nosql-redis/redis-37.png" alt="redis-37"></p>
+<p>当我重启6303端口的<code>redis</code>时，6303端口的<code>redis</code>自动成为6304端口<code>master</code>的<code>salve</code>。</p>
+<hr>
+<blockquote>
+<p>部分内容出自文章：</p>
+<p><a href="https://blog.csdn.net/wuxian90/article/details/81590252" target="_blank" rel="noopener">https://blog.csdn.net/wuxian90/article/details/81590252</a></p>
+<p><a href="https://www.cnblogs.com/pingyeaa/p/11294773.html" target="_blank" rel="noopener">https://www.cnblogs.com/pingyeaa/p/11294773.html</a></p>
+<p><a href="https://www.jianshu.com/p/84dbb25cc8dc" target="_blank" rel="noopener">https://www.jianshu.com/p/84dbb25cc8dc</a></p>
+<p><a href="https://nealli.gitee.io/2020/05/21/Redis集群安装/" target="_blank" rel="noopener">https://nealli.gitee.io/2020/05/21/Redis%E9%9B%86%E7%BE%A4%E5%AE%89%E8%A3%85/</a></p>
+</blockquote>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月26日 12:03</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/26/redis-cluster/" title="&#39;Redis（三） Redis 集群&#39;">https://midkuro.github.io/2020/05/26/redis-cluster/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/26/redis-cluster/&title=《'Redis（三） Redis 集群'》 — Kuro's Blog&pic=images/redis.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/26/redis-cluster/&title=《'Redis（三） Redis 集群'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/26/redis-cluster/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Redis（三） Redis 集群'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/26/redis-cluster/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/26/redis-cluster/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/26/redis-cluster/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/NoSql/" class="color1">NoSql</a>
+      
+    <a href="/tags/Redis/" class="color1">Redis</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Redis集群"><span class="post-toc-text">Redis集群</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Redis复制-Master-Slave"><span class="post-toc-text">Redis复制(Master&#x2F;Slave)</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#一主二仆"><span class="post-toc-text">一主二仆</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#薪火相传"><span class="post-toc-text">薪火相传</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#反客为主"><span class="post-toc-text">反客为主</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#复制原理"><span class="post-toc-text">复制原理</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#哨兵模式"><span class="post-toc-text">哨兵模式</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Redis-Cluster"><span class="post-toc-text">Redis-Cluster</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#数据分片"><span class="post-toc-text">数据分片</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#数据访问"><span class="post-toc-text">数据访问</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#数据结构"><span class="post-toc-text">数据结构</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#节点通信"><span class="post-toc-text">节点通信</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#一致性"><span class="post-toc-text">一致性</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#均衡集群"><span class="post-toc-text">均衡集群</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#优势"><span class="post-toc-text">优势</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#劣势"><span class="post-toc-text">劣势</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#集群搭建"><span class="post-toc-text">集群搭建</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/05/23/nosql-redis/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Redis（一） NoSql 之 Redis&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="redis-cluster" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 10px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 16px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 16px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MQ/" style="font-size: 10px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 14px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 12px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 10px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 16px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 14px;">JVM</a> <a href="/tags/Java/" style="font-size: 18px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 16px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 12px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MQ/" style="font-size: 10px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 14px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 12px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
