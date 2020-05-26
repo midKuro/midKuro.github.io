@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Redis（二） Hash算法&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="Redis算法数据分布算法普通Hash算法比如你有 N 个 redis实例，那么如何将一个key映射到redis上呢，你很可能会采用类似下面的通用方法计算 key的 hash 值，然后均匀的映射到到 N 个 redis上： 　　hash(key)%N 　　如果增加一个redis，映射公式变成了 hash(key)%(N+1) 　　如果一个redis宕机了，映射公式变成了 hash(key)%(N-">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Redis（二） Hash算法&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/26/redis-hash/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Redis算法数据分布算法普通Hash算法比如你有 N 个 redis实例，那么如何将一个key映射到redis上呢，你很可能会采用类似下面的通用方法计算 key的 hash 值，然后均匀的映射到到 N 个 redis上： 　　hash(key)%N 　　如果增加一个redis，映射公式变成了 hash(key)%(N+1) 　　如果一个redis宕机了，映射公式变成了 hash(key)%(N-">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-38.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-39.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-40.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-41.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-42.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-43.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-28.png">
+<meta property="article:published_time" content="2020-05-26T02:00:00.000Z">
+<meta property="article:modified_time" content="2020-05-26T12:19:44.141Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="NoSql">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/nosql-redis/redis-38.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                        <a title="Gitee" target="_blank" href="//gitee.com/midkuro/midkuro">
+                            <i class="fa fa-weibo fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-redis-hash" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Redis（二） Hash算法&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Redis/">Redis</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-26
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Redis算法"><a href="#Redis算法" class="headerlink" title="Redis算法"></a>Redis算法</h1><h2 id="数据分布算法"><a href="#数据分布算法" class="headerlink" title="数据分布算法"></a>数据分布算法</h2><h3 id="普通Hash算法"><a href="#普通Hash算法" class="headerlink" title="普通Hash算法"></a>普通Hash算法</h3><p>比如你有 N 个 <code>redis</code>实例，那么如何将一个<code>key</code>映射到<code>redis</code>上呢，你很可能会采用类似下面的通用方法计算 key的 hash 值，然后均匀的映射到到 N 个 <code>redis</code>上：</p>
+<p>　　<code>hash(key)%N</code></p>
+<p>　　如果增加一个<code>redis</code>，映射公式变成了 <code>hash(key)%(N+1)</code></p>
+<p>　　如果一个<code>redis</code>宕机了，映射公式变成了 <code>hash(key)%(N-1)</code></p>
+<p>　　在这两种情况下，每一个<code>redis</code>管理的数据全部要重新计算移动，几乎所有的缓存都失效了。会导致数据库访问的压力陡增，严重情况，还可能导致数据库宕机。</p>
+<h3 id="一致性Hash算法"><a href="#一致性Hash算法" class="headerlink" title="一致性Hash算法"></a>一致性Hash算法</h3><ol>
+<li>将内存想象成一个环，由于hash值有32位，因此将内存分出2 ^32（0~2 ^32-1）个地址</li>
+<li>将节点的IP+算法确定唯一的哈希值，之后在内存中确定节点的位置</li>
+<li>当保存数据时，根据key进行哈希运算，确定唯一的一个位置</li>
+<li>根据当前<code>key</code>位置<strong>顺时针</strong>查找最近的<code>node</code>节点进行挂载（在内存中，加法计算快于减法运算，因此采用顺时针查找）</li>
+</ol>
+<p><img src="/images/nosql-redis/redis-38.png" alt="redis-38"></p>
+<p>将各个服务器使用<code>Hash</code>进行一个哈希，具体可以选择服务器的ip或主机名作为关键字进行哈希，这样每台机器就能确定其在哈希环上的位置。</p>
+<p>假设将中四台服务器使用ip地址哈希后在环空间的位置如下：</p>
+<p><img src="/images/nosql-redis/redis-39.png" alt="redis-39"></p>
+<p>将数据key使用相同的函数Hash计算出哈希值，并确定此数据在环上的位置，从此位置沿环顺时针“行走”，第一台遇到的服务器就是其应该定位到的服务器。</p>
+<p>假设4个存储对象 Object A、B、C、D，经过对 Key 的哈希计算后，它们的位置如下：</p>
+<p><img src="/images/nosql-redis/redis-40.png" alt="redis-40"></p>
+<p>根据一致性哈希算法，数据A会被定为到<code>Node A</code>上，B被定为到<code>Node B</code>上，C被定为到<code>Node C</code>上，D被定为到<code>Node D</code>上。</p>
+<h3 id="容错性和可扩展性"><a href="#容错性和可扩展性" class="headerlink" title="容错性和可扩展性"></a>容错性和可扩展性</h3><p>假设Node C不幸宕机，可以看到此时对象A、B、D不会受到影响，只有C对象被重定位到<code>Node D</code>。一般的，在一致性哈希算法中，如果一台服务器不可用，则受影响的数据仅仅是此服务器到其环空间中前一台服务器（即沿着逆时针方向行走遇到的第一台服务器）之间数据，其它不会受到影响。</p>
+<p>如果在系统中增加一台服务器Node X，如下图所示：</p>
+<p><img src="/images/nosql-redis/redis-41.png" alt="redis-41"></p>
+<p>此时对象Object A、B、D不受影响，只有对象C需要重定位到新的Node X 。一般的，在一致性哈希算法中，如果增加一台服务器，则受影响的数据仅仅是新服务器到其环空间中前一台服务器（即沿着逆时针方向行走遇到的第一台服务器）之间数据，其它数据也不会受到影响。</p>
+<p>综上所述，一致性哈希算法对于节点的增减都只需重定位环空间中的一小部分数据，具有较好的容错性和可扩展性。</p>
+<h3 id="虚拟节点"><a href="#虚拟节点" class="headerlink" title="虚拟节点"></a>虚拟节点</h3><p><strong>但一致性哈希算法也有一个严重的问题，就是数据倾斜</strong>。如果在分片的集群中，节点太少，并且分布不均，一致性哈希算法就会出现部分节点数据太多，部分节点数据太少。也就是说无法控制节点存储数据的分配。如下图，大部分数据都在 A 上了，B 的数据比较少。</p>
+<p><img src="/images/nosql-redis/redis-42.png" alt="redis-42"></p>
+<p>节点数越少，越容易出现节点在哈希环上的分布不均匀，导致各节点映射的对象数量严重不均衡(数据倾斜)；相反，节点数越多越密集，数据在哈希环上的分布就越均匀。</p>
+<p>以删除节点为例，假设删除了<code>Node B</code>节点，原来<code>Node B</code>节点的数据将转移到<code>Node C</code>上，这样<code>Node C</code>的内存使用率会骤增，如果<code>Node B</code>上存在热点数据，<code>Node C</code>会扛不住甚至会可能挂掉，挂掉之后数据又转移给<code>Node D</code>,如此循环会造成所有节点崩溃，也就是<strong>缓存雪崩</strong>。</p>
+<p>为了解决雪崩现象和数据倾斜现象，提出了虚拟节点这个概念。就是将真实节点计算多个哈希形成多个虚拟节点并放置到哈希环上，<strong>定位算法不变，只是多了一步虚拟节点到真实节点映射的过程</strong></p>
+<p>但实际部署的物理节点有限，我们可以用有限的物理节点，虚拟出足够多的虚拟节点(<code>Virtual Node</code>)，最终达到数据在哈希环上均匀分布的效果。</p>
+<p>如下图，实际只部署了2个节点 Node A/B，每个节点都复制成3倍，结果看上去是部署了6个节点。可以想象，当复制倍数为 2^32 时，就达到绝对的均匀，通常可取复制倍数为32或更高。</p>
+<p><img src="/images/nosql-redis/redis-43.png" alt="redis-43"></p>
+<p><strong>这就解决了雪崩的问题，当某个节点宕机后，其数据并没有全部分配给某一个节点，而是被分到了多个节点，数据倾斜的问题也随之解决</strong>。</p>
+<h3 id="哈希槽"><a href="#哈希槽" class="headerlink" title="哈希槽"></a>哈希槽</h3><p><strong><code>redis</code> 集群（<code>cluster</code>）并没有选用上面一致性哈希，而是采用了哈希槽（<code>slot</code>）的这种概念</strong>。主要的原因就是上面所说的，<strong>一致性哈希算法对于数据分布、节点位置的控制并不是很友好</strong>。</p>
+<p>首先哈希槽其实是两个概念，第一个是哈希算法。<code>redis cluster</code> 的 <code>has</code>h 算法不是简单的<code>hash</code>()，而是 <code>crc16</code> 算法，一种校验算法。另外一个就是槽位的概念，空间分配的规则。</p>
+<p>其实哈希槽的本质和一致性哈希算法非常相似，不同点就是对于哈希空间的定义。一致性哈希的空间是一个圆环，节点分布是基于圆环的，无法很好的控制数据分布。而 <code>redis cluster</code> 的槽位空间是自定义分配的，类似于 <code>windows</code> 盘分区的概念。这种分区是可以自定义大小，自定义位置的。</p>
+<p><code>redis cluster</code> 包含了16384个哈希槽，每个 <code>key</code> 通过计算后都会落在具体一个槽位上，而这个槽位是属于哪个存储节点的，则由用户自己定义分配。例如机器硬盘小的，可以分配少一点槽位，硬盘大的可以分配多一点。如果节点硬盘都差不多则可以平均分配。<strong>所以哈希槽这种概念很好地解决了一致性哈希的弊端</strong>。</p>
+<p>另外在容错性和扩展性上，表象与一致性哈希一样，都是对受影响的数据进行转移。而哈希槽本质上是对槽位的转移，把故障节点负责的槽位转移到其他正常的节点上。扩展节点也是一样，把其他节点上的槽位转移到新的节点上。</p>
+<p><img src="/images/nosql-redis/redis-28.png" alt="redis-28"></p>
+<h2 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h2><h3 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h3><p><code>key</code>对应的数据在数据源并不存在，每次针对此<code>key</code>的请求从缓存获取不到，请求都会到数据源，从而可能压垮数据源。比如用一个不存在的用户<code>id</code>获取用户信息，不论缓存还是数据库都没有，若黑客利用此漏洞进行攻击可能压垮数据库。</p>
+<p>解决办法：</p>
+<p>一个一定不存在缓存及查询不到的数据，由于缓存是不命中时被动写的，并且出于容错考虑，如果从存储层查不到数据则不写入缓存，这将导致这个不存在的数据每次请求都要到存储层去查询，失去了缓存的意义。</p>
+<p><strong>最常见的则是采用布隆过滤器</strong>，将所有可能存在的数据哈希到一个足够大的<code>bitmap</code>中，一个一定不存在的数据会被 这个<code>bitmap</code>拦截掉，从而避免了对底层存储系统的查询压力。</p>
+<p>另外也有一个更为简单的方法，<strong>如果一个查询返回的数据为空（不管是数据不存在，还是系统故障），我们仍然把这个空结果进行缓存</strong>，但它的过期时间会很短，最长不超过五分钟。</p>
+<h3 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h3><p><code>key</code>对应的数据存在，但在<code>redis</code>中过期，此时若有大量并发请求过来，这些请求发现缓存过期一般都会从后端DB加载数据并回设到缓存，这个时候大并发的请求可能会瞬间把后端DB压垮。</p>
+<p>业界比较常用的做法是使用互斥锁(<code>mutex key</code>)，简单地来说，就是在缓存失效的时候（判断拿出来的值为空），不是立即去<code>load db</code>，而是先使用缓存工具的某些带成功操作返回值的操作，比如<code>Redis</code>的<code>SETNX</code>（<code>SET if Not eXists</code>），去<code>set</code>一个<code>mutex key</code>，当操作返回成功时，再进行<code>load db</code>的操作并回设缓存；否则，就重试整个<code>get</code>缓存的方法。</p>
+<h3 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h3><p>当缓存服务器重启或者大量缓存集中在某一个时间段失效，这样在失效的时候，也会给后端系统(比如DB)带来很大压力。</p>
+<p>大多数系统设计者考虑用加锁或者队列的方式保证来保证不会有大量的线程对数据库一次性进行读写，从而避免失效时大量的并发请求落到底层存储系统上。</p>
+<p>锁排队的解决方式分布式环境的并发问题，有可能还要解决分布式锁的问题；线程还会被阻塞，用户体验很差！因此，在真正的高并发场景下很少使用！</p>
+<p>还有一个简单方案就是将缓存失效时间分散开，比如我们可以在原有的失效时间基础上增加一个随机值，比如1-5分钟随机，这样每一个缓存的过期时间的重复率就会降低，就很难引发集体失效的事件。</p>
+<hr>
+<blockquote>
+<p>部分内容出自文章：</p>
+<p><a href="https://blog.csdn.net/qq_42695926/java/article/details/83090131" target="_blank" rel="noopener">https://blog.csdn.net/qq_42695926/java/article/details/83090131</a></p>
+<p><a href="https://www.cnblogs.com/lihonglin2016/p/10039670.html" target="_blank" rel="noopener">https://www.cnblogs.com/lihonglin2016/p/10039670.html</a></p>
+<p><a href="https://blog.csdn.net/kefengwang/java/article/details/81628977" target="_blank" rel="noopener">https://blog.csdn.net/kefengwang/java/article/details/81628977</a></p>
+<p><a href="https://www.cnblogs.com/xichji/p/11286443.html" target="_blank" rel="noopener">https://www.cnblogs.com/xichji/p/11286443.html</a></p>
+</blockquote>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月26日 20:19</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/26/redis-hash/" title="&#39;Redis（二） Hash算法&#39;">https://midkuro.github.io/2020/05/26/redis-hash/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/26/redis-hash/&title=《'Redis（二） Hash算法'》 — Kuro's Blog&pic=images/redis.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/26/redis-hash/&title=《'Redis（二） Hash算法'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/26/redis-hash/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Redis（二） Hash算法'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/26/redis-hash/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/26/redis-hash/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/26/redis-hash/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/NoSql/" class="color1">NoSql</a>
+      
+    <a href="/tags/Redis/" class="color1">Redis</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Redis算法"><span class="post-toc-text">Redis算法</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#数据分布算法"><span class="post-toc-text">数据分布算法</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#普通Hash算法"><span class="post-toc-text">普通Hash算法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#一致性Hash算法"><span class="post-toc-text">一致性Hash算法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#容错性和可扩展性"><span class="post-toc-text">容错性和可扩展性</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#虚拟节点"><span class="post-toc-text">虚拟节点</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#哈希槽"><span class="post-toc-text">哈希槽</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#缓存"><span class="post-toc-text">缓存</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#缓存穿透"><span class="post-toc-text">缓存穿透</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#缓存击穿"><span class="post-toc-text">缓存击穿</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#缓存雪崩"><span class="post-toc-text">缓存雪崩</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/05/26/redis-cluster/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Redis（三） 集群&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/05/23/redis-nosql/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Redis（一） NoSql 之 Redis&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="redis-hash" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 13.33px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 13.33px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
