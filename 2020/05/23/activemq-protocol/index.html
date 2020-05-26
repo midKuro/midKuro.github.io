@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;ActiveMQ（三） 传输协议&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="ActiveMQ传输协议ActiveMQ支持client和Broker的通讯协议有：TCP、NIO、UDP、SSL、Http(s)、VM。 其中配置Transport Connector的文件在ActiveMQ的安装目录的conf&#x2F;activemq.xml中的&lt;transportConnectors&gt;标签中。 123456789&lt;!--配置传输官网 http:&#x2F;&#x2F;activemq">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;ActiveMQ（三） 传输协议&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/23/activemq-protocol/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="ActiveMQ传输协议ActiveMQ支持client和Broker的通讯协议有：TCP、NIO、UDP、SSL、Http(s)、VM。 其中配置Transport Connector的文件在ActiveMQ的安装目录的conf&#x2F;activemq.xml中的&lt;transportConnectors&gt;标签中。 123456789&lt;!--配置传输官网 http:&#x2F;&#x2F;activemq">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-14.png">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-15.png">
+<meta property="article:published_time" content="2020-05-22T17:00:02.000Z">
+<meta property="article:modified_time" content="2020-05-26T05:36:20.316Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="MQ">
+<meta property="article:tag" content="ActiveMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/mq-activemq/activemq-14.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-activemq-protocol" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;ActiveMQ（三） 传输协议&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/ActiveMQ/">ActiveMQ</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-23
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="ActiveMQ"><a href="#ActiveMQ" class="headerlink" title="ActiveMQ"></a>ActiveMQ</h1><h2 id="传输协议"><a href="#传输协议" class="headerlink" title="传输协议"></a>传输协议</h2><p><code>ActiveMQ</code>支持<code>client</code>和<code>Broker</code>的通讯协议有：<code>TCP</code>、<code>NIO</code>、<code>UDP</code>、<code>SSL</code>、<code>Http(s)</code>、<code>VM</code>。</p>
+<p>其中配置<code>Transport Connector</code>的文件在<code>ActiveMQ</code>的安装目录的<code>conf/activemq.xml</code>中的<code>&lt;transportConnectors&gt;</code>标签中。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--配置传输官网 http://activemq.apache.org/configuring-transports.html--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">transportConnectors</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- DOS protection, limit concurrent connections to 1000 and frame size to 100MB --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">transportConnector</span> <span class="attr">name</span>=<span class="string">"openwire"</span> <span class="attr">uri</span>=<span class="string">"tcp://0.0.0.0:61616?maximumConnections=1000<span class="symbol">&amp;amp;</span>wireFormat.maxFrameSize=104857600&amp;trace=true"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">transportConnector</span> <span class="attr">name</span>=<span class="string">"amqp"</span> <span class="attr">uri</span>=<span class="string">"amqp://0.0.0.0:5672?maximumConnections=1000<span class="symbol">&amp;amp;</span>wireFormat.maxFrameSize=104857600"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">transportConnector</span> <span class="attr">name</span>=<span class="string">"stomp"</span> <span class="attr">uri</span>=<span class="string">"stomp://0.0.0.0:61613?maximumConnections=1000<span class="symbol">&amp;amp;</span>wireFormat.maxFrameSize=104857600"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">transportConnector</span> <span class="attr">name</span>=<span class="string">"mqtt"</span> <span class="attr">uri</span>=<span class="string">"mqtt://0.0.0.0:1883?maximumConnections=1000<span class="symbol">&amp;amp;</span>wireFormat.maxFrameSize=104857600"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">transportConnector</span> <span class="attr">name</span>=<span class="string">"ws"</span> <span class="attr">uri</span>=<span class="string">"ws://0.0.0.0:61614?maximumConnections=1000<span class="symbol">&amp;amp;</span>wireFormat.maxFrameSize=104857600"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">transportConnectors</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/mq-activemq/activemq-14.png" alt="activemq-14"></p>
+<h3 id="TCP协议"><a href="#TCP协议" class="headerlink" title="TCP协议"></a>TCP协议</h3><p><strong>ActiveMQ中默认的消息协议就是<code>openwire</code></strong>，也就是<code>Transmission Control Protocal(TCP)</code>协议。</p>
+<ol>
+<li><p><strong>这是默认的<code>Broker</code>配置，<code>TCP</code>的<code>Client</code>监听端口61616</strong></p>
+</li>
+<li><p>在网络传输数据前，必须要序列化数据，消息是通过一个叫<code>wire protocol</code>的来序列化成字节流。</p>
+<p>默认情况下<code>ActiveMQ</code>把<code>wire protocol</code>叫做<code>OpenWire</code>，它的目的是促使网络上的效率和数据快速交互。</p>
+</li>
+<li><p><code>TCP</code>连接的<code>URI</code>形式如：<code>tcp:hostname:port?key=value&amp;key=value</code>，后面的参数是可选的</p>
+</li>
+<li><p><code>TCP</code>传输的优点：</p>
+<ul>
+<li><code>TCP</code>协议传输可靠性高，稳定性强</li>
+<li>高效性：字节流方式传递，效率很高</li>
+<li>有效性、可用性：应用广泛，支持任何平台</li>
+</ul>
+</li>
+<li><p>关于<code>Transport</code>协议的可配置参数可以参考<a href="http://activemq.apache.org/configuring-transports.html" target="_blank" rel="noopener">官网</a></p>
+</li>
+</ol>
+<h3 id="NIO协议"><a href="#NIO协议" class="headerlink" title="NIO协议"></a>NIO协议</h3><ol>
+<li><p>即<code>New I/O API Protocol(NIO)</code>，和<code>TCP</code>协议类似但<code>NIO</code>侧重底层的访问操作。它允许开发人员对统一资源可有更多的<code>client</code>调用和服务端有更多的负载。</p>
+</li>
+<li><p>适合<code>NIO</code>协议的场景：</p>
+<ul>
+<li>可能有大量的<code>Client</code>去连接到<code>Broker</code>上，一般情况下，大量的<code>Client</code>去连接<code>Broker</code>是被操作系统的现成所限制的。因此，<code>NIO</code>的实现比<code>TCP</code>需要更少的线程去运行，<strong>工作中常用<code>NIO</code>协议，建议使用<code>NIO</code>协议</strong></li>
+<li>可能对于<code>Broker</code>有一个很迟钝的网络传输，<code>NIO</code>比<code>TCP</code>提供更好的性能。</li>
+</ul>
+</li>
+<li><p><code>NIO</code>连接的<code>URI</code>形式：<code>nio://hostname:port?key=value</code></p>
+</li>
+<li><p><code>Transport Conector</code>配置示例，参考<a href="http://activemq.apache.org/configuring-transports.html" target="_blank" rel="noopener">官网</a></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">broker</span>&gt;</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="tag">&lt;<span class="name">transportConnectors</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">transportConnector</span> <span class="attr">name</span>=<span class="string">"nio"</span> <span class="attr">uri</span>=<span class="string">"nio://0.0.0.0:61616"</span>/&gt;</span>  </span><br><span class="line">  <span class="tag">&lt;/<span class="name">transportConnectors</span>&gt;</span></span><br><span class="line">  ...</span><br><span class="line"><span class="tag">&lt;/<span class="name">broker</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">transportConnectors</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">transportConnector</span> <span class="attr">name</span>=<span class="string">"nio"</span> <span class="attr">uri</span>=<span class="string">"nio://0.0.0.0:61618?trace=true"</span>/&gt;</span>  </span><br><span class="line"><span class="tag">&lt;/<span class="name">transportConnectors</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="AMQP协议"><a href="#AMQP协议" class="headerlink" title="AMQP协议"></a>AMQP协议</h3><p>即<code>Advanced Message Queuing Protocol</code>，一个提供统一消息服务的应用层标准高级消息队列协议，是应用层协议的一个开放标准，为面向消息的中间件设计。基于此协议的客户端与消息中间件可传递消息，并不受客户端/中间件不同产品，不同开发语言等条件的限制。</p>
+<h3 id="STOMP协议"><a href="#STOMP协议" class="headerlink" title="STOMP协议"></a>STOMP协议</h3><p>即<code>Streaming Text Orientated Message Protocol</code>，是流文本定向消息协议，是一种为<code>MOM</code>（<code>Message Oriented Middleware</code>，面向消息的中间件）</p>
+<p>设计的简单文本协议。</p>
+<h3 id="SSL协议"><a href="#SSL协议" class="headerlink" title="SSL协议"></a>SSL协议</h3><p><code>Secure Sockets Layer Protocol</code>（<code>SSL</code>）安全加固协议</p>
+<h3 id="MQTT协议"><a href="#MQTT协议" class="headerlink" title="MQTT协议"></a>MQTT协议</h3><p><code>MQTT</code>（<code>Message Queuing Telemetry Transport</code>，消息队列遥测传输）是<code>IBM</code>开发的一个即时通讯协议，有可能成为物联网的重要组成部分，该协议支持所有平台，几乎可以把所有联网物品和外部连接起来，被用来当做传感器和制动器（比如通过<code>Twitter</code>让房屋联网）的通信协议。</p>
+<h3 id="WS协议"><a href="#WS协议" class="headerlink" title="WS协议"></a>WS协议</h3><p><code>Web Socket</code>协议</p>
+<h3 id="ActiveMQ支持的网络协议"><a href="#ActiveMQ支持的网络协议" class="headerlink" title="ActiveMQ支持的网络协议"></a>ActiveMQ支持的网络协议</h3><table>
+<thead>
+<tr>
+<th>协议</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TCP</td>
+<td>默认的协议，性能相对可以</td>
+</tr>
+<tr>
+<td>NIO</td>
+<td>基于TCP协议智商的，进行了扩展和优化，具有更好的扩展性</td>
+</tr>
+<tr>
+<td>UDP</td>
+<td>性能比TCP更好，但是不具备可靠性</td>
+</tr>
+<tr>
+<td>SSL</td>
+<td>安全链接</td>
+</tr>
+<tr>
+<td>HTTP(S)</td>
+<td>基于HTTP或者HTTPS</td>
+</tr>
+<tr>
+<td>VM</td>
+<td>VM本身不是协议，当客户端和代理在同一个Java虚拟机(VM)中运行时，他们之间需要通信，但不想占用网络通道，而是直接通信，可以使用该方式</td>
+</tr>
+</tbody></table>
+<h3 id="NIO增强"><a href="#NIO增强" class="headerlink" title="NIO增强"></a>NIO增强</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">transportConnectors</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">transportConnector</span> <span class="attr">name</span>=<span class="string">"nio"</span> <span class="attr">uri</span>=<span class="string">"nio://0.0.0.0:61618?trace=true"</span>/&gt;</span>  </span><br><span class="line"><span class="tag">&lt;/<span class="name">transportConnectors</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>当配置了<code>activemq.xml</code>配置了<code>NIO</code>协议之后，项目中的配置<code>broker-url= nio://192.168.1.132:61618</code>后，表示<strong>61618端口</strong>使用以<code>TCP</code>协议为基础的<code>NIO</code>网络<code>IO</code>模型。</p>
+<p>但是这样的设置智能使这个端口支持<code>Openwire</code>协议，那么我们怎么既让这个端口支持<code>NIO</code>网络<code>IO</code>模型，又让它支持多个协议呢？</p>
+<p><img src="/images/mq-activemq/activemq-15.png" alt="activemq-15"></p>
+<p>可以通过使用<code>auto</code>关键字，组合<strong><code>+</code></strong>符号来为端口设置多种特性，达到基于<code>NIO</code>网络<code>IO</code>模型支持多种协议。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">transportConnector</span> <span class="attr">name</span>=<span class="string">"auto+nio"</span> <span class="attr">uri</span>=<span class="string">"auto+://0.0.0.0:61608?maximumConnections=1000<span class="symbol">&amp;amp;</span>wireFormat.maxFrameSize=104857600<span class="symbol">&amp;amp;</span>org.apache.activemq.transport.nio.SelectorManager.corePoolSize=20<span class="symbol">&amp;amp;</span>org.apache.activemq.transport.nio.SelectorManager.maxmumPoolSize=50"</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月26日 13:36</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/23/activemq-protocol/" title="&#39;ActiveMQ（三） 传输协议&#39;">https://midkuro.github.io/2020/05/23/activemq-protocol/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/23/activemq-protocol/&title=《'ActiveMQ（三） 传输协议'》 — Kuro's Blog&pic=images/activemq.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/23/activemq-protocol/&title=《'ActiveMQ（三） 传输协议'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/23/activemq-protocol/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'ActiveMQ（三） 传输协议'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/23/activemq-protocol/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/23/activemq-protocol/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/23/activemq-protocol/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/MQ/" class="color3">MQ</a>
+      
+    <a href="/tags/ActiveMQ/" class="color4">ActiveMQ</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#ActiveMQ"><span class="post-toc-text">ActiveMQ</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#传输协议"><span class="post-toc-text">传输协议</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#TCP协议"><span class="post-toc-text">TCP协议</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#NIO协议"><span class="post-toc-text">NIO协议</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#AMQP协议"><span class="post-toc-text">AMQP协议</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#STOMP协议"><span class="post-toc-text">STOMP协议</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#SSL协议"><span class="post-toc-text">SSL协议</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#MQTT协议"><span class="post-toc-text">MQTT协议</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#WS协议"><span class="post-toc-text">WS协议</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#ActiveMQ支持的网络协议"><span class="post-toc-text">ActiveMQ支持的网络协议</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#NIO增强"><span class="post-toc-text">NIO增强</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/05/23/activemq-spring/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;ActiveMQ（四） Spring整合ActiveMQ&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/05/23/activemq-jms/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;ActiveMQ（二） Java消息服务&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="activemq-protocol" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 11.67px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 13.33px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 11.67px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 13.33px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

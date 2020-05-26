@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;ActiveMQ（六） 消息持久化&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="ActiveMQ消息持久化消息持久化是一种MQ服务器宕机了，消息不会丢失的机制。为避免意外宕机以后丢失信息，需要做到重启后可以恢复消息队列，消息系统一般都会采用持久化机制。 ActiveMQ消息持久化机制有JDBC,AMQ，KahaDB和LevelDB，无论使用哪种持久化方式，消息的存储逻辑都是一致的。 就是在发送者将消息发送出去后，消息中心首先将消息存储到本地数据文件、内存数据库或者远程数据库等">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;ActiveMQ（六） 消息持久化&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/23/activemq-persistent/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="ActiveMQ消息持久化消息持久化是一种MQ服务器宕机了，消息不会丢失的机制。为避免意外宕机以后丢失信息，需要做到重启后可以恢复消息队列，消息系统一般都会采用持久化机制。 ActiveMQ消息持久化机制有JDBC,AMQ，KahaDB和LevelDB，无论使用哪种持久化方式，消息的存储逻辑都是一致的。 就是在发送者将消息发送出去后，消息中心首先将消息存储到本地数据文件、内存数据库或者远程数据库等">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-16.png">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-17.png">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-18.png">
+<meta property="article:published_time" content="2020-05-22T17:00:06.000Z">
+<meta property="article:modified_time" content="2020-05-26T05:37:58.281Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="MQ">
+<meta property="article:tag" content="ActiveMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/mq-activemq/activemq-16.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-activemq-persistent" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;ActiveMQ（六） 消息持久化&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/ActiveMQ/">ActiveMQ</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-23
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="ActiveMQ"><a href="#ActiveMQ" class="headerlink" title="ActiveMQ"></a>ActiveMQ</h1><h2 id="消息持久化"><a href="#消息持久化" class="headerlink" title="消息持久化"></a>消息持久化</h2><p>消息持久化是一种<code>MQ</code>服务器宕机了，消息不会丢失的机制。为避免意外宕机以后丢失信息，需要做到重启后可以恢复消息队列，消息系统一般都会<strong>采用持久化机制</strong>。</p>
+<p><code>ActiveMQ</code>消息持久化机制有<code>JDBC</code>,<code>AMQ</code>，<code>KahaDB</code>和<code>LevelDB</code>，无论使用哪种持久化方式，消息的存储逻辑都是一致的。</p>
+<p>就是在发送者将消息发送出去后，消息中心首先将消息存储到本地数据文件、内存数据库或者远程数据库等再试图将消息发送给接收者，成功则将消息<strong>从存储中删除</strong>，失败则继续尝试发送。</p>
+<p>消息中心启动以后首先要检查指定的<strong>存储位置</strong>，如果有未发送成功的消息，则需要把消息发送出去。</p>
+<h3 id="AMQ-Message-Store"><a href="#AMQ-Message-Store" class="headerlink" title="AMQ Message Store"></a>AMQ Message Store</h3><p><code>AMQ</code>是一种文件存储形式，它具有写入速度快和容易恢复的特点。消息存储在一个个文件中，文件的默认大小为32M，当一个存储文件中的消息已经全部被消费，那么这个文件将被标识为可删除，在下一个清除阶段，这个文件被删除。<strong>AMQ适用于<code>ActiveMQ5.3</code>之前的版本</strong>，现在已经不使用了。</p>
+<h3 id="KahaDB消息存储"><a href="#KahaDB消息存储" class="headerlink" title="KahaDB消息存储"></a>KahaDB消息存储</h3><p><code>KahaDB</code>是<strong>从<code>ActiveMQ5.4</code>开始到至今的默认持久化插件</strong>，可用于任何场景，提高性能和恢复能力。</p>
+<p><strong>消息存储使用一个<em>事务日志</em>和仅仅用一个<em>索引文件</em>来存储它所有的地址</strong>。</p>
+<p><code>KahaDB</code>是一个专门针对消息持久化的解决方案，它对典型的消息使用模型进行了优化。</p>
+<p>数据被追加到<code>data logs</code>中，当不在需要<code>log</code>文件中的数据的时候，<code>log</code>会被丢弃。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--activemq.xml的配置--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">persistenceAdapter</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">kahaDB</span> <span class="attr">directory</span>=<span class="string">"$&#123;activemq.data&#125;/kahadb"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">persistenceAdapter</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在<code>ActiveMQ</code>安装目录下的<code>data/kahadb</code>文件夹中，只有<strong>四类文件和一个<code>lock</code></strong>，跟<code>ActiveMQ</code>的其他几种文件存储引擎相比十分简洁。</p>
+<p><img src="/images/mq-activemq/activemq-16.png" alt="activemq-16"></p>
+<ol>
+<li><p><code>db-&lt;Number&gt;.log</code>：</p>
+<p><code>KahaDB</code>存储消息到预定义大小的数据记录文件中，文件命名为<code>db-&lt;Number&gt;.log</code>。当数据文件已满时，一个新的文件会随之创建，<code>Number</code>数值也会随之递增，它随着消息数量的增加，如每32M一个文件，文件名按照数字进行编号，如<code>db-1.log</code>、<code>db-2.log</code>、<code>db-3.log</code>……当不再有引用到数据文件中的任何消息时，文件会被删除或者归档。</p>
+</li>
+<li><p><code>db.data</code>：</p>
+<p>该文件包含了持久化的<code>BTree</code>索引，索引了消息数据记录中的消息，他是消息的索引文件，本质上是<code>B-Tree</code>（B树），使用<code>B-Tree</code>作为索引指向<code>db-&lt;Number&gt;.log</code>里面存储的消息。</p>
+</li>
+<li><p><code>db.free</code>：</p>
+<p>当<code>db.data</code>文件里哪些页面是空闲的，文件具体内容是所有的空闲页的ID，方便后续<code>db.data</code>建立索引时使用，保证索引的连续性，没有碎片。</p>
+</li>
+<li><p><code>db.redo</code>：</p>
+<p>用来进行消息恢复，如果<code>KahaDB</code>消息存储在强制退出后启动，用于恢复<code>Btree</code>索引。</p>
+</li>
+<li><p><code>Lock</code>：</p>
+<p>文件锁，标识当前获得<code>KahaDB</code>读取权限的<code>Broker</code>。</p>
+</li>
+</ol>
+<h3 id="LevelDB消息存储"><a href="#LevelDB消息存储" class="headerlink" title="LevelDB消息存储"></a>LevelDB消息存储</h3><p>这种文件系统时从<code>ActiveMQ5.8</code>之后引进的，它和<code>KahaDB</code>非常相似，也是<strong>基于文件的本地数据库储存形式</strong>，但是它提供比<code>KahaDB</code>更快的持久性。</p>
+<p>但它不能使用自定义<code>B-Tree</code>实现来索引与写日志，而是使用基于<code>LevelDB</code>的索引。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--默认的配置如下:--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">persistenceAdapter</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">levelDB</span> <span class="attr">directory</span>=<span class="string">"activemq-data"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">persistenceAdapter</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="JDBC消息存储"><a href="#JDBC消息存储" class="headerlink" title="JDBC消息存储"></a>JDBC消息存储</h3><p>以<code>Mysql</code>数据库为例，需要将<code>Mysql</code>数据库的驱动包<code>mysql-connector-java-5.1.38.jar</code>添加到<code>ActiveMQ</code>目录下的<code>lib</code>文件夹中。</p>
+<p>然后修改<code>activemq.xml</code>配置文件，按照如下修改：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--原KahaDB的配置--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">persistenceAdapter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">kahaDB</span> <span class="attr">directory</span>=<span class="string">"$&#123;activemq.data&#125;/kahadb"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">persistenceAdapter</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!--修改成JDBC配置--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">persistenceAdapter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">jdbcPersistenceAdapter</span> <span class="attr">dataSource</span>=<span class="string">"#mysql-ds"</span> <span class="attr">createTablesOnStartup</span>=<span class="string">"true"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">persistenceAdapter</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>dataSource</code>指定将要<strong>引用的</strong>持久化数据库的<code>bean</code>名称，<code>createTablesOnStartup</code>参数表示是否在启动的时候创建数据库表，默认值是<code>true</code>，这样每次启动都会去创建数据库表了，<strong>一般是第一次启动的时候设置为<code>true</code>，之后改成<code>false</code></strong>。</p>
+<p>上文指定了一个数据库实例<code>mysql-ds</code>，所以需要创建一个<code>mysql-ds</code>的实例，通过<code>activemq.xml</code>中的<code>&lt;broker&gt;</code>标签外设置<code>bean</code></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"mysql-ds"</span> <span class="attr">class</span>=<span class="string">"org.apache.commons.dbcp2.BasicDataSource"</span> <span class="attr">destroy-method</span>=<span class="string">"close"</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"driverClassName"</span> <span class="attr">value</span>=<span class="string">"com.mysql.jdbc.Driver"</span>/&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"url"</span> <span class="attr">value</span>=<span class="string">"jdbc:mysql://localhost/activemq?relaxAutoCommit=true"</span>/&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"username"</span> <span class="attr">value</span>=<span class="string">"root"</span>/&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"password"</span> <span class="attr">value</span>=<span class="string">"123456"</span>/&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"poolPreparedStatements"</span> <span class="attr">value</span>=<span class="string">"true"</span>/&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>其中的<code>org.apache.commons.dbcp2.BasicDataSource</code>是<code>JDBC</code>驱动包自带的，当然也可以替换成<code>C3P0</code>或者<code>Druid</code>，但是<code>lib</code>文件夹就需要再添加<code>C3p0</code>或者<code>Druid</code>相关的依赖包。</p>
+<p>然后创建一个与上方配置相同的数据库（<code>activemq</code>），执行语句<code>CREATE DATABASE activemq</code> 。</p>
+<p>如果配置正常且启动成功，将会在数据库创建三张表<code>ACTIVEMQ_MSGS</code>、<code>ACTIVEMQ_ACKS</code>、<code>ACTIVEMQ_LOCK</code>。</p>
+<h4 id="ACTIVE-MSGS"><a href="#ACTIVE-MSGS" class="headerlink" title="ACTIVE_MSGS"></a>ACTIVE_MSGS</h4><table>
+<thead>
+<tr>
+<th>列名</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ID</td>
+<td>自增的数据库主键</td>
+</tr>
+<tr>
+<td>CONTAINER</td>
+<td>消息的Destination</td>
+</tr>
+<tr>
+<td>MSGID_PROD</td>
+<td>消息发送者的主键</td>
+</tr>
+<tr>
+<td>MSG_SEQ</td>
+<td>消息发送的顺序，MSGID_PROD+MSG_SEQ可以组成JMS的MessageID</td>
+</tr>
+<tr>
+<td>EXPIRATION</td>
+<td>消息过期时间，存储的是从1970-01-01到现在的毫秒数</td>
+</tr>
+<tr>
+<td>MSG</td>
+<td>消息本体的Java序列化对象的<strong>二进制数据</strong></td>
+</tr>
+<tr>
+<td>PRIORITY</td>
+<td>优先级，0-9，数值越大优先级越高</td>
+</tr>
+</tbody></table>
+<h4 id="ACTIVEMQ-ACKS"><a href="#ACTIVEMQ-ACKS" class="headerlink" title="ACTIVEMQ_ACKS"></a>ACTIVEMQ_ACKS</h4><p><code>activemq_acks</code>用于存储订阅关系。如果是持久化<code>Topic</code>，订阅者和服务器的订阅关系在这个表保存。</p>
+<table>
+<thead>
+<tr>
+<th>列名</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CONTAINER</td>
+<td>消息的Destination</td>
+</tr>
+<tr>
+<td>SUB_DEST</td>
+<td>如果是使用Static集群，这个字段会有集群其他系统的信息</td>
+</tr>
+<tr>
+<td>CLIENT_ID</td>
+<td>每个订阅者都必须有一个唯一的客户端ID用以区分</td>
+</tr>
+<tr>
+<td>SUB_NAME</td>
+<td>订阅者名称</td>
+</tr>
+<tr>
+<td>SELECTOR</td>
+<td>选择器，可以只消费满足条件的消息。条件可以用自定义属性实现，可支持多属性AND和OR操作</td>
+</tr>
+<tr>
+<td>LAST_ACKED_ID</td>
+<td>记录消费过的消息的ID</td>
+</tr>
+</tbody></table>
+<h4 id="ACTIVEMQ-LOCK"><a href="#ACTIVEMQ-LOCK" class="headerlink" title="ACTIVEMQ_LOCK"></a>ACTIVEMQ_LOCK</h4><p>表<code>activemq_lock</code>在集群环境中才有用，只有一个<code>Broker</code>可以获得消息，称为<code>Master Broker</code>，其他的只能作为备份等待<code>Master Broker</code>不可用，才可能称为下一个<code>Master Broker</code>。这个表用于记录哪个<code>Broker</code>是当前的<code>Master Broker</code>。</p>
+<h4 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h4><p>在点对点类型中：</p>
+<ul>
+<li>当<code>DeliveryMode</code>设置为<code>NON_PERSISTENCE</code>时，消息被保存在内存中；</li>
+<li>当<code>DeliveryMode</code>设置为<code>PERSISTENCE</code>时，消息保存在<code>broker</code>的相应的文件或者数据库中。</li>
+<li>而且点对点类型中消息一旦被<code>Consumer</code>消费就从<code>broker</code>中删除。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//开启消息持久化</span></span><br><span class="line">producer.setDeliveryMode(DeliveryMode.PERSISTENT);</span><br></pre></td></tr></table></figure>
+
+<p>能够看到开启消息持久化后，生产者发送消息到队列中，通过查询<code>activemq_msgs</code>表能够看到数据变化情况。</p>
+<p><img src="/images/mq-activemq/activemq-17.png" alt="activemq-17"></p>
+<h4 id="主题"><a href="#主题" class="headerlink" title="主题"></a>主题</h4><p>开启消息持久化，先启动消费者订阅再运行生产者，可以看到<code>activemq_acks</code>的变化情况。</p>
+<p><img src="/images/mq-activemq/activemq-18.png" alt="activemq-18"></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p><strong>一定要开启消息持久化</strong>：</p>
+<ul>
+<li><p>如果是队列：</p>
+<p>在没有消费者消费的情况下会将消息保存到<code>activemq_msgs</code>表中，<strong>只要有任意一个消费者已经消费国了，消费之后这些消息将会被立刻删除</strong>。</p>
+</li>
+<li><p>如果是主题：</p>
+<p>一般是先启动消费者订阅然后再生产的情况下会将消息保存到<code>activemq_acks</code>。</p>
+</li>
+<li><p>数据库<code>Jar</code>包：</p>
+<p>记得需要使用到的相关<code>Jar</code>文件放置到<code>ActiveMQ</code>安装路径下的<code>lib</code>目录。<code>mysql-jdbc</code>驱动包和对应的数据库连接池Jar包</p>
+</li>
+<li><p><code>createTablesOnStartup</code>属性：</p>
+<p>在<code>jdbcPersistenceAdapter</code>标签中设置了这个属性为<code>true</code>时，在第一次启动<code>ActiveMQ</code>时，<code>ActiveMQ</code>服务节点会自动创建所需要的数据表，启动完成后可以更改为<code>false</code>。</p>
+</li>
+<li><p>下划线：</p>
+<p><code>java.lang.illeglStateException:BeanFactory not initalized or already closed</code>，这是因为操作系统机器名中有<strong>“_”</strong>符号，请更改机器名并重启后即可解决问题。</p>
+</li>
+</ul>
+<h3 id="JDBC增强版"><a href="#JDBC增强版" class="headerlink" title="JDBC增强版"></a>JDBC增强版</h3><p> <code>JDBC Message store With ActiveMQ Journal</code>，简称JDBC增强版，这种方式客服了<code>JDBC Store</code>的不足，<code>JDBC</code>每次消息过来，都需要去写库和读库。</p>
+<p><code>ActiveMQ Journal</code>，使用高速缓存写入技术，大大提高了性能。</p>
+<p>当消费者的消费速度能够及时跟上生产者消息的生产速度时，<code>Journal</code>文件能够大大减少需要写入到DB中的消息。</p>
+<p>举个例子：</p>
+<p>​        生产者生产了1000条消息，这1000条消息会保存到<code>journal</code>文件，如果消费者的消费速度很快的情况下，在<code>journal</code>文件还没有同步到DB之前，消费者已经消费了90%以上的消息，那么这个时候<strong>只需要同步剩余的</strong>10%的<strong>消息到DB</strong>。</p>
+<p>如果消费者消费的速度很慢，这时候<code>journal</code>文件可以使消息以批量方式写到DB。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--原JDBC的配置--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">persistenceAdapter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">jdbcPersistenceAdapter</span> <span class="attr">dataSource</span>=<span class="string">"#mysql-ds"</span> <span class="attr">createTablesOnStartup</span>=<span class="string">"true"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">persistenceAdapter</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!--修改成JDBC Journal配置--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">persistenceAdapter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">journalPersistenceAdapterFactory</span> </span></span><br><span class="line"><span class="tag">        <span class="attr">journalLogFiles</span>=<span class="string">"4"</span> </span></span><br><span class="line"><span class="tag">        <span class="attr">journalLogFilSize</span>=<span class="string">"32768"</span> </span></span><br><span class="line"><span class="tag">        <span class="attr">useJournal</span>=<span class="string">"true"</span> </span></span><br><span class="line"><span class="tag">        <span class="attr">useQuickJournal</span>=<span class="string">"true"</span> </span></span><br><span class="line"><span class="tag">        <span class="attr">dataSource</span>=<span class="string">"#mysql-ds"</span> </span></span><br><span class="line"><span class="tag">        <span class="attr">dataDirectory</span>=<span class="string">"activemq-data"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">persistenceAdapter</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>持久化消息主要是指MQ所在的服务器宕机后消息不会丢失的机制。</p>
+<p>持久化机制演化过程：</p>
+<p>从最初的<code>AMQ Message Store</code>方案到<code>ActiveMQ V4</code>版本中推出的<code>High performance journal</code>（高性能事务支持）附件，并且同步推出了关于关系型数据库的存储方案。</p>
+<p><code>ActiveMQ V5.3</code>版本中又推出了对<code>KahaBD</code>的支持（<code>V5.4</code>版本后成为<code>ActiveMQ</code>默认的持久化方案），后来<code>AciveMQ V5.8</code>版本开始支持<code>LevelDB</code>，到现在，<code>v5.9+</code>版本提供了标准的<code>Zookeeper</code>+<code>LevelDB</code>集群化方案。</p>
+<p><code>ActiveMQ</code>的消息持久化机制：</p>
+<ul>
+<li><code>AMQ</code>： 基于日志文件</li>
+<li><code>KahaDB</code>：基于日志文件，从<code>ActiveMQ 5.4</code>开始默认的持久化插件</li>
+<li><code>JDBC</code>：基于第三方数据库</li>
+<li>LevelDB：基于文件的本地数据库储存，从<code>ActiveMQ 5.8</code>版本之后又推出了<code>LevelDB</code>的持久化引擎性能高于<code>KahaDB</code></li>
+<li><code>Replicated LevelDB Store</code>：从<code>ActiveMQ 5.9</code>提供了基于<code>LevelDB</code>和<code>Zookeeper</code>的数据复制方式，用于<code>Master-slave</code>方式的首选数据复制方案。</li>
+</ul>
+<p>无论使用哪种持久化方式，消息的存储逻辑都是一致的：</p>
+<p>就是在发送者将消息发送出去后，消息中心首先将消息存储到本地数据文件、内存数据库或者远程数据库等，然后试图将消息发送给接收者，发送成功则将消息从存储中删除，失败则继续尝试。消息中心启动以后首先要检查指定的存储位置，如果有未发送的消息，则需要把消息发送出去。</p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月26日 13:37</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/23/activemq-persistent/" title="&#39;ActiveMQ（六） 消息持久化&#39;">https://midkuro.github.io/2020/05/23/activemq-persistent/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/23/activemq-persistent/&title=《'ActiveMQ（六） 消息持久化'》 — Kuro's Blog&pic=images/activemq.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/23/activemq-persistent/&title=《'ActiveMQ（六） 消息持久化'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/23/activemq-persistent/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'ActiveMQ（六） 消息持久化'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/23/activemq-persistent/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/23/activemq-persistent/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/23/activemq-persistent/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/MQ/" class="color3">MQ</a>
+      
+    <a href="/tags/ActiveMQ/" class="color4">ActiveMQ</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#ActiveMQ"><span class="post-toc-text">ActiveMQ</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#消息持久化"><span class="post-toc-text">消息持久化</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#AMQ-Message-Store"><span class="post-toc-text">AMQ Message Store</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#KahaDB消息存储"><span class="post-toc-text">KahaDB消息存储</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#LevelDB消息存储"><span class="post-toc-text">LevelDB消息存储</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#JDBC消息存储"><span class="post-toc-text">JDBC消息存储</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#ACTIVE-MSGS"><span class="post-toc-text">ACTIVE_MSGS</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#ACTIVEMQ-ACKS"><span class="post-toc-text">ACTIVEMQ_ACKS</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#ACTIVEMQ-LOCK"><span class="post-toc-text">ACTIVEMQ_LOCK</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#队列"><span class="post-toc-text">队列</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#主题"><span class="post-toc-text">主题</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#总结"><span class="post-toc-text">总结</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#JDBC增强版"><span class="post-toc-text">JDBC增强版</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#总结-1"><span class="post-toc-text">总结</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/05/23/activemq-cluster/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;ActiveMQ（七） 多节点集群&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/05/23/activemq-springboot/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;ActiveMQ（五） SpringBoot整合ActiveMQ&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="activemq-persistent" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 11.67px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 13.33px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 11.67px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 13.33px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

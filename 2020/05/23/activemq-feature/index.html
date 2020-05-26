@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;ActiveMQ（八） 高级特性&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="ActiveMQ高级特性异步投递ActiveMQ支持同步、异步两种发送的模式将消息发送到Broker，模式的选择对发送延时有巨大的影响。producer能够达到怎样的产出率（产出率&#x3D;发送数据总量&#x2F;时间）主要受发送延时的影响，使用异步发送可以显著的提高发送的性能。 ActiveMQ默认使用异步发送的模式，除非明确指定使用同步发送的方式或者在未使用事务的前提下发送持久化的消息，这两种情况都是同步发送的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;ActiveMQ（八） 高级特性&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/23/activemq-feature/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="ActiveMQ高级特性异步投递ActiveMQ支持同步、异步两种发送的模式将消息发送到Broker，模式的选择对发送延时有巨大的影响。producer能够达到怎样的产出率（产出率&#x3D;发送数据总量&#x2F;时间）主要受发送延时的影响，使用异步发送可以显著的提高发送的性能。 ActiveMQ默认使用异步发送的模式，除非明确指定使用同步发送的方式或者在未使用事务的前提下发送持久化的消息，这两种情况都是同步发送的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-23.png">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-24.png">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-25.png">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-26.png">
+<meta property="article:published_time" content="2020-05-22T17:00:08.000Z">
+<meta property="article:modified_time" content="2020-05-26T05:38:49.275Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="MQ">
+<meta property="article:tag" content="ActiveMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/mq-activemq/activemq-23.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-activemq-feature" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;ActiveMQ（八） 高级特性&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/ActiveMQ/">ActiveMQ</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-23
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="ActiveMQ"><a href="#ActiveMQ" class="headerlink" title="ActiveMQ"></a>ActiveMQ</h1><h2 id="高级特性"><a href="#高级特性" class="headerlink" title="高级特性"></a>高级特性</h2><h3 id="异步投递"><a href="#异步投递" class="headerlink" title="异步投递"></a>异步投递</h3><p><code>ActiveMQ</code>支持同步、异步两种发送的模式将消息发送到<code>Broker</code>，模式的选择对发送延时有巨大的影响。<code>producer</code>能够达到怎样的产出率（产出率=发送数据总量/时间）主要受发送延时的影响，使用异步发送可以显著的提高发送的性能。</p>
+<p><strong><code>ActiveMQ</code>默认使用异步发送的模式，除非明确指定使用同步发送的方式或者在未使用事务的前提下发送持久化的消息，这两种情况都是同步发送的。</strong></p>
+<p>如果<strong>没有使用事务且发送的是持久化消息</strong>，每一次发送都是同步发送的且会阻塞<code>producer</code>直到<code>broker</code>返回一个确认，表示消息已经被安全的持久化到磁盘。确认机制提供了消息安全的保障，但同时会阻塞客户端，带来了很大的延时。</p>
+<p>很多高性能的应用，<strong>允许在失败的情况下有少量的数据丢失</strong>，如果你的应用满足这个这点，你可以使用异步发送来提高生产率，即使发送的是持久化的消息。</p>
+<p>异步发送可以最大化<code>producer</code>端的发送效率。<strong>我们通常在发送消息量比较密集的情况下使用异步发送</strong>，它可以很大的提升<code>producer</code>性能。</p>
+<p>不过这也带来了额外的问题，就是需要消耗较多的<code>Client</code>端内存，同时也会导致<code>broker</code>端的性能增加。</p>
+<p>此外它不能有效的确保消息的发送成功，在<code>useAsyncSend=true</code>的情况下客户端需要容忍消息丢失的可能。</p>
+<p>可以参考<a href="http://activemq.apache.org/async-sends" target="_blank" rel="noopener">官网</a>的三种异步投递配置方式：</p>
+<p><img src="/images/mq-activemq/activemq-23.png" alt="activemq-23"></p>
+<h5 id="异步发送确认机制"><a href="#异步发送确认机制" class="headerlink" title="异步发送确认机制"></a>异步发送确认机制</h5><p>异步发送丢失消息的场景是：生产者设置了<code>UseAsyncSend=true</code>，使用<code>producer.send(msg)</code>持久发送消息。由于消息不阻塞，生产者会认为所有<code>send</code>的消息均被成功发送至MQ。</p>
+<p>如果MQ突然宕机，此时生产者端内存中尚未被发送至MQ的消息<strong>都会丢失</strong>。<strong>所以正确的异步发送方式是需要接收回调的</strong>。</p>
+<p>同步发送和异步发送的区别：</p>
+<ul>
+<li>同步发送等<code>send</code>不阻塞了就表示一定发送成功了。</li>
+<li>异步发送需要接收回执并由客户端再判断一次是否发送成功。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JmsProducer</span> </span>&#123;</span><br><span class="line">    <span class="comment">//ActiveMQ服务器的链接地址</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String ACTIVE_URL = <span class="string">"tcp://192.168.1.132:61616"</span>;</span><br><span class="line">  <span class="comment">//队列名称</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String QUEUE_NAME = <span class="string">"queue01"</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> JMSException </span>&#123;</span><br><span class="line">        ActiveMQConnectionFactory factory = <span class="keyword">new</span> ActiveMQConnectionFactory(ACTIVE_URL);</span><br><span class="line">        <span class="comment">//设置异步投递</span></span><br><span class="line">        factory.setUseAsyncSend(<span class="keyword">true</span>);</span><br><span class="line">        Connection connection = factory.createConnection();</span><br><span class="line">        connection.start();</span><br><span class="line">        Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">        Queue queue = session.createQueue(QUEUE_NAME);</span><br><span class="line">        <span class="comment">//注意：强转成ActiveMQMessageProducer类</span></span><br><span class="line">        ActiveMQMessageProducer producer = (ActiveMQMessageProducer)session.createProducer(queue);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= <span class="number">3</span>; i++) &#123;</span><br><span class="line">            TextMessage message = session.createTextMessage(<span class="string">"message---"</span> + i);</span><br><span class="line">            message.setJMSMessageID(UUID.randomUUID.toString());</span><br><span class="line">            String messageID = message.getJMSMessageID();</span><br><span class="line">            <span class="comment">//使用具备回调函数的API发送消息</span></span><br><span class="line">            producer.send(message, <span class="keyword">new</span> AsyncCallback() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSuccess</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    System.out.println(messageID + <span class="string">"has been send"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onException</span><span class="params">(JMSException exception)</span> </span>&#123;</span><br><span class="line">                    System.out.println(messageID + <span class="string">"fail to send"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">        producer.close();</span><br><span class="line">        session.close();</span><br><span class="line">        connection.close();</span><br><span class="line">        System.out.println(<span class="string">"生产者发送消息队列queue01完毕"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="延迟投递和定时投递"><a href="#延迟投递和定时投递" class="headerlink" title="延迟投递和定时投递"></a>延迟投递和定时投递</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--activemq.xml在boker属性上配置schedulerSupport="true"--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">broker</span> <span class="attr">xmlns</span>=<span class="string">"http://activemq.apache.org/schema/core"</span> <span class="attr">brokerName</span>=<span class="string">"localhost"</span> <span class="attr">dataDirectory</span>=<span class="string">"$&#123;activemq.data&#125;"</span> <span class="attr">schedulerSupport</span>=<span class="string">"true"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Property name</th>
+<th>type</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AMQ_SCHEDULED_DELAY</td>
+<td>long</td>
+<td>延迟投递的时间</td>
+</tr>
+<tr>
+<td>AMQ_SCHEDULED_PERIOD</td>
+<td>long</td>
+<td>重复投递的时间间隔</td>
+</tr>
+<tr>
+<td>AMQ_SCHEDULED_REPEAT</td>
+<td>int</td>
+<td>重复投递次数</td>
+</tr>
+<tr>
+<td>AMQ_SCHEDULED_CRON</td>
+<td>String</td>
+<td>Cron表达式</td>
+</tr>
+</tbody></table>
+<p>  通过在<code>ActiveMQ</code>的配置文件中开启定时调度<code>SchedulerSupport=&quot;true&quot;</code>，默认为<code>false</code>。然后使用<code>ScheduleMessage</code>类进行消息属性配置。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//生产者</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JmsProducer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String ACTIVE_URL = <span class="string">"tcp://192.168.1.132:61616"</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String QUEUE_NAME = <span class="string">"queue-delay"</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> JMSException </span>&#123;</span><br><span class="line">        ActiveMQConnectionFactory factory = <span class="keyword">new</span> ActiveMQConnectionFactory(ACTIVE_URL);</span><br><span class="line">        Connection connection = factory.createConnection();</span><br><span class="line">        connection.start();</span><br><span class="line">        Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">        Queue queue = session.createQueue(QUEUE_NAME);</span><br><span class="line">        MessageProducer producer = session.createProducer(queue);</span><br><span class="line">        <span class="comment">//设置延迟投递时间</span></span><br><span class="line">        <span class="keyword">long</span> delay = <span class="number">3</span> * <span class="number">1000</span>;</span><br><span class="line">        <span class="comment">//设置重复投递的时间间隔</span></span><br><span class="line">        <span class="keyword">long</span> period = <span class="number">4</span> * <span class="number">1000</span>;</span><br><span class="line">        <span class="comment">//重复投递次数</span></span><br><span class="line">        <span class="keyword">int</span> repeat = <span class="number">5</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= <span class="number">3</span>; i++) &#123;</span><br><span class="line">            TextMessage message = session.createTextMessage(<span class="string">"delay-message---"</span> + i);</span><br><span class="line">            message.setLongProperty(ScheduleMessage.AMQ_SCHEDULED_DELAY, delay);</span><br><span class="line">            message.setLongProperty(ScheduleMessage.AMQ_SCHEDULED_PERIOD, period);</span><br><span class="line">            message.setIntProperty(ScheduleMessage.AMQ_SCHEDULED_REPEAT, repeat);</span><br><span class="line">            producer.send(message);</span><br><span class="line">        &#125;</span><br><span class="line">        producer.close();</span><br><span class="line">        session.close();</span><br><span class="line">        connection.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="重试机制"><a href="#重试机制" class="headerlink" title="重试机制"></a>重试机制</h3><p>那些情况会引发消息重发？</p>
+<ul>
+<li><code>Client</code>用了<code>transactions</code>且在<code>session</code>中调用了<code>rollback()</code></li>
+<li><code>Client</code>用了<code>transactions</code>且在调用<code>commit()</code>之前关闭或者没有<code>commit</code></li>
+<li><code>Client</code>在<code>CLINET_ACKNOWLEDGE</code>的传递模式下，在<code>session</code>中调用了<code>recover()</code></li>
+</ul>
+<p><strong>默认消息重发的时间间隔是每秒钟，重发次数是6次</strong>。</p>
+<p>有毒消息<code>Poison ACK</code>：</p>
+<p>一个消息被<code>redelivedred</code>超过默认的最大重发次数（默认6次）时。消费端会给MQ发送一个<code>Poison ack</code>表示这个消息有毒，告诉<code>broker</code>不要再发了。这个时候<code>broker</code>会把这个消息放到<code>DLQ</code>（死信队列），详情请参照<a href="http://activemq.apache.org/redelivery-policy" target="_blank" rel="noopener">官网</a>。</p>
+<p><img src="/images/mq-activemq/activemq-24.png" alt="activemq-24"></p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>默认值</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>collisionAvoidanceFactor</td>
+<td>0.15</td>
+<td>设置防止冲突范围的政府百分比，只有启动UseCollisionAvoidance参数时才生效，也就是在延迟时间再加一个</td>
+</tr>
+<tr>
+<td>maximumRedelivers</td>
+<td>6</td>
+<td>最大重传次数，达到最大重连次数后抛出异常。为-1时不限制次数，为0时表示不进行重传。</td>
+</tr>
+<tr>
+<td>maximumRedeliveryDelay</td>
+<td>-1</td>
+<td>最大传送延迟，只在UseExponentialBackOff为true时有效（V5.5），假设首次重连间隔为10ms，倍数为2，那么第二次重连时间间隔为20ms，第三次重连时间间隔为40ms，当重连时间间隔的大于最大重连时间间隔时，以后每次重连时间间隔都为最大重连时间间隔。</td>
+</tr>
+<tr>
+<td>initialRedeliveryDelay</td>
+<td>1000L</td>
+<td>初始重发延迟时间</td>
+</tr>
+<tr>
+<td>redeliveryDelay</td>
+<td>1000L</td>
+<td>重发延迟时间，当initialRedeliveryDelay=0时生效</td>
+</tr>
+<tr>
+<td>useCollisionAvoidance</td>
+<td>false</td>
+<td>启用防止冲装功能</td>
+</tr>
+<tr>
+<td>useExponentialBackOff</td>
+<td>false</td>
+<td>启用指数倍数递增的方式增加延迟时间</td>
+</tr>
+<tr>
+<td>backOffMultiplier</td>
+<td>5</td>
+<td>重连时间间隔递增倍数，只有值大于1和启动useExponentialBackOff参数时才生效</td>
+</tr>
+</tbody></table>
+<h4 id="配置重试次数"><a href="#配置重试次数" class="headerlink" title="配置重试次数"></a>配置重试次数</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//修改最大重试次数</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JmsConsumer_Redelivery</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String ACTIVE_URL = <span class="string">"tcp://192.168.1.132:61616"</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String QUEUE_NAME = <span class="string">"queue-redelivery"</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> JMSException </span>&#123;</span><br><span class="line">        ActiveMQConnectionFactory factory = <span class="keyword">new</span> ActiveMQConnectionFactory(ACTIVE_URL);</span><br><span class="line">        <span class="comment">//使用自身的配置类，设置重试次数3次</span></span><br><span class="line">        RedeliveryPolicy redeliveryPolicy = <span class="keyword">new</span> RedeliveryPolicy();</span><br><span class="line">        redeliveryPolicy.setMaximumRedeliveries(<span class="number">3</span>);</span><br><span class="line">        activeMQConnectionFactory.setRedeliveryPolicy(redeliveryPolicy);</span><br><span class="line">        <span class="comment">//省略后续代码...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="整合Spring"><a href="#整合Spring" class="headerlink" title="整合Spring"></a>整合Spring</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--定义reDelivery重发机制--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"activeMQRedeliveryPolicy"</span> <span class="attr">class</span>=<span class="string">"org.apache.activemq.RedeliveryPolicy"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"maximumRedeliveries"</span> <span class="attr">value</span>=<span class="string">"3"</span>&gt;</span><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!--创建连接工厂并指定配置--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"connectionFactory"</span> <span class="attr">class</span>=<span class="string">"org.apache.activemq.ActiveMQConnectionFactory"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"brokerURL"</span> <span class="attr">value</span>=<span class="string">"tcp://192.168.1.132:61616"</span>&gt;</span><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"redeliveryPolicy"</span> <span class="attr">ref</span>=<span class="string">"activeMQRedelivery"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="死信队列"><a href="#死信队列" class="headerlink" title="死信队列"></a>死信队列</h3><p><code>ActiveMQ</code>中引入了<strong>死信队列</strong>（<code>Dead Letter queue</code>）的概念，即一条消息再被重发了多次后（默认为重发6次<code>redeliveryConter==6</code>），将会被<code>ActiveMQ</code>移入私信队列，开发人员可以在这个<code>Queue</code>中查看处理出错的消息，<strong>进行人工干预，主要用来处理失败的消息</strong>，详情请查看<a href="http://activemq.apache.org/message-redelivery-and-dlq-handling.html" target="_blank" rel="noopener">官网</a>。</p>
+<p><img src="/images/mq-activemq/activemq-25.png" alt="activemq-25"></p>
+<p><img src="/images/mq-activemq/activemq-26.png" alt="activemq-26"></p>
+<ul>
+<li>一般生产环境中在使用MQ的时候设计两个队列：<strong>一个是核心业务队列，一个是死信队列</strong>。</li>
+<li>核心业务队列，就是比如上图专门用来让订单系统发送订单消息的，然后另外一个私信队列就是用来处理异常情况的。</li>
+</ul>
+<p>假设第三方物流系统故障了，此时无法请求，那么仓储系统每次消费到一条订单消息，尝试通知发货和配送都会遇到对方的接口报错。此时仓储系统就可以把这条消息拒绝访问或者标志位处理失败。一旦表这条消息处理失败后，MQ就会把这条消息转入提前设置好的一个死信队列中。</p>
+<p>然后看到的就是，在第三方物流系统故障期间，所有订单消息全部处理失败，全部都会转入私信队列，然后你的仓储系统得专门有一个后台线程，监控第三方系统是否正常。一旦发现对方回复正常，这个后台线程就从私信队列消费处理失败的订单，重新执行发货和配送的通知逻辑。</p>
+<h4 id="共享死信队列"><a href="#共享死信队列" class="headerlink" title="共享死信队列"></a>共享死信队列</h4><p><code>SharedDeadLetterStrategy</code>（共享死信队列），将所有的<code>DeadLetter</code>保存在一个共享的队列中，<strong>这是ActiveMQ broker</strong>端默认的策略。</p>
+<p><strong>共享队列默认为<code>ActiveMQ.DLQ</code></strong>，可以通过<code>deadLetterQueue</code>属性来设定。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">deadLetterStrategy</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">sharedDeadLetterStrategy</span> <span class="attr">deadLetterQueue</span>=<span class="string">"DLQ-QUEUE"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">deadLetterStrategy</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="个人死信队列"><a href="#个人死信队列" class="headerlink" title="个人死信队列"></a>个人死信队列</h4><p><code>IndividualDeadLetterStrategy</code>（个人死信队列），把<code>DeadLetter</code>放入<strong>各自的</strong>死信通道中。</p>
+<ul>
+<li>对于<code>Queue</code>而言，死信通道的前缀默认为<code>ActiveMQ.DLQ.Queue.</code></li>
+<li>对于<code>Topic</code>而言，死信通道的前缀默认为<code>ActiveMQ.DLQ.Topic.</code></li>
+</ul>
+<p>比如队列<code>Order</code>，那么它对应的死信队列通道为<code>ActiveMQ.DLQ.Queue.Order</code>，我们使用<code>queuePrefix</code>、<code>topicPrefix</code>来指定上述前缀。</p>
+<p>默认情况下，无论是<code>Topic</code>还是<code>Queue</code>，<code>Broker</code>将使用<code>Queue</code>来保存<code>DeadLetter</code>，即死信通道通常为<code>Queue</code>，不过开发也可以指定为<code>Topic</code>。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">policyEntry</span> <span class="attr">queue</span>=<span class="string">"order"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">deadLetterStrategy</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">individualDeadLetterStrategy</span> <span class="attr">queuePrefix</span>=<span class="string">"DLQ."</span> <span class="attr">useQueueForQueueMessages</span>=<span class="string">"false"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">deadLetterStrategy</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">policyEntry</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>将队列<code>Order</code>中出现的<code>DeadLetter</code>保存在<code>DLQ.Order</code>中，不过此时<code>DLQ.Order</code>为<code>Topic</code>。</p>
+<p>属性<code>useQueueForQueueMessages</code>设置使用队列保存死信队列，还可以设置<code>useQueueForTopicMessages</code>，使用Topic来保存死信队列，默认为<code>true</code>。</p>
+<h4 id="自动删除过期消息"><a href="#自动删除过期消息" class="headerlink" title="自动删除过期消息"></a>自动删除过期消息</h4><p>有时需要直接删除过期的消息而不需要发送到死信队列中，<code>processExpired</code>表示是否将过期消息放入私信队列，默认为<code>true</code>。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--"&gt; "类似SQL的 * --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">policyEntry</span> <span class="attr">queue</span>=<span class="string">"&gt; "</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">deadLetterStrategy</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">sharedDeadLetterStragegy</span> <span class="attr">processExpired</span>=<span class="string">"false"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">deadLetterStrategy</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">policyEntry</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="存放非持久消息"><a href="#存放非持久消息" class="headerlink" title="存放非持久消息"></a>存放非持久消息</h4><p>默认情况下，<code>ActiveMQ</code><strong>不会</strong>把非持久的死消息发送到死信队列中。<code>processNonPersistent</code>表示是否将<strong>非持久化消息</strong>放入死信队列，默认为<code>false</code>。</p>
+<p>如果想把非持久化的消息发送到死信队列中，需要设置属性<code>processNonPersistent=&quot;true&quot;</code></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">policyEntry</span> <span class="attr">queue</span>=<span class="string">"&gt; "</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">deadLetterStrategy</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">sharedDeadLetterStrategy</span> <span class="attr">processNonPersistent</span>=<span class="string">"true"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">deadLetterStrategy</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">policyEntry</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="重复消费"><a href="#重复消费" class="headerlink" title="重复消费"></a>重复消费</h3><p><strong>如何保证消息不被重复消费？幂等性问题？</strong></p>
+<p>​        网络延迟传输中，会造成进行MQ重试中，在重试过程中，可能会造成重复消费。</p>
+<p>如果消息是做数据库的插入操作，给这个消息做一个唯一主键，那么就算出现重复消息的情况，就会导致主键冲突，避免数据库出现脏数据。</p>
+<p>或者准备个第三方来做消息记录，以<code>redis</code>为例，给消息分配一个全局<code>id</code>，只要消费过该消息，将<code>&lt;id,message&gt;</code>以<code>K-V</code>形式写入<code>redis</code>，消费者开始消费前，先去<code>redis</code>中查询有没有消费记录即可。</p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月26日 13:38</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/23/activemq-feature/" title="&#39;ActiveMQ（八） 高级特性&#39;">https://midkuro.github.io/2020/05/23/activemq-feature/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/23/activemq-feature/&title=《'ActiveMQ（八） 高级特性'》 — Kuro's Blog&pic=images/activemq.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/23/activemq-feature/&title=《'ActiveMQ（八） 高级特性'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/23/activemq-feature/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'ActiveMQ（八） 高级特性'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/23/activemq-feature/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/23/activemq-feature/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/23/activemq-feature/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/MQ/" class="color3">MQ</a>
+      
+    <a href="/tags/ActiveMQ/" class="color4">ActiveMQ</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#ActiveMQ"><span class="post-toc-text">ActiveMQ</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#高级特性"><span class="post-toc-text">高级特性</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#异步投递"><span class="post-toc-text">异步投递</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#异步发送确认机制"><span class="post-toc-text">异步发送确认机制</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#延迟投递和定时投递"><span class="post-toc-text">延迟投递和定时投递</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#重试机制"><span class="post-toc-text">重试机制</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#配置重试次数"><span class="post-toc-text">配置重试次数</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#整合Spring"><span class="post-toc-text">整合Spring</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#死信队列"><span class="post-toc-text">死信队列</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#共享死信队列"><span class="post-toc-text">共享死信队列</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#个人死信队列"><span class="post-toc-text">个人死信队列</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#自动删除过期消息"><span class="post-toc-text">自动删除过期消息</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#存放非持久消息"><span class="post-toc-text">存放非持久消息</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#重复消费"><span class="post-toc-text">重复消费</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/05/23/nosql-redis/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Redis（一） NoSql 之 Redis&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/05/23/activemq-cluster/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;ActiveMQ（七） 多节点集群&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="activemq-feature" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 11.67px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 13.33px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 11.67px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 13.33px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

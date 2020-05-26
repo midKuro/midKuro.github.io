@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;ActiveMQ（七） 多节点集群&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="ActiveMQActiveMQ多节点集群引入消息队列之后该如何保证其高可用性？ 基于Zookeeper和LevelDB搭建ActiveMQ集群，提供主备方式的高可用集群功能，避免单点故障。 三种集群方式：官网介绍  在ActiveMQ V5.6版本之后推出LevelDB的持久化引擎，它使用了自定义的索引代替常用的BTree索引，其持久化性能高于KahaDB，虽然默认的持久化方式还是KahaDB，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;ActiveMQ（七） 多节点集群&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/23/activemq-cluster/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="ActiveMQActiveMQ多节点集群引入消息队列之后该如何保证其高可用性？ 基于Zookeeper和LevelDB搭建ActiveMQ集群，提供主备方式的高可用集群功能，避免单点故障。 三种集群方式：官网介绍  在ActiveMQ V5.6版本之后推出LevelDB的持久化引擎，它使用了自定义的索引代替常用的BTree索引，其持久化性能高于KahaDB，虽然默认的持久化方式还是KahaDB，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-19.png">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-20.png">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-21.png">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-22.png">
+<meta property="article:published_time" content="2020-05-22T17:00:07.000Z">
+<meta property="article:modified_time" content="2020-05-26T05:38:30.662Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="MQ">
+<meta property="article:tag" content="ActiveMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/mq-activemq/activemq-19.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-activemq-cluster" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;ActiveMQ（七） 多节点集群&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/ActiveMQ/">ActiveMQ</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-23
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="ActiveMQ"><a href="#ActiveMQ" class="headerlink" title="ActiveMQ"></a>ActiveMQ</h1><h2 id="ActiveMQ多节点集群"><a href="#ActiveMQ多节点集群" class="headerlink" title="ActiveMQ多节点集群"></a>ActiveMQ多节点集群</h2><p>引入消息队列之后该如何保证其高可用性？</p>
+<p>基于<code>Zookeeper</code>和<code>LevelDB</code>搭建<code>ActiveMQ</code>集群，提供主备方式的高可用集群功能，避免单点故障。</p>
+<p>三种集群方式：<a href="http://activemq.apache.org/masterslave.html" target="_blank" rel="noopener">官网介绍</a></p>
+<p><img src="/images/mq-activemq/activemq-19.png" alt="activemq-19"></p>
+<p>在<code>ActiveMQ V5.6</code>版本之后推出<code>LevelDB</code>的持久化引擎，它使用了自定义的索引代替常用的<code>BTree</code>索引，其持久化性能高于<code>KahaDB</code>，虽然默认的持久化方式还是<code>KahaDB</code>，但是<code>LevelDB</code>可能会是趋势。</p>
+<p><strong>在<code>ActiveMQ V5.9</code>版本还提供了基于<code>LevelDB</code>和<code>Zookeeper</code>的数据复制方式，作为<code>Master-Slave</code>方式的首选数据复制方案。</strong></p>
+<h3 id="ZK-R-LevelDB-Store"><a href="#ZK-R-LevelDB-Store" class="headerlink" title="ZK+R LevelDB Store"></a>ZK+R LevelDB Store</h3><p>从<code>ActiveMQ V5.9</code>开始，<code>ActiveMQ</code>的集群实现方式取消了传统的<code>Master-Slave</code>方式，增加了基于<code>Zookeeper</code>+<code>LevelDB</code>的<code>Master-Slave</code>实现方式，从<code>V5.9</code>版本后也是<a href="http://activemq.apache.org/replicated-leveldb-store.html" target="_blank" rel="noopener">官网</a>推荐的。</p>
+<p><img src="/images/mq-activemq/activemq-20.png" alt="activemq-20"></p>
+<p>原理说明：</p>
+<p>​        使用<code>Zookeeper</code>集群注册所有的<code>ActiveMQ Broker</code>但<strong>只有其中一个<code>Broker</code></strong>可以提供服务，它将被视为<code>Master</code>，<strong>其他<code>Broker</code>处于待机状态被视为<code>Slave</code></strong>。</p>
+<p>如果<code>Master</code>因故障而不能提供服务<code>ZooKeeper</code>会从<code>Slave</code>中选举出一个<code>Broker</code>充当<code>Master</code>。</p>
+<p><strong><code>Slave</code>连接<code>Master</code>并同步他们的存储状态，<code>Slave</code>不接受客户端连接</strong>。所有存储操作都将被复制到连接至<code>Master</code>的<code>Slaves</code>。</p>
+<p><strong>如果<code>Master</code>宕机，得到了最新更新的<code>Slave</code>会成为<code>Master</code>。故障节点在恢复会重新加入到集群中并连接<code>Master</code>进入<code>Slave</code>模式</strong>。</p>
+<p>所有需要同步的消息操作都将等待存储状态被复制到其他法定节点的操作完成才能算完成。</p>
+<p>所以，如果你配置了<code>replicas=3</code>，那么法定大小是<code>（3/2+1）=2</code>。<code>Master</code>将会存储并更新然后等待<code>（2-1）=1</code>个<code>Slave</code>存储和更新完成，才汇报<code>success</code>。至于为什么是<code>2-1</code>个，可以结合<code>Zookeeper</code>的<code>watch</code>机制、选举算法、原子广播<code>ZAB</code>协议。</p>
+<p>有一个节点要作为观察者存在，当一个新的<code>Master</code>被选中，需要至少保障一个法定节点在线，以能够找到拥有最新状态的节点，这个节点才可以成为新的<code>Master</code>。</p>
+<h3 id="部署规划和步骤"><a href="#部署规划和步骤" class="headerlink" title="部署规划和步骤"></a>部署规划和步骤</h3><p>要求关闭防火墙并保证可以<code>ping</code>通<code>ActiveMQ</code>服务器，要求具备<code>Zookeeper</code>集群并可以成功启动。</p>
+<p>集群部署规划列表</p>
+<table>
+<thead>
+<tr>
+<th>主机</th>
+<th>Zookeeper集群端口</th>
+<th>AMQ集群Bind端口</th>
+<th>AMQ消息TCP端口</th>
+<th>管理控制台端口</th>
+<th>AMQ安装目录</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>192.168.1.132</td>
+<td>2191</td>
+<td>bind=”tcp://0.0.0.0:63631”</td>
+<td>61616</td>
+<td>8161</td>
+<td>/mq_node01</td>
+</tr>
+<tr>
+<td>192.168.1.132</td>
+<td>2192</td>
+<td>bind=”tcp://0.0.0.0:63632”</td>
+<td>61617</td>
+<td>8162</td>
+<td>/mq_node02</td>
+</tr>
+<tr>
+<td>192.168.1.132</td>
+<td>2193</td>
+<td>bind=”tcp://0.0.0.0:63633”</td>
+<td>61618</td>
+<td>8163</td>
+<td>/mq_node03</td>
+</tr>
+</tbody></table>
+<h4 id="修改控制台端口"><a href="#修改控制台端口" class="headerlink" title="修改控制台端口"></a>修改控制台端口</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--AMQ目录/conf/jetty.xml--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"jettyPort"</span> <span class="attr">class</span>=<span class="string">"org.apache.activemq.web.WebConsolePort"</span> <span class="attr">init-method</span>=<span class="string">"start"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"host"</span> <span class="attr">value</span>=<span class="string">"0.0.0.0"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"port"</span> <span class="attr">value</span>=<span class="string">"8161"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="HostName映射"><a href="#HostName映射" class="headerlink" title="HostName映射"></a>HostName映射</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">hostname名字映射</span></span><br><span class="line">vim /etc/hosts</span><br><span class="line"><span class="meta">#</span><span class="bash">增加自己机器配置</span></span><br><span class="line">192.168.1.132 mq-server</span><br></pre></td></tr></table></figure>
+
+<h4 id="brokerName一致"><a href="#brokerName一致" class="headerlink" title="brokerName一致"></a>brokerName一致</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--三个节点的brokerName要求全部一致--&gt;</span></span><br><span class="line"><span class="comment">&lt;!--修改每个AMQ的activemq.xml文件--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">broker</span> <span class="attr">xmlns</span>=<span class="string">"http://activemq.apache.org/schema/core"</span> <span class="attr">brokerName</span>=<span class="string">"kuromq"</span> <span class="attr">dataDirectory</span>=<span class="string">"$&#123;activemq.data&#125;"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="持久化配置"><a href="#持久化配置" class="headerlink" title="持久化配置"></a>持久化配置</h4><p>三个节点的持久化配置要求一致，Bind根据不同MQ实例调整</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">persistenceAdapter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">replicatedLevelDB</span> </span></span><br><span class="line"><span class="tag">        <span class="attr">directory</span>=<span class="string">"$&#123;activemq.data&#125;/leveldb"</span> </span></span><br><span class="line"><span class="tag">        <span class="attr">replicas</span>=<span class="string">"3"</span> </span></span><br><span class="line"><span class="tag">        <span class="attr">bind</span>=<span class="string">"tcp://0.0.0.0:63633"</span> </span></span><br><span class="line"><span class="tag">        <span class="attr">zkAdress</span>=<span class="string">"localhost2191,localhost2192,localhost2193"</span> </span></span><br><span class="line"><span class="tag">        <span class="attr">hostname</span>=<span class="string">"#mq-server"</span> </span></span><br><span class="line"><span class="tag">        <span class="attr">sync</span>=<span class="string">"local_disk"</span> </span></span><br><span class="line"><span class="tag">        <span class="attr">zkPath</span>=<span class="string">"/activemq/leveldb-stores"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">persistenceAdapter</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="修改消息端口"><a href="#修改消息端口" class="headerlink" title="修改消息端口"></a>修改消息端口</h4><p>修改<code>activemq.xml</code>的消息协议的端口，调整为上述规划的端口。</p>
+<p>然后按照顺序启动3个<code>ActiveMQ</code>节点，前提是<code>Zookeeper</code>集群已经成功启动运行。</p>
+<h4 id="zk集群的节点状态"><a href="#zk集群的节点状态" class="headerlink" title="zk集群的节点状态"></a>zk集群的节点状态</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">进入任意一台zookeeper目录下的bin</span></span><br><span class="line">./zkCli.sh -server 127.0.0.1:2191</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/mq-activemq/activemq-21.png" alt="activemq-21"></p>
+<p><img src="/images/mq-activemq/activemq-22.png" alt="activemq-22"></p>
+<p>集群启动后对<code>Zookeeper</code>数据抓图，可以看到<code>ActiveMQ</code>的三个节点，分别是00000000000，00000000001，00000000002。</p>
+<p>第二张图00000000000的值可以看到<strong>elected的值不为空，说明这个节点是<code>Master</code>，其他两个是<code>Slave</code></strong>。</p>
+<h3 id="集群可用性测试"><a href="#集群可用性测试" class="headerlink" title="集群可用性测试"></a>集群可用性测试</h3><p><code>ActiveMQ</code>的客户端只能访问<code>Master</code>的<code>Broker</code>，其他处于<code>Slave</code>的<code>Broker</code>不能访问，所以客户端连接的<code>Broker</code>应该使用<code>failover</code>协议(失败转移)。</p>
+<p>当一个<code>ActiveMQ</code>节点挂掉或者一个<code>Zookeeper</code>节点挂掉，<code>ActiveMQ</code>服务依然正常运行，如果仅剩一个<code>ActiveMQ</code>节点，由于不能选举<code>Master</code>，所以<code>ActiveMQ</code>不能正常运行。</p>
+<p>同样的，如果<code>Zookeeper</code>仅剩一个节点活动，不管<code>ActiveMQ</code>各个节点存活与否，<code>ActiveMQ</code>也不能正常提供服务，<code>ActiveMQ</code>集群的高可用依赖于<code>Zookeeper</code>集群的高可用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//BrokerURL调整</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String ACTIVE_URL=<span class="string">"failover:(tcp://192.168.1.132:61616,tcp://192.168.1.132:61617,tcp://192.168.1.132:61618)?randomize=false"</span>;</span><br></pre></td></tr></table></figure>
+
+<p>测试：3台机器中的<code>ActiveMQ</code>只会有一个MQ可以被客户端连接使用，在测试时可以把<code>Master</code>关掉，然后再重试客户端消息发送和消息还可以正常使用，则说明集群搭建正常。</p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月26日 13:38</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/23/activemq-cluster/" title="&#39;ActiveMQ（七） 多节点集群&#39;">https://midkuro.github.io/2020/05/23/activemq-cluster/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/23/activemq-cluster/&title=《'ActiveMQ（七） 多节点集群'》 — Kuro's Blog&pic=images/activemq.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/23/activemq-cluster/&title=《'ActiveMQ（七） 多节点集群'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/23/activemq-cluster/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'ActiveMQ（七） 多节点集群'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/23/activemq-cluster/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/23/activemq-cluster/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/23/activemq-cluster/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/MQ/" class="color3">MQ</a>
+      
+    <a href="/tags/ActiveMQ/" class="color4">ActiveMQ</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#ActiveMQ"><span class="post-toc-text">ActiveMQ</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#ActiveMQ多节点集群"><span class="post-toc-text">ActiveMQ多节点集群</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#ZK-R-LevelDB-Store"><span class="post-toc-text">ZK+R LevelDB Store</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#部署规划和步骤"><span class="post-toc-text">部署规划和步骤</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#修改控制台端口"><span class="post-toc-text">修改控制台端口</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#HostName映射"><span class="post-toc-text">HostName映射</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#brokerName一致"><span class="post-toc-text">brokerName一致</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#持久化配置"><span class="post-toc-text">持久化配置</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#修改消息端口"><span class="post-toc-text">修改消息端口</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#zk集群的节点状态"><span class="post-toc-text">zk集群的节点状态</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#集群可用性测试"><span class="post-toc-text">集群可用性测试</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/05/23/activemq-feature/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;ActiveMQ（八） 高级特性&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/05/23/activemq-persistent/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;ActiveMQ（六） 消息持久化&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="activemq-cluster" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 11.67px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 13.33px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 11.67px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 13.33px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

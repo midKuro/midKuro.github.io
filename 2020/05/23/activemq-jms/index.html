@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;ActiveMQ（二） Java消息服务&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="ActiveMQJMSJavaEE是一套使用JAVA进行企业级Web应用开发的大家一致遵循的工业标准。JavaEE平台提供了一个基于组件的方法来加快设计、开发、装配及部署企业应用程序。 JavaEE的13种核心技术规范：  JDBC（Java Database）数据库连接 JNDI（Java Naming and Directory Interfaces）Java 的命名和目录接口 EJB（Ent">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;ActiveMQ（二） Java消息服务&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/05/23/activemq-jms/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="ActiveMQJMSJavaEE是一套使用JAVA进行企业级Web应用开发的大家一致遵循的工业标准。JavaEE平台提供了一个基于组件的方法来加快设计、开发、装配及部署企业应用程序。 JavaEE的13种核心技术规范：  JDBC（Java Database）数据库连接 JNDI（Java Naming and Directory Interfaces）Java 的命名和目录接口 EJB（Ent">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-11.jpg">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-12.png">
+<meta property="og:image" content="https://midkuro.github.io/images/mq-activemq/activemq-13.png">
+<meta property="article:published_time" content="2020-05-22T17:00:01.000Z">
+<meta property="article:modified_time" content="2020-05-26T05:35:48.811Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="MQ">
+<meta property="article:tag" content="ActiveMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/mq-activemq/activemq-11.jpg">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-activemq-jms" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;ActiveMQ（二） Java消息服务&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/ActiveMQ/">ActiveMQ</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-23
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="ActiveMQ"><a href="#ActiveMQ" class="headerlink" title="ActiveMQ"></a>ActiveMQ</h1><h2 id="JMS"><a href="#JMS" class="headerlink" title="JMS"></a>JMS</h2><p><strong>JavaEE是一套使用JAVA进行企业级Web应用开发的大家一致遵循的工业标准。</strong>JavaEE平台提供了一个基于组件的方法来加快设计、开发、装配及部署企业应用程序。</p>
+<p>JavaEE的13种核心技术规范：</p>
+<ol>
+<li>JDBC（Java Database）数据库连接</li>
+<li>JNDI（Java Naming and Directory Interfaces）Java 的命名和目录接口</li>
+<li>EJB（Enterprise JavaBean）</li>
+<li>RMI（Remote Method Invoke）远程方法调用</li>
+<li>Java IDL（Interface Description Language）/CORBA（Common Object Broker Architecture）Java 接口定义语言/公用对象请求代理程序体系结构</li>
+<li>JSP（Java Server Pages）</li>
+<li>Servlet</li>
+<li>XML（Extensible Markup Language）可扩展标记语言</li>
+<li><strong>JMS（Java Message Service）Java 消息服务</strong></li>
+<li>JTA（Java Transaction API）Java 事务 API</li>
+<li>JTS（Java Transaction Service）Java 事务服务</li>
+<li>JavaMail</li>
+<li>JAF（JavaBean Activation Framework）</li>
+</ol>
+<p><code>JMS</code>全称是<code>Java Message Service</code>（Java消息服务是<code>JAVA EE</code>的一门技术）。JMS的客户端之间可以通过JMS服务进行异步的消息传输。JMS用于和面向消息的中间件相互通信的应用程序接口(API)。它既支持点对点的域，有支持发布/订阅(<code>publish/subscribe</code>)类型的域，并且提供对下列类型的支持：</p>
+<ul>
+<li>经认可的消息传递</li>
+<li>事务型消息的传递</li>
+<li>一致性消息和具有持久性的订阅者支持。</li>
+</ul>
+<p>JMS消息系统带来的好处：</p>
+<ol>
+<li>提供消息灵活性；</li>
+<li>松散耦合</li>
+<li>异步性。</li>
+</ol>
+<p>JMS消息系统带来的好处：1、提供消息灵活性；2、松散耦合；3、异步性。</p>
+<p><img src="/images/mq-activemq/activemq-11.jpg" alt="activemq-11"></p>
+<h3 id="消息队列的比较"><a href="#消息队列的比较" class="headerlink" title="消息队列的比较"></a>消息队列的比较</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>ActiveMQ</th>
+<th>RabbitMQ</th>
+<th>Kafka</th>
+<th>RocketMQ</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PRODUCER-COMSUMER</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>PUBLISH-SUBSCRIBE</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>REQUEST-REPLY</td>
+<td>支持</td>
+<td>支持</td>
+<td>-</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>API完备性</td>
+<td>高</td>
+<td>高</td>
+<td>高</td>
+<td>低（静态配置）</td>
+</tr>
+<tr>
+<td>多语言支持</td>
+<td>支持，JAVA优先</td>
+<td>语言无关</td>
+<td>支持，JAVA优先</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>单机呑吐量</td>
+<td>万级</td>
+<td>万级</td>
+<td>十万级</td>
+<td>单机万级</td>
+</tr>
+<tr>
+<td>消息延迟</td>
+<td>-</td>
+<td>微秒级</td>
+<td>毫秒级</td>
+<td>-</td>
+</tr>
+<tr>
+<td>可用性</td>
+<td>高（主从）</td>
+<td>高（主从）</td>
+<td>非常高（分布式）</td>
+<td>高</td>
+</tr>
+<tr>
+<td>消息丢失</td>
+<td>-</td>
+<td>低</td>
+<td>理论上不会丢失</td>
+<td>-</td>
+</tr>
+<tr>
+<td>消息重复</td>
+<td>-</td>
+<td>可控制</td>
+<td>理论上会有重复</td>
+<td>-</td>
+</tr>
+<tr>
+<td>文档的完备性</td>
+<td>高</td>
+<td>高</td>
+<td>高</td>
+<td>中</td>
+</tr>
+<tr>
+<td>提供快速入门</td>
+<td>有</td>
+<td>有</td>
+<td>有</td>
+<td>无</td>
+</tr>
+<tr>
+<td>首次部署难度</td>
+<td>-</td>
+<td>低</td>
+<td>中</td>
+<td>高</td>
+</tr>
+</tbody></table>
+<h3 id="JMS的组成结构和特点"><a href="#JMS的组成结构和特点" class="headerlink" title="JMS的组成结构和特点"></a>JMS的组成结构和特点</h3><ol>
+<li><code>JMS provider</code>：实现JMS接口和规范的消息中间件</li>
+<li><code>JMS producer</code>：消息生产者，创建和发送JMS消息的客户端应用</li>
+<li><code>JMS consumer</code>：消息消费者，接受和处理JMS消息的客户端应用</li>
+<li><code>JMS message</code>  ：消息，包括消息头、消息体、消息属性</li>
+</ol>
+<h4 id="消息头"><a href="#消息头" class="headerlink" title="消息头"></a>消息头</h4><ol>
+<li><p><code>JMSDestination</code>：消息发送的目的地，主要指<code>Queue</code>和<code>Topic</code></p>
+</li>
+<li><p><code>JMSDeliveryMode</code>：持久和持久模式</p>
+<p>一条持久性消息：应该被传送<strong>一次仅仅一次</strong>，意味着如果JMS提供者出现故障，该消息并不会丢失，它会在服务器恢复之后再次传递。</p>
+<p>一条非持久的消息：最多传送一次，这意味着服务器出现故障，该消息将永远丢失。</p>
+</li>
+<li><p><code>JMSExpiration</code>：消息过期时间，默认永不过期</p>
+<p>消息过期时间等于<code>Destnation</code>的<code>send</code>方法中的<code>timeToLive</code>值加上发送时刻的<code>GMT</code>时间值。</p>
+<p>如果消息<code>TimeToLive</code>值等于零，则<code>JMSExpiration</code>被设置为零，表示该消息永不过期。</p>
+<p>如果发送后，在消息过期时间之后消息还没有被发送到目的地，则该消息被清除。</p>
+</li>
+<li><p><code>JMSPriority</code>：消息优先级</p>
+<p>从0-9 <strong>十个</strong>级别，0到4是普通消息，5到9是加急消息。</p>
+<p><code>JMS</code><strong>不要求</strong><code>MQ</code>严格按照这是个优先级发送消息，但必须保证加急消息要<strong>先于普通消息</strong>到达，<strong>默认是4级</strong>。</p>
+</li>
+<li><p><code>JMSMessageID</code>：唯一识别每个消息的标识，由MQ产生。</p>
+</li>
+</ol>
+<h4 id="消息体"><a href="#消息体" class="headerlink" title="消息体"></a>消息体</h4><ol>
+<li><strong><code>TextMessage</code></strong>：普通字符串消息，包含一个<code>String</code></li>
+<li><strong><code>MapMessage</code></strong>：一个<code>Map</code>类型的消息，<code>Key</code>为<code>String</code>类型，而值为Java的基本类型</li>
+<li><code>BytesMessage</code>：二进制数组消息，包含一个<code>byte[]</code></li>
+<li><code>StreamMessage</code>：Java数据流，用标准流操作来顺序的填充和读取</li>
+<li><code>ObjectMessage</code>：对象消息，包含一个可序列化的Java对象</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//例子</span></span><br><span class="line">MapMessage mapMessage = session.createMapMessage();</span><br><span class="line">mapMessage.setBoolean(<span class="string">"key"</span>, <span class="keyword">false</span>);</span><br></pre></td></tr></table></figure>
+
+<p>发送和接受的消息体类型必须一致对应。</p>
+<h4 id="消息属性"><a href="#消息属性" class="headerlink" title="消息属性"></a>消息属性</h4><p>如果需要除消息头字段以外的值，那么可以使用消息属性，<strong>主要用于识别/去重/重点标注消息</strong>。</p>
+<p>他们是以<strong>属性名和属性值对</strong>的形式制定的。可以将属性，可以看做是消息头的扩展，属性指定一些消息头没有包括的附加消息。比如可以在属性里指定消息选择器。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">TextMessage message = session.createTextMessage();</span><br><span class="line">message.setText(text);</span><br><span class="line"><span class="comment">//自定义属性</span></span><br><span class="line">message.setStringProperty(<span class="string">"userName"</span>,<span class="string">"张三"</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="JMS的可靠性"><a href="#JMS的可靠性" class="headerlink" title="JMS的可靠性"></a>JMS的可靠性</h3><h4 id="持久性"><a href="#持久性" class="headerlink" title="持久性"></a>持久性</h4><p><code>Persistent</code>持久性参数说明：</p>
+<ul>
+<li><p>非持久：当服务器宕机，消息不存在</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MessageProducer producer = session.createProducer(queue);</span><br><span class="line">producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>持久：当服务器宕机，消息依然存在</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MessageProducer producer = session.createProducer(queue);</span><br><span class="line">producer.setDeliveryMode(DeliveryMode.PERSISTENT);</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p><strong>当不配置持久化时，队列默认的消息默认是持久化消息</strong>，此模式保证这些消息只被传送一次和成功使用一次。对这些消息，<strong>可靠性</strong>是优先考虑因素。</p>
+<p>可靠性的另一个重要方面是确保持久化消息传递至目标后，消息服务在向消费者传送他们之前不会丢失这些消息。</p>
+<h5 id="持久化Topic-订阅主题"><a href="#持久化Topic-订阅主题" class="headerlink" title="持久化Topic-订阅主题"></a>持久化Topic-订阅主题</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//生产者</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JmsTopicProducer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String ACTIVE_URL = <span class="string">"tcp://192.168.1.132:61616"</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String TOPIC_NAME = <span class="string">"topic-Persist"</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> JMSException </span>&#123;</span><br><span class="line">        ActiveMQConnectionFactory factory = <span class="keyword">new</span> ActiveMQConnectionFactory(ACTIVE_URL);</span><br><span class="line">        Connection connection = factory.createConnection();</span><br><span class="line">        Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">        Topic topic = session.createTopic(TOPIC_NAME);</span><br><span class="line">        MessageProducer producer = session.createProducer(topic);</span><br><span class="line">        <span class="comment">//设置生产者的持久化消息</span></span><br><span class="line">        producer.setDeliveryMode(DeliveryMode.PERSISTENT);</span><br><span class="line">        <span class="comment">//设置完了持久化配置，然后再启动连接</span></span><br><span class="line">        connection.start();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= <span class="number">3</span>; i++) &#123;</span><br><span class="line">            TextMessage message = session.createTextMessage(<span class="string">"持久化消息：message---"</span> + i);</span><br><span class="line">            producer.send(message);</span><br><span class="line">        &#125;</span><br><span class="line">        producer.close();</span><br><span class="line">        session.close();</span><br><span class="line">        connection.close();</span><br><span class="line">        System.out.println(<span class="string">"生产者发送消息队列topic完毕"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//订阅者</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JmsTopicConsumer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String ACTIVE_URL = <span class="string">"tcp://192.168.1.132:61616"</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String TOPIC_NAME = <span class="string">"topic-Persist"</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> JMSException, IOException </span>&#123;</span><br><span class="line">        ActiveMQConnectionFactory factory = <span class="keyword">new</span> ActiveMQConnectionFactory(ACTIVE_URL);</span><br><span class="line">        Connection connection = factory.createConnection();</span><br><span class="line">        <span class="comment">//设置订阅者的ID</span></span><br><span class="line">        connection.setClientID(<span class="string">"zhangsan"</span>);</span><br><span class="line">        Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">        Topic topic = session.createTopic(TOPIC_NAME);</span><br><span class="line">        <span class="comment">//创建持久化的订阅者</span></span><br><span class="line">        TopicSubscriber subscriber = session.createDurableSubscriber(topic, <span class="string">"remark..."</span>);</span><br><span class="line">        <span class="comment">//设置完毕后再启动start</span></span><br><span class="line">        connection.start();</span><br><span class="line">        <span class="comment">//监听主题</span></span><br><span class="line">        subscriber.setMessageListener((message) -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (message != <span class="keyword">null</span> &amp;&amp; message <span class="keyword">instanceof</span> TextMessage) &#123;</span><br><span class="line">                TextMessage textMessage = (TextMessage) message;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    System.out.println(<span class="string">"收到持久化订阅消息："</span> + textMessage.getText());</span><br><span class="line">                &#125; <span class="keyword">catch</span> (JMSException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="comment">// 控制台不灭</span></span><br><span class="line">        System.in.read();</span><br><span class="line">        subscriber.close();</span><br><span class="line">        session.close();</span><br><span class="line">        connection.close();</span><br><span class="line">        System.out.println(<span class="string">"订阅消费完毕"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>需要先启动订阅者，再启动生产者，订阅主题需要为每个订阅者设置ClientID并创建订阅者</strong>，这时候生产消息时可以看到，<strong>订阅者处于激活状态</strong>并接收并消费了三条消息。</p>
+<p><img src="/images/mq-activemq/activemq-12.png" alt="activemq-12"></p>
+<p>这时候把订阅者后台关闭，订阅者<strong>从激活状态变为离线状态</strong>，可以看到如下图：</p>
+<p><img src="/images/mq-activemq/activemq-13.png" alt="activemq-13"></p>
+<p>当订阅者重新订阅时，会从离线状态重新变为激活状态。</p>
+<p><strong>切记：一定要先运行一次消费者，等于向MQ注册，类似于我订阅了这个主题，然后再运行生产者发送信息，此时无论消费者是否在线，都会接收到，不在线的话，下次链接时，会把没有收过的消息都接收下来</strong>。</p>
+<h4 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h4><p><code>Transaction</code>事务偏生产者，签收偏消费者</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第一个参数是事务开关，第二个是签收参数</span></span><br><span class="line">Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line"><span class="comment">//提交事务</span></span><br><span class="line">session.commit();</span><br><span class="line"><span class="comment">//回滚事务</span></span><br><span class="line">session.rollback();</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>false</code>：只要执行<code>send</code>，就会进入到队列中。关闭事务，那第二个签收参数的设置需要有效</li>
+<li><code>true</code>：先执行<code>send</code>再执行<code>commit</code>，消息才被真正的提交到队列中，消息需要批量发送，需要缓冲区处理</li>
+</ul>
+<p>生产者/消费者设置了事务开关等于<code>true</code>时，只有执行了<code>session.commit();</code>消息才会被生产/消费，所以事务的级别是比签收的级别高的。</p>
+<h4 id="签收"><a href="#签收" class="headerlink" title="签收"></a>签收</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Acknowledge签收方式</span></span><br><span class="line"><span class="comment">//1.自动签收--常用</span></span><br><span class="line">Session.AUTO_ACKNOWLEDGE;</span><br><span class="line"><span class="comment">//2.手动签收--常用</span></span><br><span class="line">Session.CLIENT_ACKNOWLEDGE;</span><br><span class="line"><span class="comment">//3.可允许重复的签收</span></span><br><span class="line">Session.UPS_OK_ACKNOWLEDGE;</span><br><span class="line"><span class="comment">//4.和事务组合的签收</span></span><br><span class="line">Session.SESSION_TRANSACTED;</span><br></pre></td></tr></table></figure>
+
+<p><strong>非事务的情况下，默认行为是自动签收</strong>，当使用手动签收时，客户端需要调用<code>message.acknowledge()</code>方法手动签收。</p>
+<p>在事务的情况下，只有<code>commit</code>后才能将全部消息变为已消费。<strong>在事务性会话中，当一个事务被成功提交则消息被自动签收，如果事务回滚，则消息会再次被传送</strong>。</p>
+<p>非事务性会话中，消息何时被确认取决于创建会话时的应答模式（<code>acknowledgement mode</code>）</p>
+<h3 id="JMS的点对点总结"><a href="#JMS的点对点总结" class="headerlink" title="JMS的点对点总结"></a>JMS的点对点总结</h3><p>点对点模型是基于队列的，生产者发消息到队列，消费者从队列接收消息，队列的存在使消息的<strong>异步传输</strong>称为可能。</p>
+<p>如果在<code>Session</code>关闭是有部分消息已被收到但还没有被签收（<code>acknowledged</code>），那么当消费者下次连接到相同的队列时，这些消息还会被再次接收。</p>
+<p>队列可以长久地保存消息直到消费者收到消息。消费者不需要因为担心消息会丢西而时刻和队列保持激活的连接状态，充分体现了<strong>异步传输模式的优势</strong>。</p>
+<h3 id="JMS的发布订阅总结"><a href="#JMS的发布订阅总结" class="headerlink" title="JMS的发布订阅总结"></a>JMS的发布订阅总结</h3><p><code>JMS Pub/Sub</code>模型定义了如何向一个内容节点发布和订阅消息，这些节点被称作<code>topic</code>。</p>
+<p>主题可以被认为是消息的传输中介，发布者（<code>publisher</code>）发布消息到主题，订阅者（<code>subscribe</code>）从主题订阅消息。</p>
+<h4 id="非持久订阅"><a href="#非持久订阅" class="headerlink" title="非持久订阅"></a>非持久订阅</h4><p>主题使得消息订阅和消息发布者保持互相独立，不需要接触 即可保证消息的传送。</p>
+<p>非持久订阅只有当客户处于激活状态，也就是和MQ保持连接状态才能收到发送到某个主题的消息。</p>
+<p>如果消费者处于离线状态，生产者发送的主题消息将会丢失作废，消费者永远不会收到。</p>
+<h4 id="持久订阅"><a href="#持久订阅" class="headerlink" title="持久订阅"></a>持久订阅</h4><p>客户端首先向MQ注册一个自己的身份ID识别号，当这个客户端处于离线时，生产者会为这个ID保存所有发送到主题的消息，当客户端再次连接到MQ时会根据消费者的ID得到所有当自己处于离线时发送到主题的消息。</p>
+<p>非持久订阅状态下，不能恢复或重新派送一个未签收的消息。持久订阅才能恢复或重新派送一个未签收的消息。</p>
+<h3 id="Broker"><a href="#Broker" class="headerlink" title="Broker"></a>Broker</h3><p><strong>MQ消息服务器实例被称作<code>Broker</code></strong>，作为<code>server</code>提供消息核心服务。</p>
+<p>在linux环境下通过指定不同的配置文件启动多个MQ服务器实例的命令如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./activemq start xbean:file/apache-active-5.15.9/conf/my-activemq.xml</span><br></pre></td></tr></table></figure>
+
+<h4 id="嵌入式Broker"><a href="#嵌入式Broker" class="headerlink" title="嵌入式Broker"></a>嵌入式Broker</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- pom.xml增加依赖--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.fasterxml.jackson.core<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jackson-databind<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.9.5<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EmbedBroker</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">        <span class="comment">//ActiveMQ也支持在vm中通信基于嵌入式的broker</span></span><br><span class="line">        BrokerService brokerService = newBrokerService();</span><br><span class="line">        brokerService.setUseJmx(<span class="keyword">true</span>);</span><br><span class="line">        brokerService.addConnector(<span class="string">"tcp://localhost:61616"</span>);</span><br><span class="line">        brokerService.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年05月26日 13:35</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/23/activemq-jms/" title="&#39;ActiveMQ（二） Java消息服务&#39;">https://midkuro.github.io/2020/05/23/activemq-jms/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/23/activemq-jms/&title=《'ActiveMQ（二） Java消息服务'》 — Kuro's Blog&pic=images/activemq.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/23/activemq-jms/&title=《'ActiveMQ（二） Java消息服务'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/23/activemq-jms/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'ActiveMQ（二） Java消息服务'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/23/activemq-jms/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/23/activemq-jms/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/23/activemq-jms/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/MQ/" class="color3">MQ</a>
+      
+    <a href="/tags/ActiveMQ/" class="color4">ActiveMQ</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#ActiveMQ"><span class="post-toc-text">ActiveMQ</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#JMS"><span class="post-toc-text">JMS</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#消息队列的比较"><span class="post-toc-text">消息队列的比较</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#JMS的组成结构和特点"><span class="post-toc-text">JMS的组成结构和特点</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#消息头"><span class="post-toc-text">消息头</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#消息体"><span class="post-toc-text">消息体</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#消息属性"><span class="post-toc-text">消息属性</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#JMS的可靠性"><span class="post-toc-text">JMS的可靠性</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#持久性"><span class="post-toc-text">持久性</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#持久化Topic-订阅主题"><span class="post-toc-text">持久化Topic-订阅主题</span></a></li></ol></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#事务"><span class="post-toc-text">事务</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#签收"><span class="post-toc-text">签收</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#JMS的点对点总结"><span class="post-toc-text">JMS的点对点总结</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#JMS的发布订阅总结"><span class="post-toc-text">JMS的发布订阅总结</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#非持久订阅"><span class="post-toc-text">非持久订阅</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#持久订阅"><span class="post-toc-text">持久订阅</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Broker"><span class="post-toc-text">Broker</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#嵌入式Broker"><span class="post-toc-text">嵌入式Broker</span></a></li></ol></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/05/23/activemq-protocol/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;ActiveMQ（三） 传输协议&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/05/23/activemq-mq/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;ActiveMQ（一） 基础概念&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="activemq-jms" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 11.67px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 13.33px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 11.67px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 13.33px;">Redis</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
