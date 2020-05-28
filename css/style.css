@@ -961,7 +961,7 @@ body {
 .article-entry table {
   line-height: 1.6em;
   font-size: 1rem;
-  margin: 0.8em 0;
+  margin: 1.3em 0;
   word-wrap: break-word;
 }
 .article-entry h4,
@@ -1003,6 +1003,8 @@ body {
   height: auto;
   display: block;
   margin: auto;
+  margin-bottom: 50px;
+  margin-top: 50px;
   box-shadow: 0 0 30px #ccc;
   -moz-box-shadow: 0 0 30px #ccc;
   -webkit-box-shadow: 0 0 30px #ccc;
@@ -1744,7 +1746,7 @@ body {
 .article-entry pre,
 .article-entry .highlight {
   background: #f6f8fa;
-  margin: 8px -15px;
+  margin: 25px -15px;
   padding: 15px 15px;
   border-style: solid;
   border-color: #ddd;
