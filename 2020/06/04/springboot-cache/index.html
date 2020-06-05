@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Spring Boot 缓存&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="SpringBoot 缓存JSR 规范Java Caching定义了5个核心接口，分别是CachingProvider, CacheManager,Cache, Entry 和 Expiry。 CachingProvider定义了创建、配置、获取、管理和控制多个CacheManager。一个应用可以在运行期访问多个CachingProvider。 CacheManager定义了创建、配置、获取、管">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Spring Boot 缓存&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/06/04/springboot-cache/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="SpringBoot 缓存JSR 规范Java Caching定义了5个核心接口，分别是CachingProvider, CacheManager,Cache, Entry 和 Expiry。 CachingProvider定义了创建、配置、获取、管理和控制多个CacheManager。一个应用可以在运行期访问多个CachingProvider。 CacheManager定义了创建、配置、获取、管">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/springboot-cache/cache-01.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springboot-cache/cache-02.png">
+<meta property="article:published_time" content="2020-06-04T14:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-04T15:28:41.185Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="SpringBoot">
+<meta property="article:tag" content="Cache">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/springboot-cache/cache-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-springboot-cache" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Spring Boot 缓存&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Cache/">Cache</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-06-04
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="SpringBoot-缓存"><a href="#SpringBoot-缓存" class="headerlink" title="SpringBoot 缓存"></a>SpringBoot 缓存</h1><h2 id="JSR-规范"><a href="#JSR-规范" class="headerlink" title="JSR 规范"></a>JSR 规范</h2><p><code>Java Caching</code>定义了5个核心接口，分别是<code>CachingProvider</code>, <code>CacheManager</code>,<code>Cache</code>, <code>Entry</code> 和 <code>Expiry</code>。</p>
+<p><code>CachingProvider</code>定义了创建、配置、获取、<strong>管理和控制多个<code>CacheManager</code></strong>。一个应用可以在运行期访问多个<code>CachingProvider</code>。</p>
+<p><code>CacheManager</code>定义了创建、配置、获取、管理和控制多个唯一命名的<code>Cache</code>，这些<code>Cache</code>存在于<code>CacheManager</code>的上下文中。<strong>一个<code>CacheManager</code>仅被一个<code>CachingProvider</code>所拥有</strong>。</p>
+<p><code>Cache</code>是一个类似<code>Map</code>的数据结构并临时存储以Key为索引的值。一个<code>Cache</code>仅被一个<code>CacheManager</code>所拥有。<br><code>Entry</code>是一个存储在<code>Cache</code>中的<code>key-value</code>对。</p>
+<p><code>Expiry</code> 每一个存储在<code>Cache</code>中的条目有一个定义的有效期。一旦超过这个时间，条目为过期的状态。一旦过期，条目将不可访问、更新和删除。缓存有效期可以通过<code>ExpiryPolicy</code>设置。</p>
+<p><img src="/images/springboot-cache/cache-01.png" alt="cache-01"></p>
+<p>如果要使用<code>JSR</code>规范，可以引入以下依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>javax.cache<span class="tag">&lt;/<span class="name">groupid</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>cache-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Spring-Cache"><a href="#Spring-Cache" class="headerlink" title="Spring Cache"></a>Spring Cache</h2><p><code>Spring从3.1</code>开始定义了<code>org.springframework.cache.Cache</code>和<code>org.springframework.cache.CacheManager</code>接口来统一不同的缓存技术；并支持使用<code>JCache（JSR-107）</code>注解简化我们开发；</p>
+<p><code>Cache</code>接口为缓存的组件规范定义，包含缓存的各种操作集合；<br><code>Cache</code>接口下<code>Spring</code>提供了各种<code>xxxCache</code>的实现；如<code>RedisCache</code>，<code>EhCacheCache</code> , <code>ConcurrentMapCache</code>等；</p>
+<p>每次调用需要缓存功能的方法时，Spring会检查检查指定参数的指定的目标方法是否已经被调用过；如果有就直接从缓存中获取方法调用后的结果，如果没有就调用方法并缓存结果后返回给用户。下次调用直接从缓存中获取。</p>
+<p>使用Spring缓存抽象时我们需要关注以下两点；</p>
+<ol>
+<li>确定方法需要被缓存以及他们的缓存策略</li>
+<li>从缓存中读取之前缓存存储的数据</li>
+</ol>
+<h3 id="缓存注解"><a href="#缓存注解" class="headerlink" title="缓存注解"></a>缓存注解</h3><table>
+<thead>
+<tr>
+<th>Cache</th>
+<th>缓存接口，定义缓存操作。实现有：RedisCache、EhCacheCache、ConcurrentMapCache等</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>CacheManager</strong></td>
+<td>缓存管理器，管理各种缓存（Cache）组件</td>
+</tr>
+<tr>
+<td><strong>@Cacheable</strong></td>
+<td>主要针对方法配置，能够根据方法的请求参数对其结果进行缓存</td>
+</tr>
+<tr>
+<td><strong>@CacheEvict</strong></td>
+<td>清空缓存</td>
+</tr>
+<tr>
+<td><strong>@CachePut</strong></td>
+<td>保证方法被调用，又希望结果被缓存。</td>
+</tr>
+<tr>
+<td><strong>@EnableCaching</strong></td>
+<td>开启基于注解的缓存</td>
+</tr>
+<tr>
+<td><strong>keyGenerator</strong></td>
+<td>缓存数据时key生成策略</td>
+</tr>
+<tr>
+<td><strong>serialize</strong></td>
+<td>缓存数据时value序列化策略</td>
+</tr>
+</tbody></table>
+<p><strong>案例</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Cacheable</span>(value = &#123;<span class="string">"emp"</span>&#125;)</span><br><span class="line"><span class="function"><span class="keyword">public</span> Employee <span class="title">getEmp</span><span class="params">(Integer id)</span></span>&#123;</span><br><span class="line">    System.out.println(<span class="string">"查询"</span>+id+<span class="string">"号员工"</span>);</span><br><span class="line">    Employee emp = employeeMapper.getEmpById(id);</span><br><span class="line">    <span class="keyword">return</span> emp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>@Cacheable/@CachePut/@CacheEvict</strong> 主要的参数：</p>
+<p><img src="/images/springboot-cache/cache-02.png" alt="cache-02"></p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年06月04日 23:28</p>
+        <p>原始链接： <a class="post-url" href="/2020/06/04/springboot-cache/" title="&#39;Spring Boot 缓存&#39;">https://midkuro.github.io/2020/06/04/springboot-cache/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/06/04/springboot-cache/&title=《'Spring Boot 缓存'》 — Kuro's Blog&pic=images/springboot.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/06/04/springboot-cache/&title=《'Spring Boot 缓存'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/06/04/springboot-cache/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Spring Boot 缓存'》 — Kuro's Blog&url=https://midkuro.github.io/2020/06/04/springboot-cache/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/06/04/springboot-cache/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/06/04/springboot-cache/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/SpringBoot/" class="color1">SpringBoot</a>
+      
+    <a href="/tags/Cache/" class="color1">Cache</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#SpringBoot-缓存"><span class="post-toc-text">SpringBoot 缓存</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#JSR-规范"><span class="post-toc-text">JSR 规范</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Spring-Cache"><span class="post-toc-text">Spring Cache</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#缓存注解"><span class="post-toc-text">缓存注解</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/06/03/springboot-run/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Spring Boot 启动配置原理&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="springboot-cache" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 13.33px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 13.33px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 13.33px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 13.33px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
