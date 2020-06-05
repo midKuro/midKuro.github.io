@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   
-  <title>&#39;Spring Boot 缓存&#39; | Kuro&#39;s Blog</title>
+  <title>&#39;Spring Boot Cache 缓存&#39; | Kuro&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
   <meta name="description" content="Spring Boot CacheJSR 规范Java Caching定义了5个核心接口，分别是CachingProvider, CacheManager,Cache, Entry 和 Expiry。 CachingProvider定义了创建、配置、获取、管理和控制多个CacheManager。一个应用可以在运行期访问多个CachingProvider。 CacheManager定义了创建、配置、">
 <meta property="og:type" content="article">
-<meta property="og:title" content="&#39;Spring Boot 缓存&#39;">
+<meta property="og:title" content="&#39;Spring Boot Cache 缓存&#39;">
 <meta property="og:url" content="https://midkuro.github.io/2020/06/04/springboot-cache/index.html">
 <meta property="og:site_name" content="Kuro&#39;s Blog">
 <meta property="og:description" content="Spring Boot CacheJSR 规范Java Caching定义了5个核心接口，分别是CachingProvider, CacheManager,Cache, Entry 和 Expiry。 CachingProvider定义了创建、配置、获取、管理和控制多个CacheManager。一个应用可以在运行期访问多个CachingProvider。 CacheManager定义了创建、配置、">
@@ -18,7 +18,7 @@
 <meta property="og:image" content="https://midkuro.github.io/images/springboot-cache/cache-01.png">
 <meta property="og:image" content="https://midkuro.github.io/images/springboot-cache/cache-02.png">
 <meta property="article:published_time" content="2020-06-04T14:00:00.000Z">
-<meta property="article:modified_time" content="2020-06-05T08:51:01.076Z">
+<meta property="article:modified_time" content="2020-06-05T15:39:35.506Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="SpringBoot">
 <meta property="article:tag" content="Cache">
@@ -119,7 +119,7 @@
         
   
     <h1 class="post-title" itemprop="name">
-      &#39;Spring Boot 缓存&#39;
+      &#39;Spring Boot Cache 缓存&#39;
     </h1>
     <div class="post-title-bar">
       <ul>
@@ -305,11 +305,15 @@
 
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Cacheable</span>(value = &#123;<span class="string">"emp"</span>&#125;, keyGenerator = <span class="string">"myKeyGenerator"</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> Employee <span class="title">getEmp</span><span class="params">(Integer id)</span></span>&#123;</span><br><span class="line">    System.out.println(<span class="string">"查询"</span>+ id +<span class="string">"号员工"</span>);</span><br><span class="line">    Employee emp = employeeMapper.getEmpById(id);</span><br><span class="line">    <span class="keyword">return</span> emp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">@Configuration</span><br><span class="line">@ConditionalOnClass(RedisOperations.class)</span><br><span class="line">@EnableConfigurationProperties(RedisProperties.class)</span><br><span class="line">@Import(&#123; LettuceConnectionConfiguration.class, JedisConnectionConfiguration.class &#125;)</span><br><span class="line">public class RedisAutoConfiguration &#123;</span><br><span class="line"></span><br><span class="line">  @Bean</span><br><span class="line">  @ConditionalOnMissingBean(name &#x3D; &quot;redisTemplate&quot;)</span><br><span class="line">  public RedisTemplate&lt;Object, Object&gt; redisTemplate(RedisConnectionFactory redisConnectionFactory)</span><br><span class="line">      throws UnknownHostException &#123;</span><br><span class="line">    RedisTemplate&lt;Object, Object&gt; template &#x3D; new RedisTemplate&lt;&gt;();</span><br><span class="line">    template.setConnectionFactory(redisConnectionFactory);</span><br><span class="line">    return template;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Bean</span><br><span class="line">  @ConditionalOnMissingBean</span><br><span class="line">  public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory)</span><br><span class="line">      throws UnknownHostException &#123;</span><br><span class="line">    StringRedisTemplate template &#x3D; new StringRedisTemplate();</span><br><span class="line">    template.setConnectionFactory(redisConnectionFactory);</span><br><span class="line">    return template;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">public interface RedisSerializer&lt;T&gt; &#123;</span><br><span class="line"></span><br><span class="line">  @Nullable</span><br><span class="line">  byte[] serialize(@Nullable T t) throws SerializationException;</span><br><span class="line"></span><br><span class="line">  @Nullable</span><br><span class="line">  T deserialize(@Nullable byte[] bytes) throws SerializationException;</span><br><span class="line"></span><br><span class="line">  static RedisSerializer&lt;Object&gt; java() &#123;</span><br><span class="line">    return java(null);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  static RedisSerializer&lt;Object&gt; java(@Nullable ClassLoader classLoader) &#123;</span><br><span class="line">    return new JdkSerializationRedisSerializer(classLoader);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  static RedisSerializer&lt;Object&gt; json() &#123;</span><br><span class="line">    return new GenericJackson2JsonRedisSerializer();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  static RedisSerializer&lt;String&gt; string() &#123;</span><br><span class="line">    return StringRedisSerializer.UTF_8;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年06月05日 16:51</p>
-        <p>原始链接： <a class="post-url" href="/2020/06/04/springboot-cache/" title="&#39;Spring Boot 缓存&#39;">https://midkuro.github.io/2020/06/04/springboot-cache/</a></p>
+        <p>最后更新： 2020年06月05日 23:39</p>
+        <p>原始链接： <a class="post-url" href="/2020/06/04/springboot-cache/" title="&#39;Spring Boot Cache 缓存&#39;">https://midkuro.github.io/2020/06/04/springboot-cache/</a></p>
         <footer>
             <a href="https://midkuro.github.io">
                 <img src="/images/logo.png" alt="Kuro">
@@ -366,7 +370,7 @@
     <div class="post-share-list" id="share-list">
         <ul class="share-icons">
           <li>
-            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/06/04/springboot-cache/&title=《'Spring Boot 缓存'》 — Kuro's Blog&pic=images/springboot.jpg" data-title="微博">
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/06/04/springboot-cache/&title=《'Spring Boot Cache 缓存'》 — Kuro's Blog&pic=images/springboot.jpg" data-title="微博">
               <i class="fa fa-weibo"></i>
             </a>
           </li>
@@ -376,7 +380,7 @@
             </a>
           </li>
           <li>
-            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/06/04/springboot-cache/&title=《'Spring Boot 缓存'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/06/04/springboot-cache/&title=《'Spring Boot Cache 缓存'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
               <i class="fa fa-qq"></i>
             </a>
           </li>
@@ -386,7 +390,7 @@
             </a>
           </li>
           <li>
-            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Spring Boot 缓存'》 — Kuro's Blog&url=https://midkuro.github.io/2020/06/04/springboot-cache/&via=https://midkuro.github.io" data-title="Twitter">
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Spring Boot Cache 缓存'》 — Kuro's Blog&url=https://midkuro.github.io/2020/06/04/springboot-cache/&via=https://midkuro.github.io" data-title="Twitter">
               <i class="fa fa-twitter"></i>
             </a>
           </li>
@@ -436,8 +440,8 @@
 <nav id="article-nav">
   
   
-    <a href="/2020/06/03/springboot-run/" id="article-nav-older" class="article-nav-link-wrap">
-      <span class="article-nav-title">&#39;Spring Boot 启动配置原理&#39;</span>
+    <a href="/2020/06/03/springboot-starter/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Spring Boot Starter 启动配置原理&#39;</span>
       <i class="fa fa-hand-o-right" aria-hidden="true"></i>
     </a>
   
@@ -511,7 +515,7 @@
             <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
         </div>
         <div id="sidebar-menu-box-tags">
-            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 13.33px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 13.33px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+            <a href="/tags/ActiveMQ/" style="font-size: 18.57px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 17.14px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a>
         </div>
     </div>
     <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
@@ -544,7 +548,7 @@
     <div class="mobile-header-tag-container">
         <span class="title">Tags</span>
         <div id="mobile-header-container-tags">
-            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 13.33px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 13.33px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+            <a href="/tags/ActiveMQ/" style="font-size: 18.57px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 17.14px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a>
         </div>
     </div>
 </div>
