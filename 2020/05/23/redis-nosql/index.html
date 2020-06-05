@@ -40,7 +40,7 @@
 <meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-23.png">
 <meta property="og:image" content="https://midkuro.github.io/images/nosql-redis/redis-24.png">
 <meta property="article:published_time" content="2020-05-23T02:00:00.000Z">
-<meta property="article:modified_time" content="2020-05-26T04:00:37.808Z">
+<meta property="article:modified_time" content="2020-06-05T06:27:38.980Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Redis">
 <meta property="article:tag" content="NoSql">
@@ -191,13 +191,19 @@
 <p>分布式：不同的多台服务器上面部署不同的服务模块（工程），他们之间通过Rpc/Rmi之间通信和调用，对外提供服务和组内协作。</p>
 <p>集群：不同的多台服务器上面部署相同的服务模块，通过分布式调度软件进行统一的调度，对外提供服务和访问。</p>
 <h1 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h1><p><code>redis</code>采用单进程模型来处理客户端的请求、对读写等事件的响应。</p>
-<ul>
-<li><strong>默认16个数据库</strong>，类似数组下表<strong>从零开始</strong>，初始默认使用零号库。</li>
-<li><strong>默认端口6379</strong></li>
-<li>索引都是从零开始</li>
-<li><a href="http://redisdoc.com/" target="_blank" rel="noopener">常见命令文档</a></li>
-<li>客户端访问<code>redis-cli -h host -p port -a password</code></li>
-</ul>
+<ol>
+<li><strong>默认16个数据库</strong>，类似数组下表<strong>从零开始</strong>，初始默认使用零号库</li>
+</ol>
+<ol start="2">
+<li><p><strong>默认端口6379</strong></p>
+</li>
+<li><p>索引都是从零开始</p>
+</li>
+<li><p><a href="http://redisdoc.com/" target="_blank" rel="noopener">常见命令文档</a></p>
+</li>
+<li><p>客户端访问<code>redis-cli -h host -p port -a password</code></p>
+</li>
+</ol>
 <table>
 <thead>
 <tr>
@@ -283,10 +289,16 @@
 <h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p><img src="/images/nosql-redis/redis-13.png" alt="redis-13"></p>
 <ol>
 <li><code>RDB</code>是一个非常紧凑的文件</li>
-<li><code>RDB</code>在保存<code>RDB</code>文件时父进程唯一需要做的就是<code>fork</code>出一个子进程，接下来的工作全部由子进程来做，父进程不需要再做其他IO操作，所以<code>RDB</code>持久化方式可以最大化<code>redis</code>的性能</li>
-<li>与<code>AOF</code>相比，在恢复大的数据集的时候，<code>RDB</code>方式会更快一些</li>
-<li>数据丢失风险大</li>
-<li><code>RDB</code>需要经常<code>fork</code>子进程来保存数据到硬盘上，当数据集比较大的时候，<code>fork</code>的过程是非常耗时的，可能会导致<code>redis</code>在一些毫秒级别不能响应客户端请求</li>
+</ol>
+<ol start="2">
+<li><p><code>RDB</code>在保存<code>RDB</code>文件时父进程唯一需要做的就是<code>fork</code>出一个子进程，接下来的工作全部由子进程来做，父进程不需要再做其他IO操作，所以<code>RDB</code>持久化方式可以最大化<code>redis</code>的性能</p>
+</li>
+<li><p>与<code>AOF</code>相比，在恢复大的数据集的时候，<code>RDB</code>方式会更快一些</p>
+</li>
+<li><p>数据丢失风险大</p>
+</li>
+<li><p><code>RDB</code>需要经常<code>fork</code>子进程来保存数据到硬盘上，当数据集比较大的时候，<code>fork</code>的过程是非常耗时的，可能会导致<code>redis</code>在一些毫秒级别不能响应客户端请求</p>
+</li>
 </ol>
 <h3 id="AOF-Append-Only-File"><a href="#AOF-Append-Only-File" class="headerlink" title="AOF(Append Only File)"></a>AOF(Append Only File)</h3><p><code>AOF</code>持久化策略是<strong>以日志的形式来记录每个写操作，将<code>Redis</code>执行过的所有写指令记录下来</strong>(读操作不记录)，只许追加文件但不可以改写文件，<code>redis</code>启动之初会读取该文件重新构建数据。</p>
 <p>换言之，<code>redis</code>重启的话就根据日志文件的内容将写指令从前到后执行一次以完成数据的恢复工作。</p>
@@ -307,10 +319,16 @@
 <h4 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h4><p><img src="/images/nosql-redis/redis-14.png" alt="redis-14"></p>
 <ol>
 <li><code>AOF</code>文件是一个只进行追加的日志文件</li>
-<li><code>Redis</code>可以在<code>AOF</code>文件体积变得过大时，自动地在后台对<code>AOF</code>进行重写</li>
-<li><code>AOF</code>文件有序地保存了对数据库执行的所有写入操作，这些写入操作以<code>Redis</code>协议的格式保存，因此<code>AOF</code>文件的内容非常容易被人读懂，对文件进行分析也很轻松</li>
-<li>对于相同的数据集来说，<code>AOF</code>文件的体积通常要大于<code>RDB</code>文件的体积</li>
-<li>根据所使用的<code>fsync</code>策略，<code>AOF</code>的速度可能会慢于<code>RDB</code></li>
+</ol>
+<ol start="2">
+<li><p><code>Redis</code>可以在<code>AOF</code>文件体积变得过大时，自动地在后台对<code>AOF</code>进行重写</p>
+</li>
+<li><p><code>AOF</code>文件有序地保存了对数据库执行的所有写入操作，这些写入操作以<code>Redis</code>协议的格式保存，因此<code>AOF</code>文件的内容非常容易被人读懂，对文件进行分析也很轻松</p>
+</li>
+<li><p>对于相同的数据集来说，<code>AOF</code>文件的体积通常要大于<code>RDB</code>文件的体积</p>
+</li>
+<li><p>根据所使用的<code>fsync</code>策略，<code>AOF</code>的速度可能会慢于<code>RDB</code></p>
+</li>
 </ol>
 <h3 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h3><ol>
 <li><p><code>RDB</code>持久化方式能够在指定的时间间隔能对你的数据进行快照存储</p>
@@ -356,14 +374,22 @@
 <h3 id="总结-3"><a href="#总结-3" class="headerlink" title="总结"></a>总结</h3><p>开启事务后的三个阶段：</p>
 <ol>
 <li>开启：以MULTI开始一个事务</li>
-<li>入队：将多个命令入队到事务中，接到这些命令并不会立即执行，而是放到等待执行的事务队列里面</li>
-<li>执行：由EXEC命令触发事务</li>
+</ol>
+<ol start="2">
+<li><p>入队：将多个命令入队到事务中，接到这些命令并不会立即执行，而是放到等待执行的事务队列里面</p>
+</li>
+<li><p>执行：由EXEC命令触发事务</p>
+</li>
 </ol>
 <p>开启事务后的三个特性：</p>
 <ol>
 <li>单独的隔离操作：事务中的所有命令都会序列化、按顺序地执行。事务在执行的过程中，不会被其他客户端发送来的命令请求所打断。</li>
-<li>没有隔离级别的概念：队列中的命令没有提交之前都不会实际的被执行，因为事务提交前任何指令都不会被实际执行，也就不存在”事务内的查询要看到事务里的更新，在事务外查询不能看到”这个让人万分头痛的问题</li>
-<li>不保证原子性：<code>redis</code>同一个事务中如果有一条命令执行失败，其后的命令仍然会被执行，没有回滚</li>
+</ol>
+<ol start="2">
+<li><p>没有隔离级别的概念：队列中的命令没有提交之前都不会实际的被执行，因为事务提交前任何指令都不会被实际执行，也就不存在”事务内的查询要看到事务里的更新，在事务外查询不能看到”这个让人万分头痛的问题</p>
+</li>
+<li><p>不保证原子性：<code>redis</code>同一个事务中如果有一条命令执行失败，其后的命令仍然会被执行，没有回滚</p>
+</li>
 </ol>
 <h2 id="Redis发布订阅"><a href="#Redis发布订阅" class="headerlink" title="Redis发布订阅"></a>Redis发布订阅</h2><p><img src="/images/nosql-redis/redis-23.png" alt="redis-23"></p>
 <p><strong>必须要先订阅后发布才能收到消息</strong>。</p>
@@ -372,7 +398,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年05月26日 12:00</p>
+        <p>最后更新： 2020年06月05日 14:27</p>
         <p>原始链接： <a class="post-url" href="/2020/05/23/redis-nosql/" title="&#39;Redis（一） NoSql 之 Redis&#39;">https://midkuro.github.io/2020/05/23/redis-nosql/</a></p>
         <footer>
             <a href="https://midkuro.github.io">
