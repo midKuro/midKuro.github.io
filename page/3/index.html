@@ -107,6 +107,143 @@
       <div class="outer">
         <section id="main" class="body-wrap">
   
+    <article id="post-garbage-collector" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/05/21/garbage-collector/"  >&#39;JVM（三） 垃圾收集器&#39;</a>
+    </h1>
+  
+
+          
+              <span class="header-cate">
+                <i class="fa fa-map-marker"></i>
+                  
+                  <a href="/categories/JVM/">JVM</a>
+                  
+              </span>
+          
+      </header>
+    
+    <div class="article-entry " itemprop="articleBody">
+      
+        <div class="article-img">
+            <a href="/2020/05/21/garbage-collector/" >
+                
+                <img src="/images/jvm.jpg" alt="'JVM（三） 垃圾收集器'" title="'JVM（三） 垃圾收集器'">
+                
+            </a>
+        </div>
+        <div class="article-feed">
+            <p>
+                垃圾收集器与内存分配策略GC回收的区间
+
+清理Eden区和Survivor区叫Minor GC；
+清理Old区叫Major GC；
+清理整个堆空间————包括年轻代和老年代叫Full GC；
+
+
+GC回收的定位保守式 GC在进行 GC 的时候，会从一些已知的位置（也就是GC Roots）开始扫...
+            </p>
+        </div>
+      
+        
+    </div>
+    <footer class="article-footer">
+        
+        <ul class="article-footer-menu">
+            
+                <li><i class="fa fa-calendar"></i>2020-05-21</li>
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Java/" class="color5">Java</a>
+      
+    <a href="/tags/JVM/" class="color4">JVM</a>
+      
+  </li>
+
+        </ul>
+        
+            <a href="/2020/05/21/garbage-collector/#more" class="article-more-link" >more&gt;&gt;</a>
+        
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article id="post-garbage-collection" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/05/21/garbage-collection/"  >&#39;JVM（二） 垃圾回收机制&#39;</a>
+    </h1>
+  
+
+          
+              <span class="header-cate">
+                <i class="fa fa-map-marker"></i>
+                  
+                  <a href="/categories/JVM/">JVM</a>
+                  
+              </span>
+          
+      </header>
+    
+    <div class="article-entry " itemprop="articleBody">
+      
+        <div class="article-img">
+            <a href="/2020/05/21/garbage-collection/" >
+                
+                <img src="/images/jvm.jpg" alt="'JVM（二） 垃圾回收机制'" title="'JVM（二） 垃圾回收机制'">
+                
+            </a>
+        </div>
+        <div class="article-feed">
+            <p>
+                垃圾回收机制想要了解垃圾收集策略，需要先了解 Java内存区域
+说起垃圾收集（Garbage Collection，GC），经过半个多世纪的发展，目前的内存的动态分配与内存回收技术已经相当成熟，一切看起来都进入了 “ 自动化 ” 时代，那为什么还要去了解GC和内存分配呢？
+答案很简单：需要排查...
+            </p>
+        </div>
+      
+        
+    </div>
+    <footer class="article-footer">
+        
+        <ul class="article-footer-menu">
+            
+                <li><i class="fa fa-calendar"></i>2020-05-21</li>
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Java/" class="color5">Java</a>
+      
+    <a href="/tags/JVM/" class="color4">JVM</a>
+      
+  </li>
+
+        </ul>
+        
+            <a href="/2020/05/21/garbage-collection/#more" class="article-more-link" >more&gt;&gt;</a>
+        
+    </footer>
+  </div>
+</article>
+
+
+  
     <article id="post-jvm-memory" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -637,151 +774,6 @@ FROM：指定基础镜像，必须为第一个命令
 
 
   
-    <article id="post-linux-software" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/05/20/linux-software/"  >&#39;linux（三） 安装nginx redis&#39;</a>
-    </h1>
-  
-
-          
-              <span class="header-cate">
-                <i class="fa fa-map-marker"></i>
-                  
-                  <a href="/categories/Nginx/">Nginx</a>
-                  
-                  <a href="/categories/Redis/">Redis</a>
-                  
-              </span>
-          
-      </header>
-    
-    <div class="article-entry " itemprop="articleBody">
-      
-        <div class="article-img">
-            <a href="/2020/05/20/linux-software/" >
-                
-                <img src="/images/redis.jpg" alt="'linux（三） 安装nginx redis'" title="'linux（三） 安装nginx redis'">
-                
-            </a>
-        </div>
-        <div class="article-feed">
-            <p>
-                安装nginx1.下载安装包nginx-1.14.1.tar.gz  其他版本请自行下载 官网地址
-2.上传并解压安装包
-1tar -zxvf nginx-1.14.1.tar.gz
-
-3.设置配置信息
-1./configure --prefix=/usr/local/nginx  (安装后的...
-            </p>
-        </div>
-      
-        
-    </div>
-    <footer class="article-footer">
-        
-        <ul class="article-footer-menu">
-            
-                <li><i class="fa fa-calendar"></i>2020-05-20</li>
-            
-            
-  <li class="article-footer-tags">
-    <i class="fa fa-tags"></i>
-      
-    <a href="/tags/Linux/" class="color1">Linux</a>
-      
-    <a href="/tags/Nginx/" class="color1">Nginx</a>
-      
-    <a href="/tags/Redis/" class="color1">Redis</a>
-      
-  </li>
-
-        </ul>
-        
-            <a href="/2020/05/20/linux-software/#more" class="article-more-link" >more&gt;&gt;</a>
-        
-    </footer>
-  </div>
-</article>
-
-
-  
-    <article id="post-linux-systemctl" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/05/20/linux-systemctl/"  >&#39;linux（二） centos7设置应用程序为系统服务&#39;</a>
-    </h1>
-  
-
-          
-              <span class="header-cate">
-                <i class="fa fa-map-marker"></i>
-                  
-                  <a href="/categories/Systemctl/">Systemctl</a>
-                  
-              </span>
-          
-      </header>
-    
-    <div class="article-entry " itemprop="articleBody">
-      
-        <div class="article-img">
-            <a href="/2020/05/20/linux-systemctl/" >
-                
-                <img src="/images/linux.jpg" alt="'linux（二） centos7设置应用程序为系统服务'" title="'linux（二） centos7设置应用程序为系统服务'">
-                
-            </a>
-        </div>
-        <div class="article-feed">
-            <p>
-                centos7使用systemctl以下的 xxx为服务名称，需根据自身需求修改
-1.进入目录
-1cd /usr/lib/systemd/system/
-
-2.创建xxx.service文件
-1vi xxx.service
-
-3.赋予xxx.service文件权限
-1chmod 754 xxx...
-            </p>
-        </div>
-      
-        
-    </div>
-    <footer class="article-footer">
-        
-        <ul class="article-footer-menu">
-            
-                <li><i class="fa fa-calendar"></i>2020-05-20</li>
-            
-            
-  <li class="article-footer-tags">
-    <i class="fa fa-tags"></i>
-      
-    <a href="/tags/Linux/" class="color1">Linux</a>
-      
-    <a href="/tags/Systemctl/" class="color5">Systemctl</a>
-      
-  </li>
-
-        </ul>
-        
-            <a href="/2020/05/20/linux-systemctl/#more" class="article-more-link" >more&gt;&gt;</a>
-        
-    </footer>
-  </div>
-</article>
-
-
-  
 
 
   <nav id="page-nav">
@@ -840,10 +832,10 @@ FROM：指定基础镜像，必须为第一个命令
 <div class="sidebar-menu-box" id="sidebar-menu-box">
     <div class="sidebar-menu-box-container">
         <div id="sidebar-menu-box-categories">
-            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
         </div>
         <div id="sidebar-menu-box-tags">
-            <a href="/tags/ActiveMQ/" style="font-size: 18.57px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 17.14px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a>
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 11.67px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.33px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 13.33px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 16.67px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 15px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
         </div>
     </div>
     <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
@@ -876,7 +868,7 @@ FROM：指定基础镜像，必须为第一个命令
     <div class="mobile-header-tag-container">
         <span class="title">Tags</span>
         <div id="mobile-header-container-tags">
-            <a href="/tags/ActiveMQ/" style="font-size: 18.57px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 17.14px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a>
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 11.67px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.33px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 13.33px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 16.67px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 15px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
         </div>
     </div>
 </div>

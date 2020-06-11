@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Java 密码学 基本概念&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="密码学密码学基本概念密码在我们的生活中有着重要的作用，那么密码究竟来自何方，为何会产生呢？ 密码学是网络安全、信息安全、区块链等产品的基础，常见的非对称加密、对称加密、散列函数等，都属于密码学范畴。 密码学有数千年的历史，从最开始的替换法到如今的非对称加密算法，经历了古典密码学，近代密码学和现代密码学三个阶段。密码学不仅仅是数学家们的智慧，更是如今网络空间安全的重要基础。 古典密码学在古代的战争中">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Java 密码学 基本概念&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/06/10/cryptography-base/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="密码学密码学基本概念密码在我们的生活中有着重要的作用，那么密码究竟来自何方，为何会产生呢？ 密码学是网络安全、信息安全、区块链等产品的基础，常见的非对称加密、对称加密、散列函数等，都属于密码学范畴。 密码学有数千年的历史，从最开始的替换法到如今的非对称加密算法，经历了古典密码学，近代密码学和现代密码学三个阶段。密码学不仅仅是数学家们的智慧，更是如今网络空间安全的重要基础。 古典密码学在古代的战争中">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-01.png">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-02.png">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-03.png">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-04.png">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-05.png">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-06.png">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-07.png">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-08.png">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-09.png">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-10.png">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-11.png">
+<meta property="article:published_time" content="2020-06-10T04:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-10T13:42:37.206Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Cryptography">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-cryptography-base" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Java 密码学 基本概念&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Cryptography/">Cryptography</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-06-10
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="密码学"><a href="#密码学" class="headerlink" title="密码学"></a>密码学</h1><h2 id="密码学基本概念"><a href="#密码学基本概念" class="headerlink" title="密码学基本概念"></a>密码学基本概念</h2><p>密码在我们的生活中有着重要的作用，那么密码究竟来自何方，为何会产生呢？</p>
+<p>密码学是网络安全、信息安全、区块链等产品的基础，常见的非对称加密、对称加密、散列函数等，都属于密码学范畴。</p>
+<p>密码学有数千年的历史，从最开始的替换法到如今的非对称加密算法，经历了古典密码学，近代密码学和现代密码学三个阶段。密码学不仅仅是数学家们的智慧，更是如今网络空间安全的重要基础。</p>
+<h3 id="古典密码学"><a href="#古典密码学" class="headerlink" title="古典密码学"></a>古典密码学</h3><p>在古代的战争中，多见使用隐藏信息的方式保护重要的通信资料。比如先把需要保护的信息用化学药水写到纸上，药水干后，纸上看不出任何的信息，需要使用另外的化学药水涂抹后才可以阅读纸上的信息。</p>
+<p>这些方法都是在保护重要的信息不被他人获取，但藏信息的方式比较容易被他人识破，例如增加哨兵的排查力度，就会发现其中的猫腻，因而随后发展出了较难破解的古典密码学。</p>
+<h4 id="替换法"><a href="#替换法" class="headerlink" title="替换法"></a>替换法</h4><p>替换法很好理解，就是用固定的信息将原文替换成无法直接阅读的密文信息。例如将 <code>b</code> 替换成 <code>w</code> ，<code>e</code> 替换成<code>p</code> ，这样<code>bee</code> 单词就变换成了<code>wpp</code>，不知道替换规则的人就无法阅读出原文的含义。</p>
+<p>替换法有单表替换和多表替换两种形式。单表替换即只有一张原文密文对照表单，发送者和接收者用这张表单来加密解密。在上述例子中，表单即为：<code>a b c d e - s w t r p</code> 。</p>
+<p>多表替换即有多张原文密文对照表单，不同字母可以用不同表单的内容替换。</p>
+<p>例如约定好表单为：表单 <code>1：abcde-swtrp</code> 、表单<code>2：abcde-chfhk</code> 、表单 <code>3：abcde-jftou</code>。</p>
+<p>规定第一个字母用第三张表单，第二个字母用第一张表单，第三个字母用第二张表单，这时 <code>bee</code>单词就变成了</p>
+<p><code>(312)fpk</code> ，破解难度更高，其中 312 又叫做密钥，密钥可以事先约定好，也可以在传输过程中标记出来。</p>
+<h4 id="移位法"><a href="#移位法" class="headerlink" title="移位法"></a>移位法</h4><p>移位法就是将原文中的所有字母都在字母表上向后（或向前）按照一个固定数目进行偏移后得出密文，典型的移位法应用有 “ 恺撒密码 ”。</p>
+<p>例如约定好向后移动2位<code>（abcde - cdefg）</code>，这样 <code>bee</code> 单词就变换成了<code>dgg</code>。</p>
+<p>同理替换法，移位法也可以采用多表移位的方式，典型的多表案例是“维尼吉亚密码”（又译维热纳尔密码），属于多表密码的一种形式。</p>
+<p><img src="/images/java-cryptography/cryptography-01.png" alt="cryptography-1"></p>
+<h4 id="古典密码破解方式"><a href="#古典密码破解方式" class="headerlink" title="古典密码破解方式"></a>古典密码破解方式</h4><p>古典密码虽然很简单，但是在密码史上是使用的最久的加密方式，直到“概率论”的数学方法被发现，古典密码就被破解了。</p>
+<p><img src="/images/java-cryptography/cryptography-02.png" alt="cryptography-2"></p>
+<p>英文单词中字母出现的频率是不同的，e以12.702%的百分比占比最高，z 只占到0.074%，感兴趣的可以去百科查字母频率详细统计数据。如果密文数量足够大，仅仅采用频度分析法就可以破解单表的替换法或移位法。</p>
+<p><img src="/images/java-cryptography/cryptography-03.png" alt="cryptography-3"></p>
+<p>多表的替换法或移位法虽然难度高一些，但如果数据量足够大的话，也是可以破解的。以维尼吉亚密码算法为例，破解方法就是先找出密文中完全相同的字母串，猜测密钥长度，得到密钥长度后再把同组的密文放在一起，使用频率分析法破解。</p>
+<h3 id="近代密码学"><a href="#近代密码学" class="headerlink" title="近代密码学"></a>近代密码学</h3><p>古典密码的安全性受到了威胁，外加使用便利性较低，到了工业化时代，近现代密码被广泛应用。</p>
+<p>恩尼格玛机是二战时期纳粹德国使用的加密机器，后被英国破译，参与破译的人员有被称为计算机科学之父、人工智能之父的图灵。</p>
+<p><img src="/images/java-cryptography/cryptography-04.png" alt="cryptography-4"></p>
+<p>恩尼格玛机使用的加密方式本质上还是移位和替代，只不过因为密码表种类极多，破解难度高，同时加密解密机器化，使用便捷，因而在二战时期得以使用。</p>
+<h3 id="现代密码学"><a href="#现代密码学" class="headerlink" title="现代密码学"></a>现代密码学</h3><h4 id="散列函数"><a href="#散列函数" class="headerlink" title="散列函数"></a>散列函数</h4><p>散列函数，也叫杂凑函数、摘要函数或哈希函数，可将任意长度的消息经过运算，变成固定长度数值，常见的有<code>MD5</code>、<code>SHA-1</code>、<code>SHA256</code>，多应用在文件校验，数字签名中。</p>
+<p>MD5 可以将任意长度的原文生成一个128位（16字节）的哈希值</p>
+<p>SHA-1可以将任意长度的原文生成一个160位（20字节）的哈希值</p>
+<h4 id="对称密码"><a href="#对称密码" class="headerlink" title="对称密码"></a>对称密码</h4><p><strong>对称密码应用了相同的加密密钥和解密密钥。</strong>对称密码分为：序列密码(流密码)，分组密码(块密码)两种。流密码是对信息流中的每一个元素（一个字母或一个比特）作为基本的处理单元进行加密，块密码是先对信息流分块，再对每一块分别加密。</p>
+<p>例如原文为1234567890，流加密即先对1进行加密，再对2进行加密，再对3进行加密……最后拼接成密文；块加密先分成不同的块，如1234成块，5678成块，90XX(XX为补位数字)成块，再分别对不同块进行加密，最后拼接成密文。前文提到的古典密码学加密方法，都属于流加密。</p>
+<h4 id="非对称密码"><a href="#非对称密码" class="headerlink" title="非对称密码"></a>非对称密码</h4><p>对称密码的密钥安全极其重要，加密者和解密者需要提前协商密钥，并各自确保密钥的安全性，一但密钥泄露，即使算法是安全的也无法保障原文信息的私密性。</p>
+<p>在实际的使用中，远程的提前协商密钥不容易实现，即使协商好，在远程传输过程中也容易被他人获取，因此非对称密钥此时就凸显出了优势。</p>
+<p><strong>非对称密码有两支密钥，公钥（<code>publickey</code>）和私钥（<code>privatekey</code>）</strong>，加密和解密运算使用的密钥不同。用公钥对原文进行加密后，需要由私钥进行解密；用私钥对原文进行加密后（此时一般称为签名），需要由公钥进行解密（此时一般称为验签）。公钥可以公开的，大家使用公钥对信息进行加密，再发送给私钥的持有者，私钥持有者使用私钥对信息进行解密，获得信息原文。因为私钥只有单一人持有，因此不用担心被他人解密获取信息原文。</p>
+<h3 id="如何设置密码才安全"><a href="#如何设置密码才安全" class="headerlink" title="如何设置密码才安全"></a>如何设置密码才安全</h3><ul>
+<li>密码不要太常见，不要使用类似于123456式的常用密码。</li>
+<li>各应用软件密码建议不同，避免出现一个应用数据库被脱库，全部应用密码崩塌，</li>
+<li>可在设置密码时增加注册时间、注册地点、应用特性等方法。例如tianjin123456，表示在天津注册的该应用。</li>
+</ul>
+<h2 id="ASCII编码"><a href="#ASCII编码" class="headerlink" title="ASCII编码"></a>ASCII编码</h2><p><code>ASCII</code>（American Standard Code for Information Interchange，美国信息交换标准代码）是基于拉丁字母的一套电脑编码系统，主要用于显示现代英语和其他西欧语言。它是现今最通用的单字节编码系统，并等同于国际标准ISO/IEC 646。</p>
+<p><img src="/images/java-cryptography/cryptography-05.png" alt="cryptography-5"></p>
+<p>创建<code>Maven</code>项目，添加<code>pom.xml</code>依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>commons-io<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>commons-io<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.6<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AsciiDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">char</span> a = <span class="string">'A'</span>;</span><br><span class="line">        <span class="keyword">int</span> b = a;</span><br><span class="line">        <span class="comment">// 打印ascii码</span></span><br><span class="line">        System.out.println(b);  <span class="comment">//65</span></span><br><span class="line">        </span><br><span class="line">        String a = <span class="string">"AaZ"</span>;</span><br><span class="line">        <span class="comment">// 获取ascii码，需要把字符串转成字符</span></span><br><span class="line">        <span class="keyword">char</span>[] chars = a.toCharArray();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">char</span> c : chars) &#123;</span><br><span class="line">            <span class="keyword">int</span> asciiCode = c;</span><br><span class="line">            System.out.println(asciiCode); <span class="comment">//65 97 90</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="恺撒加密"><a href="#恺撒加密" class="headerlink" title="恺撒加密"></a>恺撒加密</h2><h3 id="凯撒密码"><a href="#凯撒密码" class="headerlink" title="凯撒密码"></a>凯撒密码</h3><p>在密码学中，恺撒密码是一种最简单且最广为人知的加密技术。</p>
+<p>凯撒密码最早由古罗马军事统帅盖乌斯·尤利乌斯·凯撒在军队中用来传递加密信息，故称凯撒密码。这是一种位移加密方式，只对26个字母进行位移替换加密，规则简单，容易破解。下面是位移1次的对比：</p>
+<p><img src="/images/java-cryptography/cryptography-06.png" alt="cryptography-6"></p>
+<p>将明文字母表向后移动1位，A变成了B，B变成了C……，Z变成了A。同理，若将明文字母表向后移动3位：</p>
+<p><img src="/images/java-cryptography/cryptography-07.png" alt="cryptography-7"></p>
+<p>则A变成了D，B变成了E……，Z变成了C。</p>
+<p>字母表最多可以移动25位。凯撒密码的明文字母表向后或向前移动都是可以的，通常表述为向后移动，如果要向前移动1位，则等同于向后移动25位，位移选择为25即可。</p>
+<p>它是一种替换加密的技术，明文中的所有字母都在字母表上向后（或向前）按照一个固定数目进行偏移后被替换成密文。</p>
+<p>例如，当偏移量是3的时候，所有的字母A将被替换成D，B变成E，以此类推。</p>
+<p>这个加密方法是以恺撒的名字命名的，当年恺撒曾用此方法与其将军们进行联系。</p>
+<p>恺撒密码通常被作为其他更复杂的加密方法中的一个步骤。</p>
+<p><img src="/images/java-cryptography/cryptography-08.png" alt="cryptography-8"></p>
+<p><strong>简单来说就是当秘钥为n，其中一个待加密字符ch，加密之后的字符为ch+n，当ch+n超过’z’时，回到’a’计数。</strong></p>
+<h3 id="凯撒位移加密"><a href="#凯撒位移加密" class="headerlink" title="凯撒位移加密"></a>凯撒位移加密</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//把 hello world 往右边移动3位</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">KaiserDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String input = <span class="string">"Hello world"</span>;</span><br><span class="line">        <span class="comment">// 往右边移动3位</span></span><br><span class="line">        <span class="keyword">int</span> key = <span class="number">3</span>;</span><br><span class="line">        <span class="comment">// 用来拼接</span></span><br><span class="line">        StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        <span class="comment">// 字符串转换成字节数组</span></span><br><span class="line">        <span class="keyword">char</span>[] chars = input.toCharArray();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">char</span> c : chars) &#123;</span><br><span class="line">            <span class="keyword">int</span> asciiCode = c;</span><br><span class="line">            <span class="comment">// 移动3位</span></span><br><span class="line">            asciiCode = asciiCode + key;</span><br><span class="line">            <span class="keyword">char</span> newChar = (<span class="keyword">char</span>) asciiCode;</span><br><span class="line">            sb.append(newChar);</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        System.out.println(sb.toString()); <span class="comment">//khoor#zruog</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="凯撒加密和解密"><a href="#凯撒加密和解密" class="headerlink" title="凯撒加密和解密"></a>凯撒加密和解密</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">KaiserDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String orignal = <span class="string">"Hello world"</span>;</span><br><span class="line">        <span class="comment">// 往右边偏移三位</span></span><br><span class="line">        <span class="keyword">int</span> key = <span class="number">3</span>;</span><br><span class="line">        <span class="comment">// 选中我即将抽取的代码，按快捷键Ctrl + Alt + M </span></span><br><span class="line">        String encryptKaiser =  encryptKaiser(orignal,key);</span><br><span class="line">        System.out.println(<span class="string">"加密："</span> + encryptKaiser);</span><br><span class="line">        String decryptKaiser =  decryptKaiser(encryptKaiser,key);</span><br><span class="line">        System.out.println(<span class="string">"解密："</span> + decryptKaiser);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 使用凯撒加密方式解密数据</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> encryptedData :密文</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key           :密钥</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> : 源数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">decryptKaiser</span><span class="params">(String encryptedData, <span class="keyword">int</span> key)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 将字符串转为字符数组</span></span><br><span class="line">        <span class="keyword">char</span>[] chars = encryptedData.toCharArray();</span><br><span class="line">        StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">char</span> aChar : chars) &#123;</span><br><span class="line">            <span class="comment">// 获取字符的ASCII编码</span></span><br><span class="line">            <span class="keyword">int</span> asciiCode = aChar;</span><br><span class="line">            <span class="comment">// 偏移数据</span></span><br><span class="line">            asciiCode -= key;</span><br><span class="line">            <span class="comment">// 将偏移后的数据转为字符</span></span><br><span class="line">            <span class="keyword">char</span> result = (<span class="keyword">char</span>) asciiCode;</span><br><span class="line">            <span class="comment">// 拼接数据</span></span><br><span class="line">            sb.append(result);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sb.toString();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 使用凯撒加密方式加密数据</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> orignal :原文</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key     :密钥</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> :加密后的数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">encryptKaiser</span><span class="params">(String orignal, <span class="keyword">int</span> key)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 将字符串转为字符数组</span></span><br><span class="line">        <span class="keyword">char</span>[] chars = orignal.toCharArray();</span><br><span class="line">        StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">char</span> aChar : chars) &#123;</span><br><span class="line">            <span class="comment">// 获取字符的ascii编码</span></span><br><span class="line">            <span class="keyword">int</span> asciiCode = aChar;</span><br><span class="line">            <span class="comment">// 偏移数据</span></span><br><span class="line">            asciiCode += key;</span><br><span class="line">            <span class="comment">// 将偏移后的数据转为字符</span></span><br><span class="line">            <span class="keyword">char</span> result = (<span class="keyword">char</span>) asciiCode;</span><br><span class="line">            <span class="comment">// 拼接数据</span></span><br><span class="line">            sb.append(result);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sb.toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="频度分析法"><a href="#频度分析法" class="headerlink" title="频度分析法"></a>频度分析法</h2><p>加密者选择将组成信息的字母替代成别的字母，比如说将a写成1，这样就不能被解密者直接拿到信息了。</p>
+<p>这难不倒解密者，以英文字母为例，为了确定每个英文字母的出现频率，分析一篇或者数篇普通的英文文章，英文字母出现频率最高的是e，接下来是t，然后是a……，然后检查要破解的密文，也将每个字母出现的频率整理出来，假设密文中出现频率最高的字母是j，那么就可能是e的替身，如果密码文中出现频率次高的但是P，那么可能是t的替身，以此类推便就能解开加密信息的内容。这就是频率分析法。</p>
+<ul>
+<li>将明文字母的出现频率与密文字母的频率相比较的过程</li>
+<li>通过分析每个符号出现的频率而轻易地破译代换式密码</li>
+<li>在每种语言中，冗长的文章中的字母表现出一种可对之进行分辨的频率。</li>
+<li>e是英语中最常用的字母，其出现频率为八分之一</li>
+</ul>
+<p>运行计算<a href="/images/java-cryptography/article.txt">article.txt</a>文本中各个符号的出现次数，如下：</p>
+<p><img src="/images/java-cryptography/cryptography-09.png" alt="cryptography-9"></p>
+<p>然后对该文本进行位移3位，得到密文报，并在此统计密文的符号出现次数：</p>
+<p><img src="/images/java-cryptography/cryptography-10.png" alt="cryptography-10"></p>
+<p>运行结果 # 出现次数最多， 我们知道在英文当中 e 出现的频率是最高的，我们假设现在 # 号，就是 e ，变形而来的 ，我们可以对照 <code>ascii</code> 编码表 ，我们的凯撒加密当中位移是加了一个 key ，所以我们 猜测 两个值直接相差 -66 ，我们现在就以 -66 进行解密 生成一个文件，我们查看第一个文件发现，根本读不懂，所以解密失败，我们在猜测 h 是 e ，h 和 e 之间相差3 ，所以我们在去看第二个解密文件，发现我们可以读懂，解密成功。</p>
+<p><img src="/images/java-cryptography/cryptography-11.png" alt="cryptography-11"></p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年06月10日 21:42</p>
+        <p>原始链接： <a class="post-url" href="/2020/06/10/cryptography-base/" title="&#39;Java 密码学 基本概念&#39;">https://midkuro.github.io/2020/06/10/cryptography-base/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/06/10/cryptography-base/&title=《'Java 密码学 基本概念'》 — Kuro's Blog&pic=images/java.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/06/10/cryptography-base/&title=《'Java 密码学 基本概念'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/06/10/cryptography-base/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Java 密码学 基本概念'》 — Kuro's Blog&url=https://midkuro.github.io/2020/06/10/cryptography-base/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/06/10/cryptography-base/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/06/10/cryptography-base/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Java/" class="color5">Java</a>
+      
+    <a href="/tags/Cryptography/" class="color3">Cryptography</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#密码学"><span class="post-toc-text">密码学</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#密码学基本概念"><span class="post-toc-text">密码学基本概念</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#古典密码学"><span class="post-toc-text">古典密码学</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#替换法"><span class="post-toc-text">替换法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#移位法"><span class="post-toc-text">移位法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#古典密码破解方式"><span class="post-toc-text">古典密码破解方式</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#近代密码学"><span class="post-toc-text">近代密码学</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#现代密码学"><span class="post-toc-text">现代密码学</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#散列函数"><span class="post-toc-text">散列函数</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#对称密码"><span class="post-toc-text">对称密码</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#非对称密码"><span class="post-toc-text">非对称密码</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#如何设置密码才安全"><span class="post-toc-text">如何设置密码才安全</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#ASCII编码"><span class="post-toc-text">ASCII编码</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#恺撒加密"><span class="post-toc-text">恺撒加密</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#凯撒密码"><span class="post-toc-text">凯撒密码</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#凯撒位移加密"><span class="post-toc-text">凯撒位移加密</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#凯撒加密和解密"><span class="post-toc-text">凯撒加密和解密</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#频度分析法"><span class="post-toc-text">频度分析法</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/06/10/cryptography-symmetrical/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Java 密码学 对称加密&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/06/04/springboot-cache/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Spring Boot Cache 缓存&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="cryptography-base" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 11.67px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.33px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 13.33px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 16.67px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 15px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 11.67px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.33px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.33px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 13.33px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 16.67px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 15px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
