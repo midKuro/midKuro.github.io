@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Java 密码学 非对称加密&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="密码学消息摘要消息摘要（Message Digest）又称为数字摘要(Digital Digest)，它是一个唯一对应一个消息或文本的固定长度的值，它由一个单向Hash加密函数对消息进行作用而产生，使用数字摘要生成的值是不可以篡改的，为了保证文件或者值的安全 特点无论输入的消息有多长，计算出来的消息摘要的长度总是固定的。 例如应用MD5算法摘要的消息有128个比特位，用SHA-1算法摘要的消息最终">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Java 密码学 非对称加密&#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/06/15/cryptography-asymmetric/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="密码学消息摘要消息摘要（Message Digest）又称为数字摘要(Digital Digest)，它是一个唯一对应一个消息或文本的固定长度的值，它由一个单向Hash加密函数对消息进行作用而产生，使用数字摘要生成的值是不可以篡改的，为了保证文件或者值的安全 特点无论输入的消息有多长，计算出来的消息摘要的长度总是固定的。 例如应用MD5算法摘要的消息有128个比特位，用SHA-1算法摘要的消息最终">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-24.png">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-25.png">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-26.png">
+<meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-27.png">
+<meta property="article:published_time" content="2020-06-15T13:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-15T14:42:59.924Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Cryptography">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-24.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-cryptography-asymmetric" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Java 密码学 非对称加密&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Cryptography/">Cryptography</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-06-15
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="密码学"><a href="#密码学" class="headerlink" title="密码学"></a>密码学</h1><h2 id="消息摘要"><a href="#消息摘要" class="headerlink" title="消息摘要"></a>消息摘要</h2><p>消息摘要（<code>Message Digest</code>）又称为数字摘要(<code>Digital Digest</code>)，它是一个唯一对应一个消息或文本的固定长度的值，它由一个单向Hash加密函数对消息进行作用而产生，使用数字摘要生成的值是不可以篡改的，<strong>为了保证文件或者值的安全</strong></p>
+<h3 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h3><p>无论输入的消息有多长，计算出来的消息摘要的<strong>长度总是固定</strong>的。</p>
+<p>例如应用<strong>MD5算法摘要的消息有128个比特位</strong>，用<strong>SHA-1算法摘要的消息最终有160比特位</strong>的输出，只要输入的消息不同，对其进行摘要以后产生的摘要消息也必不相同，但<strong>相同的输入必会产生相同的输出</strong>。</p>
+<p><strong>消息摘要是单向、不可逆的</strong>。常见算法：<code>MD5</code>、<code>SHA1</code>、<code>SHA256</code>、<code>SHA512</code>。</p>
+<p><a href="http://tool.oschina.net/encrypt?type=2" target="_blank" rel="noopener">在线加密消息摘要</a></p>
+<p><code>public abstract class MessageDigest</code>类为应用程序提供小弟摘要算法功能，如<code>SHA-1</code>、<code>SHA-256</code>。消息摘要是采用任意大小的数据并输出固定长度散列值得安全单向散列函数。</p>
+<h4 id="字符串消息摘要"><a href="#字符串消息摘要" class="headerlink" title="字符串消息摘要"></a>字符串消息摘要</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MD5Demo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">        <span class="comment">// 原文</span></span><br><span class="line">        String input = <span class="string">"aa"</span>;</span><br><span class="line">        <span class="comment">// 算法</span></span><br><span class="line">        String algorithm = <span class="string">"MD5"</span>;</span><br><span class="line">        <span class="comment">// 获取数字摘要对象</span></span><br><span class="line">        MessageDigest messageDigest = MessageDigest.getInstance(algorithm);</span><br><span class="line">        <span class="comment">// 获取消息数字摘要的字节数组</span></span><br><span class="line">        <span class="keyword">byte</span>[] bytes = messageDigest.digest(input.getBytes());</span><br><span class="line">        System.out.println(<span class="keyword">new</span> String(bytes));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果直接输出<code>bytes</code>字节对象会造成以下乱码：</p>
+<p><img src="/images/java-cryptography/cryptography-24.png" alt="cryptography-24"></p>
+<p>可以像<code>DES</code>一样通过<code>Base64</code>对乱码进行加密处理达到可视化数据的效果。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">byte</span>[] digest = messageDigest.digest(input.getBytes());</span><br><span class="line"><span class="comment">//输出：QSS8CpM1wn8IbyS6IHpJEg==</span></span><br><span class="line">System.out.println(Base64.encode(digest));</span><br></pre></td></tr></table></figure>
+
+<p>使用在线 md5 加密 ，发现我们生成的值和代码生成的值不一样，那是因为消息摘要不是使用<code>base64</code>进行编码的，所以我们需要把值转成16进制</p>
+<p><img src="/images/java-cryptography/cryptography-25.png" alt="cryptography-25"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DigestDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        String input = <span class="string">"aa"</span>;</span><br><span class="line"></span><br><span class="line">        String md5 = getDigest(input, <span class="string">"MD5"</span>);</span><br><span class="line">        <span class="comment">//4124bc0a9335c27f086f24ba207a4912     </span></span><br><span class="line">        System.out.println(md5);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">toHex</span><span class="params">(<span class="keyword">byte</span>[] digest)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">byte</span> b : digest) &#123;</span><br><span class="line">            <span class="comment">// 转成16进制</span></span><br><span class="line">            String s = Integer.toHexString(b &amp; <span class="number">0xff</span>);</span><br><span class="line">            <span class="keyword">if</span> (s.length() == <span class="number">1</span>)&#123;</span><br><span class="line">                <span class="comment">// 如果生成的字符只有一个，高位补0</span></span><br><span class="line">                s = <span class="string">"0"</span>+s;</span><br><span class="line">            &#125;</span><br><span class="line">            sb.append(s);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">"16进制数据的长度："</span> + sb.toString().getBytes().length);</span><br><span class="line">        <span class="keyword">return</span> sb.toString();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">getDigest</span><span class="params">(String input, String algorithm)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//创建消息摘要</span></span><br><span class="line">        MessageDigest messageDigest = MessageDigest.getInstance(algorithm);</span><br><span class="line">        <span class="comment">// 执行消息摘要算法</span></span><br><span class="line">        <span class="keyword">byte</span>[] digest = messageDigest.digest(input.getBytes());</span><br><span class="line">        System.out.println(<span class="string">"密文的字节长度:"</span> + digest.length);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> toHex(digest);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>其他消息摘要：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DigestDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        String input = <span class="string">"aa"</span>;</span><br><span class="line"></span><br><span class="line">        String md5 = getDigest(input, <span class="string">"MD5"</span>);</span><br><span class="line"></span><br><span class="line">        String sha1 = getDigest(input, <span class="string">"SHA-1"</span>);</span><br><span class="line">        System.out.println(sha1);</span><br><span class="line"></span><br><span class="line">        String sha256 = getDigest(input, <span class="string">"SHA-256"</span>);</span><br><span class="line">        System.out.println(sha256);</span><br><span class="line"></span><br><span class="line">        String sha512 = getDigest(input, <span class="string">"SHA-512"</span>);</span><br><span class="line">        System.out.println(sha512);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/java-cryptography/cryptography-26.png" alt="cryptography-26"></p>
+<h4 id="文件消息摘要"><a href="#文件消息摘要" class="headerlink" title="文件消息摘要"></a>文件消息摘要</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">getDigestFile</span><span class="params">(String filePath, String algorithm)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">        FileInputStream fis = <span class="keyword">new</span> FileInputStream(filePath);</span><br><span class="line">        <span class="keyword">int</span> len;</span><br><span class="line">        <span class="keyword">byte</span>[] buffer = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span>];</span><br><span class="line">        ByteArrayOutputStream baos = <span class="keyword">new</span> ByteArrayOutputStream();</span><br><span class="line">        <span class="keyword">while</span> ( (len =  fis.read(buffer))!=-<span class="number">1</span>)&#123;</span><br><span class="line">            baos.write(buffer,<span class="number">0</span>,len);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 获取消息摘要对象</span></span><br><span class="line">        MessageDigest messageDigest = MessageDigest.getInstance(algorithm);</span><br><span class="line">        <span class="comment">// 获取消息摘要</span></span><br><span class="line">        <span class="keyword">byte</span>[] digest = messageDigest.digest(baos.toByteArray());</span><br><span class="line">        System.out.println(<span class="string">"密文的字节长度："</span>+digest.length);</span><br><span class="line">        <span class="keyword">return</span> toHex(digest);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>如使用<code>sha-1</code>算法，可以实现秒传功能，不管咱们如何修改文件的名字，最后得到的值是一样的，如果原文修改了，那么<code>sha-1</code>值就会不一样。</p>
+<p><strong>总结：</strong></p>
+<ul>
+<li><code>MD5</code>算法 : 摘要结果16个字节, 转16进制后32个字节</li>
+<li><code>SHA1</code>算法 : 摘要结果20个字节, 转16进制后40个字节</li>
+<li><code>SHA256</code>算法 : 摘要结果32个字节, 转16进制后64个字节</li>
+<li><code>SHA512</code>算法 : 摘要结果64个字节, 转16进制后128个字节</li>
+</ul>
+<h2 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h2><p>①非对称加密算法又称<strong>现代加密算法</strong>，常见算法有<code>RSA</code>、<code>ECC</code></p>
+<p>② 非对称加密是计算机通信安全的基石，保证了加密数据<strong>不会被破解</strong>。</p>
+<p>③ 与对称加密算法不同，非对称加密算法需要两个密钥：<strong>公开密钥(<code>publickey</code>)</strong> 和<strong>私有密钥(<code>privatekey</code>)</strong></p>
+<p>④ 公开密钥和私有密钥是<strong>一对</strong></p>
+<p>⑤ 如果用<strong>公开密钥</strong>对数据进行<strong>加密</strong>，只有用<strong>对应的私有密钥</strong>才能<strong>解密</strong>。</p>
+<p>⑥ 如果用<strong>私有密钥</strong>对数据进行<strong>加密</strong>，只有用<strong>对应的公开密钥</strong>才能<strong>解密</strong>。</p>
+<p>⑦ 因为加密和解密使用的是两个<strong>不同</strong>的密钥，所以这种算法叫作<strong>非对称加密算法</strong>。</p>
+<p>特点：</p>
+<ol>
+<li>加密和解密使用不同的密钥</li>
+</ol>
+<ol start="2">
+<li><p>如果使用私钥加密, 只能使用公钥解密</p>
+</li>
+<li><p>如果使用公钥加密, 只能使用私钥解密</p>
+</li>
+<li><p>处理数据的速度较慢, 因为安全级别高</p>
+</li>
+</ol>
+<p><code>public abstract class KeyPairGenerator</code>类用于生成公钥和密钥对。密钥对生成器使用<code>getInstance</code>工厂方法构造。</p>
+<h4 id="生成公钥和私钥"><a href="#生成公钥和私钥" class="headerlink" title="生成公钥和私钥"></a>生成公钥和私钥</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.security.utils.Base64;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.io.FileUtils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.crypto.Cipher;</span><br><span class="line"><span class="keyword">import</span> javax.crypto.spec.SecretKeySpec;</span><br><span class="line"><span class="keyword">import</span> java.io.File;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.Charset;</span><br><span class="line"><span class="keyword">import</span> java.security.*;</span><br><span class="line"><span class="keyword">import</span> java.security.spec.PKCS8EncodedKeySpec;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RSAdemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// 加密算法</span></span><br><span class="line">        String algorithm = <span class="string">"RSA"</span>;</span><br><span class="line">        <span class="comment">//  创建密钥对生成器对象</span></span><br><span class="line">        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm);</span><br><span class="line">        <span class="comment">// 生成密钥对</span></span><br><span class="line">        KeyPair keyPair = keyPairGenerator.generateKeyPair();</span><br><span class="line">        <span class="comment">// 生成私钥</span></span><br><span class="line">        PrivateKey privateKey = keyPair.getPrivate();</span><br><span class="line">        <span class="comment">// 生成公钥</span></span><br><span class="line">        PublicKey publicKey = keyPair.getPublic();</span><br><span class="line">        <span class="comment">// 获取私钥字节数组</span></span><br><span class="line">        <span class="keyword">byte</span>[] privateKeyEncoded = privateKey.getEncoded();</span><br><span class="line">        <span class="comment">// 获取公钥字节数组</span></span><br><span class="line">        <span class="keyword">byte</span>[] publicKeyEncoded = publicKey.getEncoded();</span><br><span class="line">        <span class="comment">// 对公私钥进行base64编码</span></span><br><span class="line">        String privateKeyString = Base64.encode(privateKeyEncoded);</span><br><span class="line">        String publicKeyString = Base64.encode(publicKeyEncoded);</span><br><span class="line">        <span class="comment">// 打印私钥</span></span><br><span class="line">        System.out.println(privateKeyString);</span><br><span class="line">        <span class="comment">// 打印公钥</span></span><br><span class="line">        System.out.println(publicKeyString);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行程序：先打印的是私钥 ， 后面打印的是公钥</p>
+<p><img src="/images/java-cryptography/cryptography-27.png" alt="cryptography-27"></p>
+<h3 id="私钥加密"><a href="#私钥加密" class="headerlink" title="私钥加密"></a>私钥加密</h3>
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年06月15日 22:42</p>
+        <p>原始链接： <a class="post-url" href="/2020/06/15/cryptography-asymmetric/" title="&#39;Java 密码学 非对称加密&#39;">https://midkuro.github.io/2020/06/15/cryptography-asymmetric/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/06/15/cryptography-asymmetric/&title=《'Java 密码学 非对称加密'》 — Kuro's Blog&pic=images/cryptography.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/06/15/cryptography-asymmetric/&title=《'Java 密码学 非对称加密'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/06/15/cryptography-asymmetric/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Java 密码学 非对称加密'》 — Kuro's Blog&url=https://midkuro.github.io/2020/06/15/cryptography-asymmetric/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/06/15/cryptography-asymmetric/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/06/15/cryptography-asymmetric/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Java/" class="color5">Java</a>
+      
+    <a href="/tags/Cryptography/" class="color3">Cryptography</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#密码学"><span class="post-toc-text">密码学</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#消息摘要"><span class="post-toc-text">消息摘要</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#特点"><span class="post-toc-text">特点</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#字符串消息摘要"><span class="post-toc-text">字符串消息摘要</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#文件消息摘要"><span class="post-toc-text">文件消息摘要</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#非对称加密"><span class="post-toc-text">非对称加密</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#生成公钥和私钥"><span class="post-toc-text">生成公钥和私钥</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#私钥加密"><span class="post-toc-text">私钥加密</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/06/10/cryptography-symmetrical/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Java 密码学 对称加密&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="cryptography-asymmetric" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.57px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 17.14px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.57px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 17.14px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
