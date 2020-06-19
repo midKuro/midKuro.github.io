@@ -28,7 +28,7 @@
 <meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-22.png">
 <meta property="og:image" content="https://midkuro.github.io/images/java-cryptography/cryptography-23.png">
 <meta property="article:published_time" content="2020-06-10T13:00:00.000Z">
-<meta property="article:modified_time" content="2020-06-12T14:02:18.706Z">
+<meta property="article:modified_time" content="2020-06-16T02:54:06.248Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="Cryptography">
@@ -203,7 +203,7 @@
 <p>④ + / = 2个符号</p>
 <p><code>Base58</code>是<code>Bitcoin</code>(比特币)中使用的一种编码方式，主要用于产生<code>Bitcoin</code>的钱包地址，相比<code>Base64</code>，<code>Base58</code>不使用数字”0”，字母大写”O”，字母大写”I”，和字母小写”i”，以及”+”和”/“符号。</p>
 <p><strong><code>base64</code> 是 3个字节为一组，一个字节 8位，一共 就是24位 ，然后，把3个字节转成4组，每组6位</strong></p>
-<p>3 * 8 = 4 * 6 = 24 ，每组6位，<strong>缺少的2位，会在高位进行补0 **，这样做的好处在于 ，base取的是后面6位，去掉高2位 ，</strong>那么<code>Base64</code>的取值就可以控制在0-63位了，所以就叫base64**，111 111 = 32 + 16 + 8 + 4 + 2 + 1 = 63</p>
+<p>3 * 8 = 4 * 6 = 24 ，每组6位，<strong>缺少的2位，会在高位进行补0</strong>，这样做的好处在于 ，base取的是后面6位，去掉高2位 ，<strong>那么<code>Base64</code>的取值就可以控制在0-63位了，所以就叫base64</strong>，111 111 = 32 + 16 + 8 + 4 + 2 + 1 = 63</p>
 <p><img src="/images/java-cryptography/cryptography-15.png" alt="cryptography-19"></p>
 <p>可能发现一个问题，<code>base64</code>加密后有个<code>=</code>号，但是在映射表里面没有发现 <code>=</code>号 ， 这个地方需要注意，等号非常特殊，<strong>因为base64是三个字节一组 ，如果当我们的位数不够的时候，会使用等号来补齐</strong>。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.sun.org.apache.xerces.internal.impl.dv.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestBase64</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//  1表示一个字节，不够三个字节，所以需要后面通过 == 号补齐</span></span><br><span class="line">        System.out.println(Base64.encode(<span class="string">"1"</span>.getBytes()));     <span class="comment">//MQ==</span></span><br><span class="line">        System.out.println(Base64.encode(<span class="string">"12"</span>.getBytes()));    <span class="comment">//MTI=</span></span><br><span class="line">        System.out.println(Base64.encode(<span class="string">"123"</span>.getBytes()));   <span class="comment">//MTIz</span></span><br><span class="line">        <span class="comment">// 测试:中文(UTF-8)占6个字节，6 * 8 = 48 ，刚刚好被整除，所以没有等号</span></span><br><span class="line">        System.out.println(Base64.encode(<span class="string">"测试"</span>.getBytes()));   <span class="comment">//5rWL6K+V</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -267,7 +267,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年06月12日 22:02</p>
+        <p>最后更新： 2020年06月16日 10:54</p>
         <p>原始链接： <a class="post-url" href="/2020/06/10/cryptography-symmetrical/" title="&#39;Java 密码学 对称加密&#39;">https://midkuro.github.io/2020/06/10/cryptography-symmetrical/</a></p>
         <footer>
             <a href="https://midkuro.github.io">
