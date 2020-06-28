@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Spring Cloud Nacos &#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="Spring Cloud Nacos简介Nacos：前四个字母分别为Naming和Configuration的前两个字母，最后s为Service。  Nacos(Dynamic Naming and Configuration Service)是一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。 Nacos就是注册中心 + 配置中心的组合， Nacos &#x3D; Eureka + Conf">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Spring Cloud Nacos &#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/06/28/springcloud-nacos/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Spring Cloud Nacos简介Nacos：前四个字母分别为Naming和Configuration的前两个字母，最后s为Service。  Nacos(Dynamic Naming and Configuration Service)是一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。 Nacos就是注册中心 + 配置中心的组合， Nacos &#x3D; Eureka + Conf">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-01.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-02.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-03.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-04.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-05.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-06.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-07.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-09.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-08.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-10.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-11.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-12.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-13.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-14.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-15.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-16.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-17.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-18.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-19.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-20.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-21.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-22.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-23.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-24.png">
+<meta property="article:published_time" content="2020-06-28T03:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-28T03:22:20.405Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="SpringCloud">
+<meta property="article:tag" content="Nacos">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/springcloud-nacos/nacos-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-springcloud-nacos" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Spring Cloud Nacos &#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Nacos/">Nacos</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-06-28
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Spring-Cloud-Nacos"><a href="#Spring-Cloud-Nacos" class="headerlink" title="Spring Cloud Nacos"></a>Spring Cloud Nacos</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p><code>Nacos</code>：前四个字母分别为<code>Naming</code>和<code>Configuration</code>的前两个字母，最后s为<code>Service</code>。 </p>
+<p><code>Nacos</code>(<code>Dynamic Naming and Configuration Service</code>)是一个更易于构建云原生应用的动态服务发现、配置管理和服务管理平台。</p>
+<p><code>Nacos</code>就是注册中心 + 配置中心的组合， <code>Nacos</code> = <code>Eureka</code> + <code>Config</code> + <code>Bus</code>。</p>
+<p><a href="https://spring-cloud-alibaba-group.github.io/github-pages/greenwich/spring-cloud-alibaba.html" target="_blank" rel="noopener">Spring Cloud Alibaba文档</a></p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p><a href="https://github.com/alibaba/nacos/tags" target="_blank" rel="noopener">下载地址</a>  <a href="https://nacos.io/zh-cn/docs/what-is-nacos.html" target="_blank" rel="noopener">帮助文档</a> 从官网下载<code>Nacos</code>，解压压缩包，进入<code>bin</code>目录运行<code>start.cmd</code>，<code>linux</code>环境则运行<code>start.sh</code>。</p>
+<p>命令运行成功后直接访问<code>http://localhost:8848/nacos</code>，默认的账号密码都是<code>nacos</code>。</p>
+<p><img src="/images/springcloud-nacos/nacos-01.png" alt="nacos-01"></p>
+<p><img src="/images/springcloud-nacos/nacos-02.png" alt="nacos-02"></p>
+<p>看到上述页面则表示安装成功。</p>
+<h2 id="服务提供者"><a href="#服务提供者" class="headerlink" title="服务提供者"></a>服务提供者</h2><p><strong>新建项目<code>nacos-provider</code>，引入服务发现及<code>alibaba</code>依赖：</strong></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--pom.xml--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">"http://maven.apache.org/POM/4.0.0"</span> <span class="attr">xmlns:xsi</span>=<span class="string">"http://www.w3.org/2001/XMLSchema-instance"</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xsi:schemaLocation</span>=<span class="string">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>cn.midkuro.com<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>nacos-provider<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.0.1-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">packaging</span>&gt;</span>jar<span class="tag">&lt;/<span class="name">packaging</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>nacos-provider<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">parent</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.2.2.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">parent</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">  <span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">maven-jar-plugin.version</span>&gt;</span>2.6<span class="tag">&lt;/<span class="name">maven-jar-plugin.version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">project.build.sourceEncoding</span>&gt;</span>UTF-8<span class="tag">&lt;/<span class="name">project.build.sourceEncoding</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">project.reporting.outputEncoding</span>&gt;</span>UTF-8<span class="tag">&lt;/<span class="name">project.reporting.outputEncoding</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">java.version</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">java.version</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">spring.cloud.version</span>&gt;</span>Hoxton.SR1<span class="tag">&lt;/<span class="name">spring.cloud.version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">spring.cloud.alibaba.version</span>&gt;</span>2.1.0.RELEASE<span class="tag">&lt;/<span class="name">spring.cloud.alibaba.version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-actuator<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">        </span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-nacos-discovery<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line">  </span><br><span class="line">  <span class="tag">&lt;<span class="name">dependencyManagement</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-dependencies<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;spring.cloud.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">type</span>&gt;</span>pom<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">scope</span>&gt;</span>import<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">            </span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-alibaba-dependencies<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;spring.cloud.alibaba.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">type</span>&gt;</span>pom<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">scope</span>&gt;</span>import<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependencyManagement</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#application.yml</span></span><br><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">8081</span></span><br><span class="line"></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-provider</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line">        </span><br><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoints:</span> </span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">'*'</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestController</span> </span>&#123;</span><br><span class="line">  <span class="meta">@Value</span>(<span class="string">"$&#123;server.port&#125;"</span>)</span><br><span class="line">  <span class="keyword">private</span> String port;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@GetMapping</span>(<span class="string">"/port"</span>)</span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">port</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">"My Port : "</span> + port;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EnableDiscoveryClient</span></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NacosProdiverApplication</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    SpringApplication.run(NacosProdiverApplication<span class="class">.<span class="keyword">class</span>, <span class="title">args</span>)</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过引入<code>springCloud</code>及<code>alibaba</code>依赖，并编写相关配置文件，并在启动类上增加注解<code>@EnableDiscoveryClient</code>，启动即可注册到<code>nacos</code>中。</p>
+<p><img src="/images/springcloud-nacos/nacos-03.png" alt="nacos-03"></p>
+<p><strong><code>nacos</code>天生支持负载均衡，因为<code>nacos</code>集成了<code>netfilx</code>的<code>ribbon</code>依赖。</strong></p>
+<p>在启动多个相同实例时，如下：</p>
+<p><img src="/images/springcloud-nacos/nacos-04.png" alt="nacos-04"></p>
+<h2 id="服务消费者"><a href="#服务消费者" class="headerlink" title="服务消费者"></a>服务消费者</h2><p>新建<code>nacos-consumer</code>项目，<code>pom.xml</code>与上文<code>nacos-provider</code>项目相同。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#application.yml</span></span><br><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">8083</span></span><br><span class="line"></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-cunsumer</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line">        </span><br><span class="line"><span class="attr">service:</span> </span><br><span class="line">  <span class="attr">provider-url:</span> <span class="string">http://nacos-provider/</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ApplicationContextConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Bean</span></span><br><span class="line">  <span class="meta">@LoadBalanced</span> <span class="comment">//注意必须配置负载均衡注解</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> RestTemplate <span class="title">restTemplate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> RestTemplate();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestController</span> </span>&#123;</span><br><span class="line">  <span class="meta">@Value</span>(<span class="string">"$&#123;service.provider-url&#125;"</span>)</span><br><span class="line">  <span class="keyword">private</span> String serviceURL;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Autowired</span></span><br><span class="line">  <span class="keyword">private</span> RestTemplate restTemplate;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@GetMapping</span>(<span class="string">"/consumer/port"</span>)</span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">port</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> restTemplate.getForObject(serviceURL + <span class="string">"/port"</span>, String<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这时候启动<code>nacos-consumer</code>项目，并且运行两个<code>nacos-provider</code>项目，用以测试负载均衡。</p>
+<p><img src="/images/springcloud-nacos/nacos-05.png" alt="nacos-05"></p>
+<p>通过使用<code>RestTemplate</code>以及<code>@LoadBalanced</code>请求访问<code>nacos-provider</code>服务，达到负载均衡的目的。</p>
+<p><img src="/images/springcloud-nacos/nacos-06.png" alt="nacos-06"></p>
+<p><img src="/images/springcloud-nacos/nacos-07.png" alt="nacos-07"></p>
+<h2 id="配置中心"><a href="#配置中心" class="headerlink" title="配置中心"></a>配置中心</h2><p>新建<code>nacos-config-client</code>项目，并且新建两个配置文件<code>application.yml</code>和<code>bootstrap.yml</code>。</p>
+<p><code>Nacos</code>和<code>Spring-cloud-config</code>一样，在项目初始化时，要保证先从配置中心进行配置拉取，拉取配置之后，才能保证项目的正常启动。</p>
+<p><code>SpringBoot</code>中配置文件的加载是存在优先顺序的，<strong><code>bootstrap</code>优先级高于<code>application</code></strong>。</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#bootstrap.yaml</span></span><br><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">3377</span></span><br><span class="line"></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-config-client</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line">      <span class="attr">config:</span> </span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span> <span class="comment">#配置中心地址</span></span><br><span class="line">        <span class="attr">file-extension:</span> <span class="string">yaml</span> <span class="comment">#指定配置文件后缀</span></span><br></pre></td></tr></table></figure>
+
+<p>将主体配置放在<code>bootstrap.yml</code>中。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#application.yml</span></span><br><span class="line"><span class="attr">spring:</span> </span><br><span class="line">  <span class="attr">profiles:</span> </span><br><span class="line">    <span class="attr">active:</span> <span class="string">dev</span> <span class="comment">#表示开发环境</span></span><br></pre></td></tr></table></figure>
+
+<p>环境配置放在<code>application.yml</code>中。</p>
+<p>在 <code>Nacos Spring Cloud</code> 中，<code>dataId</code> 的完整格式如下：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">$&#123;prefix&#125;-$&#123;spring.profile.active&#125;.$&#123;file-extension&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>prefix</code> 默认为 <code>spring.application.name</code> 的值，也可以通过配置项 <code>spring.cloud.nacos.config.prefix</code>来配置。</p>
+<p>也就是说，默认情况是：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">$&#123;spring.application.name&#125;-$&#123;spring.profile.active&#125;.$&#123;file-extension&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>例如上述的<code>nacos-config-client</code>的配置文件，则产生的对应的<code>dataId</code>则为：<code>nacos-config-client-dev.yaml</code>。</p>
+<p><img src="/images/springcloud-nacos/nacos-09.png" alt="nacos-09"></p>
+<p><strong>切记<code>nacos</code>只支持<code>yaml</code>后缀格式，暂不兼容<code>yml</code>，所以在编写的过程中需要注意不要写错。</strong></p>
+<p><code>spring.profile.active</code> 即为当前环境对应的 profile，详情可以参考 <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-profiles.html#boot-features-profiles" target="_blank" rel="noopener">Spring Boot文档</a>。 <strong>注意：当 <code>spring.profile.active</code> 为空时，对应的连接符 <code>-</code> 也将不存在，dataId 的拼接格式变成 <code>${prefix}.${file-extension}</code></strong></p>
+<p><code>file-exetension</code> 为配置内容的数据格式，可以通过配置项 <code>spring.cloud.nacos.config.file-extension</code> 来配置。目前只支持 <code>properties</code> 和 <code>yaml</code> 类型。</p>
+<p>通过 <code>Spring Cloud</code> 原生注解 <code>@RefreshScope</code> 实现配置自动更新。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RefreshScope</span> <span class="comment">// 支持nasos的动态刷新工能</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestController</span> </span>&#123;</span><br><span class="line">  <span class="meta">@Value</span>(<span class="string">"$&#123;config.info&#125;"</span>)</span><br><span class="line">  <span class="keyword">private</span> String configInfo;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@GetMapping</span>(<span class="string">"/configInfo"</span>)</span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">getConfigInfo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> configInfo;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/springcloud-nacos/nacos-08.png" alt="nacos-08"></p>
+<p>通过在<code>nacos</code>界面上新建配置，新建``nacos-config-client-dev.yaml<code>的</code>dataId`。</p>
+<p><img src="/images/springcloud-nacos/nacos-10.png" alt="nacos-10"></p>
+<p>点击右下角的发布保存之后就能够在列表中看到：</p>
+<p><img src="/images/springcloud-nacos/nacos-11.png" alt="nacos-11"></p>
+<p>通过访问之前编写的<code>Controller</code>能够看到获取得到配置：</p>
+<p><img src="/images/springcloud-nacos/nacos-12.png" alt="nacos-12"></p>
+<p><strong>自动刷新</strong>：</p>
+<p>通过在<code>nacos</code>界面上进行调整编辑配置文件，将<code>version = 1</code>改成<code>version = 2</code>，在不重启<code>mtex-config-client</code>的情况下，能够看到配置已经刷新。</p>
+<p><img src="/images/springcloud-nacos/nacos-13.png" alt="nacos-13"></p>
+<h2 id="命名空间"><a href="#命名空间" class="headerlink" title="命名空间"></a>命名空间</h2><p><img src="/images/springcloud-nacos/nacos-14.png" alt="nacos-14"></p>
+<p>命名空间类似于<code>java</code>里面的<code>package</code>名和类名，最外层的<code>namespace</code>是可以用于区分部署环境的，<code>Group</code>和<code>DataID</code>逻辑上区分两个目标对象。</p>
+<p><img src="/images/springcloud-nacos/nacos-15.png" alt="nacos-15"></p>
+<p>默认情况下：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Namespace</span>=<span class="string">public</span></span><br><span class="line"><span class="attr">Group</span>=<span class="string">DEFAULT_GROUP</span></span><br><span class="line"><span class="attr">Cluster</span>=<span class="string">DEFAULT</span></span><br></pre></td></tr></table></figure>
+
+<p><strong><code>Nacos</code>默认的命名空间是<code>public</code></strong>，<code>Namespace</code>主要用来实现隔离。比放说现在有三个环境：开发、测试、生产环境，我们可以创建三个<code>Namespace</code>，不同的<code>Namespace</code>之间是隔离的。</p>
+<p><code>Group</code>默认是<code>DEFAULT_GROUP</code>，<code>Group</code>可以把不同的微服务划分到同一个分组里面去。</p>
+<p><code>Service</code>就是微服务，一个<code>Service</code>可以包含多个<code>Cluster</code>（集群），<code>Nacos</code>默认<code>Cluster</code>是<code>DEFAULT</code>，<code>Cluster</code>是对指定微服务的一个虚拟划分。</p>
+<p>比放说为了容灾，将<code>Service</code>微服务分别部署在杭州机房和广州机房，这时候就可以给杭州机房的<code>Service</code>微服务起一个集群名称，给广州机房的<code>Service</code>微服务起另一个集群名称，还可以尽量让同一个机房的微服务互相调用，以提升性能。</p>
+<p>最后<code>Instance</code>，指的是微服务的实例。</p>
+<h2 id="DataID"><a href="#DataID" class="headerlink" title="DataID"></a>DataID</h2><p><img src="/images/springcloud-nacos/nacos-16.png" alt="nacos-16"></p>
+<p>通过在同个分组里，编写不同的运行环境后缀的配置文件</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span> </span><br><span class="line">  <span class="attr">profiles:</span> </span><br><span class="line">    <span class="comment">#表示开发环境</span></span><br><span class="line">    <span class="attr">active:</span> <span class="string">dev</span></span><br><span class="line">    <span class="comment">#active:pro</span></span><br></pre></td></tr></table></figure>
+
+<p>并通过修改<code>application.yml</code>的相关配置切换环境。</p>
+<h2 id="Group"><a href="#Group" class="headerlink" title="Group"></a>Group</h2><p><img src="/images/springcloud-nacos/nacos-17.png" alt="nacos-17"></p>
+<p>通过新建同名称的文件，所属不同分组，以切换分组的形式切换相关配置运行环境。</p>
+<p><img src="/images/springcloud-nacos/nacos-18.png" alt="nacos-18"></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span> </span><br><span class="line">  <span class="attr">profiles:</span> </span><br><span class="line">    <span class="attr">active:</span> <span class="string">info</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="NameSpace"><a href="#NameSpace" class="headerlink" title="NameSpace"></a>NameSpace</h2><p><img src="/images/springcloud-nacos/nacos-19.png" alt="nacos-19"></p>
+<p>新建命名空间，会生成一个唯一的命名空间ID。</p>
+<p><img src="/images/springcloud-nacos/nacos-20.png" alt="nacos-20"></p>
+<p><img src="/images/springcloud-nacos/nacos-21.png" alt="nacos-21"></p>
+<p>点击切换命名空间，并且在<code>bootstrap.yml</code>中<code>namespace</code>属性配置相关的命名空间ID。</p>
+<p><img src="/images/springcloud-nacos/nacos-22.png" alt="nacos-22"></p>
+<h2 id="持久化"><a href="#持久化" class="headerlink" title="持久化"></a>持久化</h2><p>默认<code>Nacos</code>使用嵌入式数据库实现数据的存储，所以，如果启动多个默认配置下的<code>Nacos</code>节点，数据存储是存在一致性问题的，为了解决这个问题，<code>Nacos</code>采用了集中式存储的方式来支持集群化部署，<strong>目前只支持<code>Mysql</code>的存储</strong>。</p>
+<p><strong>Nacos支持三种部署模式</strong>：</p>
+<ul>
+<li>单机模式 - 用于测试和单机试用。</li>
+<li>集群模式 - 用于生产环境，确保高可用。</li>
+<li>多集群模式 - 用于多数据中心场景。</li>
+</ul>
+<p><strong>单机模式支持<code>mysql</code>：</strong></p>
+<p>在0.7版本之前，在单机模式时nacos使用嵌入式数据库实现数据的存储，不方便观察数据存储的基本情况。0.7版本增加了支持mysql数据源能力，具体的操作步骤：</p>
+<p>1.安装数据库，版本要求：5.6.5+</p>
+<p>2.初始化<code>mysql</code>数据库，数据库初始化文件：<code>nacos-mysql.sql</code>，<strong>拷贝文件内容到<code>mysql</code>中执行</strong>。</p>
+<p>3.修改<code>conf/application.properties</code>文件，增加支持mysql数据源配置（目前只支持<code>mysql</code>），添加<code>mysql</code>数据源的<code>url</code>、用户名和密码。</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">spring.datasource.platform</span>=<span class="string">mysql</span></span><br><span class="line"></span><br><span class="line"><span class="meta">db.num</span>=<span class="string">1</span></span><br><span class="line"><span class="meta">db.url.0</span>=<span class="string">jdbc:mysql://127.0.0.1:3306/nacos_devtest?characterEncoding=utf8&amp;connectTimeout=1000&amp;socketTimeout=3000&amp;autoReconnect=true</span></span><br><span class="line"><span class="meta">db.user</span>=<span class="string">nacos_devtest</span></span><br><span class="line"><span class="meta">db.password</span>=<span class="string">youdontknow</span></span><br></pre></td></tr></table></figure>
+
+<p>再以单机模式启动<code>nacos</code>，<code>nacos</code>所有写嵌入式数据库的数据都写到了<code>mysql</code>。</p>
+<h2 id="集群"><a href="#集群" class="headerlink" title="集群"></a>集群</h2><p>以<code>linux</code>环境为例，在已经配置好<code>mysql</code>作为持久化的前提下，拷贝<code>cluster.conf.example</code>文件，将新文件重命名为<code>cluster.conf</code>。</p>
+<p>并编辑文件配置集群IP和端口</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">192.168.1.131:3333</span><br><span class="line">192.168.1.131:4444</span><br><span class="line">192.168.1.131:5555</span><br></pre></td></tr></table></figure>
+
+<p>这个IP必须是<code>linux</code>命令<code>hostname -i</code>能够识别到的<code>IP</code>。</p>
+<p>备份<code>startup.sh</code>，并修改<code>startup.sh</code>，增加 <code>-p</code>参数相关配置及日志输出携带端口，若使用的版本是<code>1.3.0</code>以上，则会已存在<code>-p</code>参数，换成其他英文字母即可。</p>
+<p><img src="/images/springcloud-nacos/nacos-23.png" alt="nacos-23"></p>
+<p><img src="/images/springcloud-nacos/nacos-24.png" alt="nacos-24"></p>
+<p>在<code>nacos V1.3.0</code>版本中，<strong>支持了内嵌式关系型分布式数据库</strong>，其默认的<code>start.sh</code>部分内容如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">while getopts ":m:f:s:c:p:" opt</span><br><span class="line">do</span><br><span class="line">    case $opt in</span><br><span class="line">        m)</span><br><span class="line">            MODE=$OPTARG;;</span><br><span class="line">        f)</span><br><span class="line">            FUNCTION_MODE=$OPTARG;;</span><br><span class="line">        s)</span><br><span class="line">            SERVER=$OPTARG;;</span><br><span class="line">        c)</span><br><span class="line">            MEMBER_LIST=$OPTARG;;</span><br><span class="line">        p)</span><br><span class="line">            EMBEDDED_STORAGE=$OPTARG;;</span><br><span class="line">        ?)</span><br><span class="line">        echo "Unknown parameter"</span><br><span class="line">        exit 1;;</span><br><span class="line">    esac</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+<p>可以看到新增了<code>p</code>参数，用来提供集群部署时可以不依赖<code>Mysql</code>，以便降低中小用户的集群运维部署成本（大客户，生产环境依然建议依赖<code>Mysql</code>，以便有更高的性能），其开启命令为：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./startup.sh -p embedded</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年06月28日 11:22</p>
+        <p>原始链接： <a class="post-url" href="/2020/06/28/springcloud-nacos/" title="&#39;Spring Cloud Nacos &#39;">https://midkuro.github.io/2020/06/28/springcloud-nacos/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/06/28/springcloud-nacos/&title=《'Spring Cloud Nacos '》 — Kuro's Blog&pic=images/springboot.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/06/28/springcloud-nacos/&title=《'Spring Cloud Nacos '》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/06/28/springcloud-nacos/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Spring Cloud Nacos '》 — Kuro's Blog&url=https://midkuro.github.io/2020/06/28/springcloud-nacos/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/06/28/springcloud-nacos/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/06/28/springcloud-nacos/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/SpringCloud/" class="color2">SpringCloud</a>
+      
+    <a href="/tags/Nacos/" class="color1">Nacos</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Spring-Cloud-Nacos"><span class="post-toc-text">Spring Cloud Nacos</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#简介"><span class="post-toc-text">简介</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安装"><span class="post-toc-text">安装</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#服务提供者"><span class="post-toc-text">服务提供者</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#服务消费者"><span class="post-toc-text">服务消费者</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#配置中心"><span class="post-toc-text">配置中心</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#命名空间"><span class="post-toc-text">命名空间</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#DataID"><span class="post-toc-text">DataID</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Group"><span class="post-toc-text">Group</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#NameSpace"><span class="post-toc-text">NameSpace</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#持久化"><span class="post-toc-text">持久化</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#集群"><span class="post-toc-text">集群</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/06/15/cryptography-asymmetric/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Java 密码学 非对称加密&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="springcloud-nacos" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.57px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 17.14px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 10px;">SpringCloud</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.57px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 17.14px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 10px;">SpringCloud</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
