@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Spring Cloud Stream &#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="Spring Cloud Stream是什么Spring Cloud Stream是一个构件消息驱动微服务的框架。 应用程序通过inputs或者outputs来与Spring Cloud Stream中的binder对象交互。通过我们配置binding，Spring Cloud Stream的binder对象负责与消息中间件交互。 通过使用Spring Integration来链接消息代理中间件以">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Spring Cloud Stream &#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/06/28/springcloud-stream/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Spring Cloud Stream是什么Spring Cloud Stream是一个构件消息驱动微服务的框架。 应用程序通过inputs或者outputs来与Spring Cloud Stream中的binder对象交互。通过我们配置binding，Spring Cloud Stream的binder对象负责与消息中间件交互。 通过使用Spring Integration来链接消息代理中间件以">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-stream/stream-01.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-stream/stream-02.png">
+<meta property="og:image" content="https://midkuro.github.io/images/springcloud-stream/stream-03.png">
+<meta property="article:published_time" content="2020-06-28T05:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-09T08:16:14.993Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="SpringCloud">
+<meta property="article:tag" content="Stream">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/springcloud-stream/stream-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-springcloud-stream" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Spring Cloud Stream &#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Stream/">Stream</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-06-28
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Spring-Cloud-Stream"><a href="#Spring-Cloud-Stream" class="headerlink" title="Spring Cloud Stream"></a>Spring Cloud Stream</h1><h2 id="是什么"><a href="#是什么" class="headerlink" title="是什么"></a>是什么</h2><p><code>Spring Cloud Stream</code>是一个构件消息驱动微服务的框架。</p>
+<p>应用程序通过<code>inputs</code>或者<code>outputs</code>来与<code>Spring Cloud Stream</code>中的<code>binder</code>对象交互。通过我们配置<code>binding</code>，<code>Spring Cloud Stream</code>的<code>binder</code>对象负责与消息中间件交互。</p>
+<p>通过使用<code>Spring Integration</code>来链接消息代理中间件以实现消息事件驱动。<code>Spring Cloud Stream</code>为一些供应商的消息中间件产品提供了个性化的自动化配置实现，引用了发布-订阅、消费组、分区的三个核心概念。 </p>
+<p><a href="https://spring.io/projects/spring-cloud-stream" target="_blank" rel="noopener">官方文档</a></p>
+<p>在没有绑定器这个概念的情况下，<code>SpringBoot</code>应用要直接与消息中间件进行信息交互的时候，由于各个消息中间件构建的初衷不同，他们的实现细节会有较大的差异，通过定义绑定器作为中间件，完美地实现了<strong>应用程序与消息中间件细节之间的隔离，</strong>通过向应用程序暴露统一的<code>Channel</code>通道，使得应用程序不需要再考虑各种不同的消息中间件实现。</p>
+<p><strong>spring官方目前只支持RabbitMQ和Kafka，rocketMQ的由alibaba研发支持</strong>。</p>
+<p><img src="/images/springcloud-stream/stream-01.png" alt="stream-01"> </p>
+<h2 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h2><p><img src="/images/springcloud-stream/stream-02.png" alt="sentinel-02"> </p>
+<p><img src="/images/springcloud-stream/stream-03.png" alt="sentinel-03"> </p>
+<p><code>Binder</code> ：很方便的链接中间件，屏蔽差异</p>
+<p><code>Channel</code>：通道，是队列<code>queue</code>的一种抽象，在消息通讯系统中就是实现存储和转发的媒介，通过<code>Cahnnel</code>对队列进行配置。</p>
+<p><code>Source</code>和<code>Sink</code>：参照对象是<code>Spring Cloud Stream</code>自身，从<code>Stream</code>发布消息就是输出，接受消息就是输入。</p>
+<table>
+<thead>
+<tr>
+<th>组成</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Middleware</td>
+<td>中间件，目前只支持RabbitMQ和Kafka</td>
+</tr>
+<tr>
+<td>Binder</td>
+<td>Binder是应用与消息中间件之间的封装，目前实行了Kafka和RabbitMQ的Binder，通过Binder可以很方便的连接中间件，可以动态的改变消息类型(对应于Kafka的topic，RabbitMQ的exchange)，这些都可以通过配置文件来实现</td>
+</tr>
+<tr>
+<td>@Input</td>
+<td>注解标识输入通道，通过该输入通道接收到的消息进入应用程序</td>
+</tr>
+<tr>
+<td>@Output</td>
+<td>注解标识输出通道，发布的消息将通过该通道离开应用程序</td>
+</tr>
+<tr>
+<td>@StreamListener</td>
+<td>监听队列，用于消费者的队列的消息接收</td>
+</tr>
+<tr>
+<td>@EnableBinding</td>
+<td>指信道channel和exchange绑定在一起</td>
+</tr>
+</tbody></table>
+<h2 id="生产者"><a href="#生产者" class="headerlink" title="生产者"></a>生产者</h2><p>新建<code>springBoot</code>工程<code>cloud-stream-privider</code></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--pom.xml--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-stream-rocketmq<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">8801</span></span><br><span class="line"></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">cloud-stream-rocketmq-provider</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="string">localhost:8848</span></span><br><span class="line">      <span class="attr">config:</span> </span><br><span class="line">        <span class="comment">#配置中心地址</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="string">localhost:8848</span></span><br><span class="line">        <span class="comment">#指定配置文件后缀</span></span><br><span class="line">        <span class="attr">file-extension:</span> <span class="string">yaml</span></span><br><span class="line">    <span class="attr">stream:</span></span><br><span class="line">      <span class="attr">rocketmq:</span></span><br><span class="line">        <span class="attr">binder:</span> <span class="comment">#RocketMQ需要配置name-server</span></span><br><span class="line">          <span class="attr">name-server:</span> <span class="string">localhost:9876</span></span><br><span class="line">      <span class="attr">bindings:</span>   <span class="comment">#服务的整合处理</span></span><br><span class="line">        <span class="attr">output:</span> <span class="comment">#生产者默认绑定器名称</span></span><br><span class="line">          <span class="attr">destination:</span> <span class="string">testChannel</span> <span class="comment">#表示要使用的目的地名称</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cn.midkuro.com.service;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ProviderService</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">send</span><span class="params">(String message)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.cloud.stream.annotation.EnableBinding;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cloud.stream.messaging.Source;</span><br><span class="line"><span class="keyword">import</span> org.springframework.messaging.MessageChannel;</span><br><span class="line"><span class="keyword">import</span> org.springframework.messaging.support.MessageBuilder;</span><br><span class="line"></span><br><span class="line"><span class="meta">@EnableBinding</span>(Source<span class="class">.<span class="keyword">class</span>)  //定义消息推送通道</span></span><br><span class="line"><span class="class"><span class="title">public</span> <span class="title">class</span> <span class="title">ProviderServiceImpl</span> <span class="keyword">implements</span> <span class="title">ProviderService</span> </span>&#123;</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> MessageChannel output;  <span class="comment">//消息发送通道</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">send</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        String serial = UUID.randomUUID().toString();</span><br><span class="line">        output.send(MessageBuilder.withPayload(serial).build());</span><br><span class="line">        System.out.println(<span class="string">"***********serial:"</span>+serial);</span><br><span class="line">        <span class="keyword">return</span> serial;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RefreshScope</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ProviderController</span> </span>&#123;</span><br><span class="line">  <span class="meta">@Autowired</span></span><br><span class="line">  <span class="keyword">private</span> ProviderService service;</span><br><span class="line">  <span class="meta">@GetMapping</span>(<span class="string">"/sendMessage"</span>)</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sendMessage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    service.send();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="消费者"><a href="#消费者" class="headerlink" title="消费者"></a>消费者</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">8802</span></span><br><span class="line"></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">cloud-stream-rocketmq-consumer</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="string">localhost:8848</span></span><br><span class="line">      <span class="attr">config:</span> </span><br><span class="line">        <span class="comment">#配置中心地址</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="string">localhost:8848</span></span><br><span class="line">        <span class="comment">#指定配置文件后缀</span></span><br><span class="line">        <span class="attr">file-extension:</span> <span class="string">yaml</span></span><br><span class="line">    <span class="attr">stream:</span></span><br><span class="line">      <span class="attr">rocketmq:</span> </span><br><span class="line">        <span class="attr">binder:</span></span><br><span class="line">          <span class="attr">name-server:</span> <span class="string">localhost:9876</span></span><br><span class="line">      <span class="attr">bindings:</span></span><br><span class="line">        <span class="attr">input:</span> <span class="comment">#消费者默认绑定器名称</span></span><br><span class="line">          <span class="attr">destination:</span> <span class="string">testChannel</span> <span class="comment">#与生产者相同的目的地名称</span></span><br><span class="line">          <span class="attr">group:</span> <span class="string">cloud-stream-rocketmq-consumer</span> <span class="comment">#rocketMQ要求消费者必须配置分组</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cn.midkuro.com.Service;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.annotation.Value;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cloud.stream.annotation.EnableBinding;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cloud.stream.annotation.StreamListener;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cloud.stream.messaging.Sink;</span><br><span class="line"><span class="keyword">import</span> org.springframework.messaging.Message;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@EnableBinding</span>(Sink<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class"><span class="title">public</span> <span class="title">class</span> <span class="title">ConsumerService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Value</span>(<span class="string">"$&#123;server.port&#125;"</span>)</span><br><span class="line">  <span class="keyword">private</span> String serverPort;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@StreamListener</span>(Sink.INPUT)</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">input</span><span class="params">(Message&lt;String&gt; message)</span> </span>&#123;</span><br><span class="line">    System.out.println(<span class="string">"我是消费者1号，-----》接受到的消息是："</span> + message.getPayload() + <span class="string">"\t"</span> + serverPort);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="自定义Binding"><a href="#自定义Binding" class="headerlink" title="自定义Binding"></a>自定义Binding</h2><p><code>org.springframework.cloud.stream.binder.Binder</code>是<code>Spring Cloud</code>对消息容器的抽象，不同的消息容器有不同的实现，通过它可以屏蔽各消息容器的内部细节。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Binder</span>&lt;<span class="title">T</span>, <span class="title">C</span> <span class="keyword">extends</span> <span class="title">ConsumerProperties</span>, <span class="title">P</span> <span class="keyword">extends</span> <span class="title">ProducerProperties</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="function">Binding&lt;T&gt; <span class="title">bindConsumer</span><span class="params">(String name, String group, T inboundBindTarget,</span></span></span><br><span class="line"><span class="function"><span class="params">			C consumerProperties)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="function">Binding&lt;T&gt; <span class="title">bindProducer</span><span class="params">(String name, T outboundBindTarget, P producerProperties)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Binder</code>可以生成<code>Binding</code>，<strong><code>Binding</code>用来绑定消息容器的生产者和消费者</strong>。</p>
+<p>它有两种类型，<code>INPUT</code>和<code>OUTPUT</code>，<strong><code>INPUT</code>对应于消费者，<code>OUTPUT</code>对应于生产者</strong>。</p>
+<p>可以通过在配置类上使用<code>@EnableBinding</code>指定需要使用的<code>Binding</code>，它指定的是一个接口，在对应接口中会定义一些标注了<code>@Input</code>或<code>@Output</code>的方法，它们就对应一个<code>Binding</code>了。</p>
+<p><code>Spring</code>提供了两个内置的接口，<code>Source</code>和<code>Sink</code>，<code>Source</code>对应的是<code>OUTPUT</code>生产者，<code>Sink</code>对应的是<code>INPUT</code>消费者。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Source</span> </span>&#123;</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Name of the output channel.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">  String OUTPUT = <span class="string">"output"</span>;</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span> output channel</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">  <span class="meta">@Output</span>(Source.OUTPUT)</span><br><span class="line">  <span class="function">MessageChannel <span class="title">output</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Sink</span> </span>&#123;</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Input channel name.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">  String INPUT = <span class="string">"input"</span>;</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span> input channel.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">  <span class="meta">@Input</span>(Sink.INPUT)</span><br><span class="line">  <span class="function">SubscribableChannel <span class="title">input</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在一个<code>EnableBinding</code>注解中可以同时定义多个<code>Binding</code>，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EnableBinding</span>(value = &#123; Source<span class="class">.<span class="keyword">class</span>, <span class="title">Sink</span>.<span class="title">class</span> &#125;) </span></span><br><span class="line"><span class="class">//或者</span></span><br><span class="line"><span class="class">@<span class="title">EnableBinding</span>(<span class="title">Processor</span>.<span class="title">class</span>)</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Processor</span> <span class="keyword">extends</span> <span class="title">Source</span>, <span class="title">Sink</span> </span>&#123; <span class="comment">//spring内置提供</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>默认情况下，它的内置<code>binding</code>是<code>input</code>和<code>output</code>，也就是我们配置文件配置的：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">stream:</span></span><br><span class="line">      <span class="attr">bindings:</span></span><br><span class="line">        <span class="attr">output:</span> <span class="comment">#生产者默认绑定器名称</span></span><br></pre></td></tr></table></figure>
+
+<p>如果自定义了一个<code>binding</code>配置，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  cloud:</span><br><span class="line">    stream:</span><br><span class="line">      bindings:</span><br><span class="line">        mybinding: #自定义绑定器名称</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">MyBinding</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Output</span>(<span class="string">"mybinding"</span>) <span class="comment">// 通过@Output指定绑定器名称mybinding</span></span><br><span class="line">  <span class="function">MessageChannel <span class="title">output</span><span class="params">()</span></span>; <span class="comment">// 使用@Output注解标注的输入管道需要使用MessageChannel来订阅通道</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EnableBinding</span>(MyBinding<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class"><span class="title">public</span> <span class="title">class</span> <span class="title">ProviderServiceImpl</span> <span class="keyword">implements</span> <span class="title">ProviderService</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">  <span class="meta">@Qualifier</span>(<span class="string">"mybinding"</span>)</span><br><span class="line">  <span class="keyword">private</span> MessageChannel output;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>若是消费者频道，则是在方法上通过<code>@StreamListener</code>进行标注，表示它将监听消费某个<code>Binding</code>的消息。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@StreamListener</span>(<span class="string">"mybinding"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>当有多个<code>Binding</code>时，可以通过进行组合，并在使用注入时通过<code>@Qualifier</code>进行区分即可，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">MutipleMyBinding</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Output</span>(<span class="string">"mybinding1"</span>)</span><br><span class="line">    <span class="function">MessageChannel <span class="title">output1</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Output</span>(<span class="string">"mybinding2"</span>)</span><br><span class="line">    <span class="function">MessageChannel <span class="title">output2</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="重复消费"><a href="#重复消费" class="headerlink" title="重复消费"></a>重复消费</h2><p>比如在如下场景中，订单系统做集群部署，都会从消息队列中获取订单信息，那如果一个订单同时被两个服务获取到，就会造成数据错误，得避免这种情况，这时候<strong>需要使用<code>stream</code>中的消息分组来解决</strong>。</p>
+<p>在<code>stream</code>中处于同一个group中的多个消费者是<strong>竞争关系</strong>，就能保证消息只会被其中一个应用消费一次。<strong>不同组是可以全面消费的(重复消费)</strong>。</p>
+<p>微服务应用放置于同一个group中，就能够保证消息只会被其中一个应用消费一次。<strong>不同的组是可以重复消费的，同一个组内会发生竞争关系，只有一个可以消费。</strong></p>
+<p>通过在配置文件配置分组配置实现</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">stream:</span></span><br><span class="line">      <span class="attr">bindings:</span></span><br><span class="line">        <span class="attr">input:</span></span><br><span class="line">          <span class="attr">group:</span> <span class="string">myGroupName</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="持久化"><a href="#持久化" class="headerlink" title="持久化"></a>持久化</h2><p><strong>配置了分组名称的消费者，在程序重新启动时，会接着消费未消费的消息，而没有配置分组的，则会丢失之前未消费的消息。</strong></p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年07月09日 16:16</p>
+        <p>原始链接： <a class="post-url" href="/2020/06/28/springcloud-stream/" title="&#39;Spring Cloud Stream &#39;">https://midkuro.github.io/2020/06/28/springcloud-stream/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/06/28/springcloud-stream/&title=《'Spring Cloud Stream '》 — Kuro's Blog&pic=images/springcloud.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/06/28/springcloud-stream/&title=《'Spring Cloud Stream '》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/06/28/springcloud-stream/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Spring Cloud Stream '》 — Kuro's Blog&url=https://midkuro.github.io/2020/06/28/springcloud-stream/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/06/28/springcloud-stream/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/06/28/springcloud-stream/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/SpringCloud/" class="color2">SpringCloud</a>
+      
+    <a href="/tags/Stream/" class="color2">Stream</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Spring-Cloud-Stream"><span class="post-toc-text">Spring Cloud Stream</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#是什么"><span class="post-toc-text">是什么</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#设计思想"><span class="post-toc-text">设计思想</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#生产者"><span class="post-toc-text">生产者</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#消费者"><span class="post-toc-text">消费者</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#自定义Binding"><span class="post-toc-text">自定义Binding</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#重复消费"><span class="post-toc-text">重复消费</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#持久化"><span class="post-toc-text">持久化</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/06/29/springcloud-seata/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Spring Cloud Seata &#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/06/28/springcloud-sentinel/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Spring Cloud Sentinel &#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="springcloud-stream" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.57px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 10px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.57px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/NIO/" style="font-size: 10px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 10px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
