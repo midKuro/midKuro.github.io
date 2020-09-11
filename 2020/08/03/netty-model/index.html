@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Netty（一）Netty简介 与 零拷贝 &#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="Netty简介与零拷贝零拷贝我们说零拷贝，是从操作系统的角度来说的。因为内核缓冲区之间，没有数据是重复的（只有 kernel buffer 有一份数据），也就是说，是没有CPU拷贝的。 零拷贝不仅仅带来更少的数据复制，还能带来其他的性能优势，例如更少的上下文切换，更少的 CPU 缓存伪共享以及无 CPU 校验和计算。 在 Java 程序中，常用的零拷贝有 mmap(内存映射) 和 sendFile">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Netty（一）Netty简介 与 零拷贝 &#39;">
+<meta property="og:url" content="https://midkuro.github.io/2020/08/03/netty-model/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Netty简介与零拷贝零拷贝我们说零拷贝，是从操作系统的角度来说的。因为内核缓冲区之间，没有数据是重复的（只有 kernel buffer 有一份数据），也就是说，是没有CPU拷贝的。 零拷贝不仅仅带来更少的数据复制，还能带来其他的性能优势，例如更少的上下文切换，更少的 CPU 缓存伪共享以及无 CPU 校验和计算。 在 Java 程序中，常用的零拷贝有 mmap(内存映射) 和 sendFile">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.github.io/images/nio-netty/netty-01.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nio-netty/netty-02.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nio-netty/netty-03.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nio-netty/netty-04.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nio-netty/netty-05.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nio-netty/netty-06.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nio-netty/netty-07.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nio-netty/netty-08.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nio-netty/netty-09.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nio-netty/netty-10.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nio-netty/netty-12.png">
+<meta property="og:image" content="https://midkuro.github.io/images/nio-netty/netty-11.png">
+<meta property="article:published_time" content="2020-08-03T04:00:00.000Z">
+<meta property="article:modified_time" content="2020-09-08T14:22:23.254Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="NIO">
+<meta property="article:tag" content="Netty">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.github.io/images/nio-netty/netty-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.github.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-netty-model" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Netty（一）Netty简介 与 零拷贝 &#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Netty/">Netty</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-08-03
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Netty简介与零拷贝"><a href="#Netty简介与零拷贝" class="headerlink" title="Netty简介与零拷贝"></a>Netty简介与零拷贝</h1><h2 id="零拷贝"><a href="#零拷贝" class="headerlink" title="零拷贝"></a>零拷贝</h2><p><strong>我们说零拷贝，是从操作系统的角度来说的。因为内核缓冲区之间，没有数据是重复的（只有 kernel buffer 有一份数据），也就是说，是没有CPU拷贝的</strong>。</p>
+<p>零拷贝不仅仅带来更少的数据复制，还能带来其他的性能优势，例如更少的上下文切换，更少的 CPU 缓存伪共享以及无 CPU 校验和计算。</p>
+<p>在 Java 程序中，常用的零拷贝有 <code>mmap</code>(内存映射) 和 <code>sendFile</code>。</p>
+<h3 id="传统IO"><a href="#传统IO" class="headerlink" title="传统IO"></a>传统IO</h3><p><img src="/images/nio-netty/netty-01.png" alt="netty-01"></p>
+<p><strong>传统的IO模型，从数据传输到客户端需要经过3次上下文切换,4次数据拷贝。</strong></p>
+<p>上下文切换：从用户态–&gt;内核态–&gt;用户态–&gt;内核态</p>
+<p>数据拷贝：DMA–&gt;内核态-&gt;用户态–&gt;Socket缓冲区–&gt;TCP协议(网卡)</p>
+<h3 id="mmap"><a href="#mmap" class="headerlink" title="mmap"></a>mmap</h3><p><img src="/images/nio-netty/netty-02.png" alt="netty-02"></p>
+<p><code>mmap</code>通过内存映射，将文件映射到内核缓冲区，同时，用户空间可以共享内核空间的数据。这样，在进行网络传输时，就可以减少内核空间到用户控件的拷贝次数。</p>
+<p><strong><code>mmap</code>实现了3次上下文切换，3次数据拷贝</strong>。</p>
+<h3 id="sendFile"><a href="#sendFile" class="headerlink" title="sendFile"></a>sendFile</h3><p><img src="/images/nio-netty/netty-03.png" alt="netty-03"></p>
+<p><code>Linux</code> 2.1 版本 提供了 <code>sendFile</code> 函数，其基本原理如下：数据根本不经过用户态，直接从内核缓冲区进入到 <code>Socket Buffer</code>，同时，由于和用户态完全无关，就减少了一次上下文切换。</p>
+<p><img src="/images/nio-netty/netty-04.png" alt="netty-04"></p>
+<p><code>Linux</code> 在 2.4 版本中，做了一些修改，避免了从内核缓冲区拷贝到 <code>Socket buffer</code> 的操作，直接拷贝到协议栈，从而再一次减少了数据拷贝。</p>
+<p>这里其实有 一次cpu 拷贝： 内核态–&gt; <code>socket buffer</code>，但是，拷贝的信息很少，比如<code>lenght</code> ,<code>offset</code>, 消耗低，可以忽略。</p>
+<h3 id="区别"><a href="#区别" class="headerlink" title="区别"></a>区别</h3><p><code>mmap</code> 适合小数据量读写，<code>sendFile</code> 适合大文件传输。</p>
+<p><code>mmap</code> 需要 3 次上下文切换，3 次数据拷贝；<code>sendFile</code> 需要 2 次上下文切换，最少 2 次数据拷贝。</p>
+<p><code>sendFile</code> 可以利用<code>DMA</code> 方式，减少 <code>CPU</code> 拷贝，<code>mmap</code> 则不能（必须从内核拷贝到 Socket 缓冲区）。</p>
+<h2 id="Netty介绍"><a href="#Netty介绍" class="headerlink" title="Netty介绍"></a>Netty介绍</h2><p><code>Netty</code> 是由 <code>JBOSS</code> 提供的一个 Java 开源框架。<code>Netty</code> 提供异步的、基于事件驱动的网络应用程序框架，用以快速开发高性能、高可靠性的网络 IO 程序</p>
+<p> <code>Netty</code> 可以帮助你快速、简单的开发出一个网络应用，相当于简化和流程化了 NIO 的开发过程</p>
+<p><code>Netty</code> 是目前最流行的 <code>NIO</code> 框架，<code>Netty</code> 在互联网领域、大数据分布式计算领域、游戏行业、通信行业等获得了广泛的应用，知名的 <code>Elasticsearch</code> 、<code>Dubbo</code> 框架内部都采用了 <code>Netty</code>。</p>
+<h3 id="NIO存在的问题"><a href="#NIO存在的问题" class="headerlink" title="NIO存在的问题"></a>NIO存在的问题</h3><p><code>NIO</code> 的类库和 API 繁杂，使用麻烦：需要熟练掌握 <code>Selector</code>、<code>ServerSocketChannel</code>、<code>SocketChannel</code>、<code>ByteBuffer</code> 等。<br>需要具备其他的额外技能：要熟悉 Java 多线程编程，因为 NIO 编程涉及到 <code>Reactor</code> 模式，你必须对多线程和网络编程非常熟悉，才能编写出高质量的 NIO 程序。</p>
+<p>开发工作量和难度都非常大：例如客户端面临断连重连、网络闪断、半包读写、失败缓存、网络拥塞和异常流的处理等等。</p>
+<p><strong>JDK NIO 的 Bug</strong>：例如臭名昭著的 Epoll Bug，它会导致 Selector 空轮询，最终导致 CPU 100%。直到 JDK 1.7 版本该问题仍旧存在，没有被根本解决。</p>
+<h3 id="Netty的优点"><a href="#Netty的优点" class="headerlink" title="Netty的优点"></a>Netty的优点</h3><p><code>Netty</code> 对 JDK 自带的 <code>NIO</code> 的 API 进行了封装，解决了上述问题。</p>
+<p>设计优雅：适用于各种传输类型的统一 API 阻塞和非阻塞 Socket；基于灵活且可扩展的事件模型，可以清晰地分离关注点；高度可定制的线程模型 - 单线程，一个或多个线程池.</p>
+<p>使用方便：详细记录的 Javadoc，用户指南和示例；没有其他依赖项，JDK 5（Netty 3.x）或 6（Netty 4.x）就足够了。<br>高性能、吞吐量更高：延迟更低；减少资源消耗；最小化不必要的内存复制。</p>
+<p>安全：完整的 SSL/TLS 和 StartTLS 支持。<br>社区活跃、不断更新：社区活跃，版本迭代周期短，发现的 Bug 可以被及时修复，同时，更多的新功能会被加入。</p>
+<h3 id="Netty版本说明"><a href="#Netty版本说明" class="headerlink" title="Netty版本说明"></a>Netty版本说明</h3><p>netty版本分为  netty3.x  和  netty4.x、netty5.x<br>因为Netty5出现重大bug，已经被官网废弃了，目前推荐使用的是Netty4.x的稳定版本。<br><a href="https://bintray.com/netty/downloads/netty/" target="_blank" rel="noopener">下载地址</a></p>
+<h2 id="线程模型"><a href="#线程模型" class="headerlink" title="线程模型"></a>线程模型</h2><p>不同的线程模式，对程序的性能有很大影响，为了搞清<code>Netty</code> 线程模式，我们来系统的讲解下 各个线程模式， 最后看看Netty 线程模型有什么优越性.</p>
+<p>目前存在的线程模型有：传统阻塞 I/O 服务模型 和<code>Reactor</code> 模式。</p>
+<p>根据 <code>Reactor</code> 的数量和处理资源池线程的数量不同，有 3 种典型的实现：</p>
+<ul>
+<li>单 Reactor 单线程</li>
+<li>单 Reactor 多线程</li>
+<li>主从 Reactor 多线程 </li>
+</ul>
+<p><code>Netty</code> 线程模式：基于主从 <code>Reactor</code> 多线程模型做了一定的改进，其中主从 <code>Reactor</code> 多线程模型有多个 <code>Reactor</code>。</p>
+<h3 id="传统阻塞-I-O-服务模型"><a href="#传统阻塞-I-O-服务模型" class="headerlink" title="传统阻塞 I/O 服务模型"></a>传统阻塞 I/O 服务模型</h3><p><img src="/images/nio-netty/netty-05.png" alt="netty-05"></p>
+<p><strong>工作原理图</strong><br>黄色的框表示对象， 蓝色的框表示线程，白色的框表示方法(API)。</p>
+<p><strong>模型特点</strong><br>采用阻塞IO模式获取输入的数据，每个连接都需要独立的线程完成数据的输入，业务处理和数据返回。</p>
+<p><strong>问题分析</strong><br>当并发数很大，就会创建大量的线程，占用很大系统资源，连接创建后，如果当前线程暂时没有数据可读，该线程会阻塞在<code>read</code>操作，造成线程资源浪费。</p>
+<h3 id="Reactor-模式"><a href="#Reactor-模式" class="headerlink" title="Reactor 模式"></a>Reactor 模式</h3><p><strong>针对传统阻塞 I/O 服务模型的 2 个缺点，解决方案</strong>： </p>
+<p>基于 I/O 复用模型：多个连接共用一个阻塞对象，应用程序只需要在一个阻塞对象等待，无需阻塞等待所有连接。当某个连接有新的数据可以处理时，操作系统通知应用程序，线程从阻塞状态返回，开始进行业务处理。</p>
+<p><code>Reactor</code>对应的叫法: </p>
+<ol>
+<li>反应器模式 </li>
+<li>分发者模式(<code>Dispatcher</code>) </li>
+<li>通知者模式(<code>notifier</code>)</li>
+</ol>
+<p>基于线程池复用线程资源：不必再为每个连接创建线程，将连接完成后的业务处理任务分配给线程进行处理，一个线程可以处理多个连接的业务。</p>
+<p><img src="/images/nio-netty/netty-06.png" alt="netty-06"></p>
+<p><code>Reactor</code> 模式，通过一个或多个输入同时传递给服务处理器的模式(基于事件驱动)。</p>
+<p>服务器端程序处理传入的多个请求，并将它们同步分派到相应的处理线程， 因此<code>Reactor</code>模式也叫 <code>Dispatcher</code>模式。</p>
+<p><code>Reactor</code> 模式使用<strong>IO复用监听事件</strong>， 收到事件后，分发给某个线程(进程), 这点就是网络服务器高并发处理关键。</p>
+<h4 id="核心组成"><a href="#核心组成" class="headerlink" title="核心组成"></a>核心组成</h4><p><code>Reactor</code>：<code>Reactor</code> 在一个单独的线程中运行，负责监听和分发事件，分发给适当的处理程序来对 IO 事件做出反应。</p>
+<p> 它就像公司的电话接线员，它接听来自客户的电话并将线路转移到适当的联系人；</p>
+<p><code>Handlers</code>：处理程序执行 I/O 事件要完成的实际事件，类似于客户想要与之交谈的公司中的实际官员。<code>Reactor</code> 通过调度适当的处理程序来响应 I/O 事件，处理程序执行非阻塞操作。</p>
+<h4 id="单-Reactor-单线程"><a href="#单-Reactor-单线程" class="headerlink" title="单 Reactor 单线程"></a>单 Reactor 单线程</h4><p><img src="/images/nio-netty/netty-07.png" alt="netty-07"><br><strong>方案说明</strong>：</p>
+<ol>
+<li><code>Select</code> 是前面 I/O 复用模型介绍的标准网络编程 API，可以实现应用程序通过一个阻塞对象监听多路连接请求。</li>
+</ol>
+<ol start="2">
+<li><p><code>Reactor</code> 对象通过 <code>Select</code> 监控客户端请求事件，收到事件后通过 <code>Dispatch</code> 进行分发。</p>
+</li>
+<li><p>如果是建立连接请求事件，则由<code>Acceptor</code> 通过 <code>Accept</code> 处理连接请求，然后创建一个 <code>Handler</code> 对象处理连接完成后的后续业务处理。</p>
+</li>
+<li><p>如果不是建立连接事件，则 <code>Reactor</code> 会分发调用连接对应的 <code>Handler</code> 来响应，<code>Handler</code> 会完成 <code>Read</code>–&gt;业务处理–&gt;<code>Send</code> 的完整业务流程</p>
+</li>
+</ol>
+<p>结合实例：服务器端用一个线程通过多路复用搞定所有的 IO 操作（包括连接，读、写等），编码简单，清晰明了，但是如果客户端连接数量较多，将无法支撑。</p>
+<p><strong>方案优缺点分析：</strong></p>
+<p><strong>优点</strong>：模型简单，没有多线程、进程通信、竞争的问题，全部都在一个线程中完成</p>
+<p><strong>缺点</strong>：性能问题，只有一个线程，无法完全发挥多核 CPU 的性能。<code>Handler</code> 在处理某个连接上的业务时，整个进程无法处理其他连接事件，很容易导致性能瓶颈<br>缺点：可靠性问题，线程意外终止，或者进入死循环，会导致整个系统通信模块不可用，不能接收和处理外部消息，造成节点故障。</p>
+<p><strong>使用场景</strong>：客户端的数量有限，业务处理非常快速，比如 <code>Redis</code>在业务处理的时间复杂度 O(1) 的情况。</p>
+<h4 id="单Reactor多线程"><a href="#单Reactor多线程" class="headerlink" title="单Reactor多线程"></a>单Reactor多线程</h4><p><img src="/images/nio-netty/netty-08.png" alt="netty-08"></p>
+<ol>
+<li><strong>方案说明</strong>：<br><code>Reactor</code> 对象通过<code>select</code> 监控客户端请求事件, 收到事件后，通过<code>dispatch</code>进行分发。</li>
+</ol>
+<ol start="2">
+<li><p>如果建立连接请求, 则由<code>Acceptor</code> 通过<code>accept</code> 处理连接请求, 然后创建一个<code>Handler</code>对象处理完成连接后的各种事件。</p>
+</li>
+<li><p>如果不是连接请求，则由<code>reactor</code>分发调用连接对应的<code>handler</code> 来处理。</p>
+</li>
+<li><p><code>handler</code> 只负责响应事件，不做具体的业务处理, 通过<code>read</code> 读取数据后，会分发给后面的<code>worker</code>线程池的某个线程处理业务。</p>
+</li>
+<li><p><code>worker</code> 线程池会分配独立线程完成真正的业务，并将结果返回给<code>handler</code>。</p>
+</li>
+<li><p><code>handler</code>收到响应后，通过<code>send</code> 将结果返回给<code>client</code>。</p>
+</li>
+</ol>
+<p><strong>方案优缺点分析：</strong></p>
+<p><strong>优点</strong>：可以充分的利用多核cpu 的处理能力</p>
+<p><strong>缺点</strong>：多线程数据共享和访问比较复杂，<code>reactor</code> 处理所有的事件的监听和响应，在单线程运行， 在高并发场景容易出现性能瓶颈。</p>
+<h4 id="主从-Reactor-多线程"><a href="#主从-Reactor-多线程" class="headerlink" title="主从 Reactor 多线程"></a>主从 Reactor 多线程</h4><p><img src="/images/nio-netty/netty-09.png" alt="netty-09"></p>
+<p>针对单 <code>Reactor</code> 多线程模型中，<code>Reactor</code> 在单线程中运行，高并发场景下容易成为性能瓶颈，可以让 <code>Reactor</code> 在多线程中运行。</p>
+<p><strong>方案说明：</strong></p>
+<ol>
+<li><code>Reactor</code>主线程 <code>MainReactor</code> 对象通过<code>select</code> 监听连接事件, 收到事件后，通过<code>Acceptor</code> 处理连接事件。</li>
+</ol>
+<ol start="2">
+<li><p>当 <code>Acceptor</code>  处理连接事件后，<code>MainReactor</code> 将连接分配给<code>SubReactor</code>。</p>
+</li>
+<li><p><code>Subreactor</code> 将连接加入到连接队列进行监听,并创建<code>handler</code>进行各种事件处理。</p>
+</li>
+<li><p>当有新事件发生时， <code>Subreactor</code> 就会调用对应的<code>handler</code>处理。</p>
+</li>
+<li><p><code>handler</code> 通过<code>read</code> 读取数据，分发给后面的<code>worker</code> 线程处理。</p>
+</li>
+<li><p><code>worker</code> 线程池分配独立的<code>worker</code> 线程进行业务处理，并返回结果。</p>
+</li>
+<li><p><code>handler</code> 收到响应的结果后，再通过<code>send</code> 将结果返回给<code>client</code>。</p>
+</li>
+<li><p><code>Reactor</code> 主线程可以对应多个<code>Reactor</code> 子线程, 即<code>MainRecator</code> 可以关联多个<code>SubReactor</code>。</p>
+</li>
+</ol>
+<p><strong>方案优缺点说明</strong>：</p>
+<p><strong>优点</strong>：父线程与子线程的数据交互简单职责明确，父线程只需要接收新连接，子线程完成后续的业务处理。</p>
+<p>父线程与子线程的数据交互简单，<code>Reactor</code> 主线程只需要把新连接传给子线程，子线程无需返回数据。</p>
+<p><strong>缺点</strong>：编程复杂度较高。</p>
+<p>结合实例：这种模型在许多项目中广泛使用，包括 <code>Nginx</code> 主从 <code>Reactor</code> 多进程模型，<code>Memcached</code> 主从多线程，<code>Netty</code> 主从多线程模型的支持。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>3 种模式用生活案例来理解：<br>单 <code>Reactor</code> 单线程，前台接待员和服务员是同一个人，全程为顾客服</p>
+<p>单 <code>Reactor</code> 多线程，1 个前台接待员，多个服务员，接待员只负责接待</p>
+<p>主从 <code>Reactor</code> 多线程，多个前台接待员，多个服务生</p>
+<p><code>Reactor</code> 模式具有如下的优点：</p>
+<ol>
+<li>响应快，不必为单个同步时间所阻塞，虽然 Reactor 本身依然是同步的。</li>
+</ol>
+<ol start="2">
+<li><p>可以最大程度的避免复杂的多线程及同步问题，并且避免了多线程/进程的切换开销。</p>
+</li>
+<li><p>扩展性好，可以方便的通过增加 Reactor 实例个数来充分利用 CPU 资源。</p>
+</li>
+<li><p>复用性好，<code>Reactor</code> 模型本身与具体事件处理逻辑无关，具有很高的复用性。</p>
+</li>
+</ol>
+<h3 id="Netty模型"><a href="#Netty模型" class="headerlink" title="Netty模型"></a>Netty模型</h3><p><img src="/images/nio-netty/netty-10.png" alt="netty-10"></p>
+<p><code>Netty</code> 主要基于主从<code>Reactor</code> 多线程模型（如图）做了一定的改进，其中主从 <code>Reactor</code> 多线程模型有多个<code>Reactor</code>。</p>
+<p><code>BossGroup</code> 线程维护<code>Selector</code> , 只关注<code>Accept</code>。</p>
+<p>当接收到<code>Accept</code>事件，获取到对应的<code>SocketChannel</code>, 封装成 <code>NIOScoketChannel</code>并注册到<code>Worker</code> 线程(事件循环), 并进行维护</p>
+<p>当<code>Worker</code>线程监听到<code>Selector</code> 中通道发生自己感兴趣的事件后，就由<code>handler</code>进行处理， 注意<code>handler</code> 已经加入到通道。</p>
+<p><img src="/images/nio-netty/netty-12.png" alt="netty-12"></p>
+<h4 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h4><p><img src="/images/nio-netty/netty-11.png" alt="netty-11"></p>
+<ol>
+<li><p><code>Netty</code>抽象出两组线程池<code>BossGroup</code>专门负责接收客户端的连接,<code>WorkerGroup</code> 专门负责网络的读写。</p>
+</li>
+<li><p><code>BossGroup</code> 和 <code>WorkerGroup</code> 类型都是 <code>NioEventLoopGroup</code>。</p>
+</li>
+<li><p><code>NioEventLoopGroup</code> 相当于一个事件循环组, 这个组中含有多个事件循环 ，每一个事件循环是 <code>NioEventLoop</code>。</p>
+</li>
+<li><p><code>NioEventLoop</code> 表示一个不断循环的执行处理任务的线程， 每个<code>NioEventLoop</code> 都有一个<code>selector</code> , 用于监听绑定在其上的<code>socket</code>的网络通讯。</p>
+</li>
+<li><p><code>NioEventLoopGroup</code> 可以有多个线程, 即可以含有多个<code>NioEventLoop</code>。</p>
+</li>
+<li><p>每个<code>BossGroup</code>的<code>NioEventLoop</code> 循环执行的步骤有3步：</p>
+<ul>
+<li><p>轮询<code>accept</code> 事件。</p>
+</li>
+<li><p>处理<code>accept</code> 事件，与<code>client</code>建立连接 , 生成<code>NioScocketChannel</code> , 并将其注册到某个<code>workerGroup</code>的<code>NIOEventLoop</code> 上的 <code>selector</code>中。</p>
+</li>
+<li><p>处理任务队列的任务 ， 即<code>runAllTasks</code>。</p>
+</li>
+</ul>
+</li>
+<li><p>每个<code>WorkerGroup</code>的<code>NIOEventLoop</code>  处理业务时，会使用<code>pipeline</code>(管道)，<code>pipeline</code> 中包含了 <code>channel</code> , 即通过<code>pipeline</code> 可以获取到对应通道, 管道中维护了很多的处理器。</p>
+</li>
+</ol>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年09月08日 22:22</p>
+        <p>原始链接： <a class="post-url" href="/2020/08/03/netty-model/" title="&#39;Netty（一）Netty简介 与 零拷贝 &#39;">https://midkuro.github.io/2020/08/03/netty-model/</a></p>
+        <footer>
+            <a href="https://midkuro.github.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/08/03/netty-model/&title=《'Netty（一）Netty简介 与 零拷贝 '》 — Kuro's Blog&pic=images/netty.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/08/03/netty-model/&title=《'Netty（一）Netty简介 与 零拷贝 '》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/08/03/netty-model/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Netty（一）Netty简介 与 零拷贝 '》 — Kuro's Blog&url=https://midkuro.github.io/2020/08/03/netty-model/&via=https://midkuro.github.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/08/03/netty-model/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/08/03/netty-model/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/NIO/" class="color4">NIO</a>
+      
+    <a href="/tags/Netty/" class="color1">Netty</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Netty简介与零拷贝"><span class="post-toc-text">Netty简介与零拷贝</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#零拷贝"><span class="post-toc-text">零拷贝</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#传统IO"><span class="post-toc-text">传统IO</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#mmap"><span class="post-toc-text">mmap</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#sendFile"><span class="post-toc-text">sendFile</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#区别"><span class="post-toc-text">区别</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Netty介绍"><span class="post-toc-text">Netty介绍</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#NIO存在的问题"><span class="post-toc-text">NIO存在的问题</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Netty的优点"><span class="post-toc-text">Netty的优点</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Netty版本说明"><span class="post-toc-text">Netty版本说明</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#线程模型"><span class="post-toc-text">线程模型</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#传统阻塞-I-O-服务模型"><span class="post-toc-text">传统阻塞 I&#x2F;O 服务模型</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Reactor-模式"><span class="post-toc-text">Reactor 模式</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#核心组成"><span class="post-toc-text">核心组成</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#单-Reactor-单线程"><span class="post-toc-text">单 Reactor 单线程</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#单Reactor多线程"><span class="post-toc-text">单Reactor多线程</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#主从-Reactor-多线程"><span class="post-toc-text">主从 Reactor 多线程</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#总结"><span class="post-toc-text">总结</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Netty模型"><span class="post-toc-text">Netty模型</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#工作原理"><span class="post-toc-text">工作原理</span></a></li></ol></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/08/04/netty-source/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Netty（二）编码 &#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/07/20/rocketmq-springboot/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;RocketMQ（三）整合springBoot &#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="netty-model" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.github.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.57px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 20px;">MQ</a> <a href="/tags/MySql/" style="font-size: 10px;">MySql</a> <a href="/tags/NIO/" style="font-size: 12.86px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.43px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.86px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 18.57px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 20px;">MQ</a> <a href="/tags/MySql/" style="font-size: 10px;">MySql</a> <a href="/tags/NIO/" style="font-size: 12.86px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.43px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.86px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
