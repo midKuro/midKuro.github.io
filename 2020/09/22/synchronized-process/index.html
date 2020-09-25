@@ -16,11 +16,21 @@
 <meta property="og:description" content="锁升级的过程在Java中说到锁，肯定熟悉Synchronized关键字，synchronized关键字最主要有以下3种应用方式，下面分别介绍  修饰实例方法，作用于当前实例加锁，进入同步代码前要获得当前实例的锁 修饰静态方法，作用于当前类对象加锁，进入同步代码前要获得当前类对象的锁 修饰代码块，指定加锁对象，对给定对象加锁，进入同步代码库前要获得给定对象的锁。  在非静态方法中加锁同步代码块，比如">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-01.png">
+<meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-07.png">
 <meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-02.png">
 <meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-03.png">
 <meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-04.png">
+<meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-06.png">
+<meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-08.png">
+<meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-08.png">
+<meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-13.png">
+<meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-11.png">
+<meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-12.png">
+<meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-14.png">
+<meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-15.png">
+<meta property="og:image" content="https://midkuro.github.io/images/synchronized-process/sync-16.png">
 <meta property="article:published_time" content="2020-09-22T04:20:00.000Z">
-<meta property="article:modified_time" content="2020-09-23T10:11:30.644Z">
+<meta property="article:modified_time" content="2020-09-24T13:17:44.693Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="Synchronized">
@@ -177,7 +187,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</span><br><span class="line">  <span class="keyword">boolean</span> flag = <span class="keyword">false</span>;  <span class="comment">//boolean类型占1个字节</span></span><br><span class="line">    <span class="keyword">int</span> k = <span class="number">0</span>;				<span class="comment">//int类型占4个字节</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><strong>填充数据</strong>：在64位的虚拟机中，规定了java对象大小要求必须是<strong>8个字节</strong>的整数倍，所以当大小不满足8个字节的整数倍时，会自动填充。比如上图实例变量占用了5个字节，那么为了对齐数据，该对象可能需要填充3个字节数据。</p>
-<p><strong>对象头</strong>：对象头是对象的第一部分且是所有对象公共部分，对象头由两部分组成，分别是<code>Mark Word</code>和<code>Klass Pointer</code>（或者叫做<code>Class Metadata Address</code>），如果对象是数组，则由三部分组成，将会多出一部分记录数组长度。</p>
+<p><strong>对象头</strong>：对象头是对象的第一部分且是所有对象公共部分，对象头由两部分组成，分别是<code>Mark Word</code>和<code>Klass Pointer</code>（或者叫做<code>Class Metadata Address</code>、<code>Class Pointer</code>），如果对象是数组，则由三部分组成，将会多出一部分记录数组长度。</p>
 <p>因为虚拟机可以通过普通Java对象的元数据信息确定Java对象的大小，但是从数组的元数据中无法确定数组的大小。</p>
 <h3 id="案例分析"><a href="#案例分析" class="headerlink" title="案例分析"></a>案例分析</h3><hr>
 <blockquote>
@@ -225,7 +235,7 @@
 <td>8</td>
 </tr>
 </tbody></table>
-<p>然后通过引入<code>jol-core</code>依赖，输出对象的字节存储结构，用以分析对象头的组成情况</p>
+<p>然后通过引入<code>jol-core</code>（<code>jol=java object layout</code>）依赖，输出对象的字节存储结构，用以分析对象头的组成情况</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.openjdk.jol<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jol-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.13<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LockDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> L l = <span class="keyword">new</span> L();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println(ClassLayout.parseInstance(l).toPrintable());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">L</span> </span>&#123;</span><br><span class="line">  <span class="keyword">boolean</span> flag = <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -264,8 +274,13 @@
 <p>2、<strong>对象头大小 = Mark Word(32bit) + Klass Pointer(32bit) = 64bit = 8byte</strong></p>
 <p>3、<strong>数组对象的对象头占用了96bit（位） = 12byte（字节）</strong></p>
 <p>4、<strong>数组对象头大小=Mark Word(32bit) + Klass Pointer(32bit)  + 数组长度(32bit) = 128bit = 12byte</strong></p>
+<p>通过执行以下命令输出java的默认运行参数：</p>
+<p><img src="/images/synchronized-process/sync-07.png" alt="sync-07"></p>
+<p>其中能够看到JDK在运行时默认开启了<code>UseCompressedClassPointers</code>和<code>UseCompressedOops</code>指针压缩，即最终存储<code>Klass Pointer</code>时将会压缩成4个字节。</p>
+<p>其中上文的<code>Oops</code>全称是<code>Ordinary Object Pointers</code>，即普通对象指针，比如当一个对象成员变量是一个引用数据类型，其指针指向另外一个对象时，该指针的大小，默认也是压缩成4个字节。</p>
 <h3 id="对象头"><a href="#对象头" class="headerlink" title="对象头"></a>对象头</h3><p>在JVM虚拟机规范中规范了对象头的定义：</p>
 <p>每个GC管理的堆对象开头的公共结构。（每一个oop指针都指向一个对象头。）包括对象的布局、类型、GC状态、同步状态和标识哈希码的基本信息，由两个词组成（在Hotspot虚拟机中，分别是Mark Word和Klass Pointer），在数组中，他后面紧跟着一个长度字段，Java对象和VM内部对象都有一个通用的对象头格式。</p>
+<p>Klass Pointer存储的是一个指针，描述的是该对象属于哪一个类的相关信息。</p>
 <p><code>Mark Word</code>在存储格式如下：</p>
 <p><img src="/images/synchronized-process/sync-02.png" alt="sync-02"></p>
 <p><img src="/images/synchronized-process/sync-03.png" alt="sync-03"></p>
@@ -356,7 +371,7 @@
 <p>可以看到，<strong>在32位虚拟机中，无锁状态的对象，前25bit存储了对象的<code>HashCode</code>，跟着4bit存储了对象的分代年龄，接着1bit存储偏向锁信息，最后2bit存储锁标志位信息</strong>。</p>
 <p><strong>在64位虚拟机中，无锁状态的对象，前25bit未被使用，跟着31bit存储了对象的<code>HashCode</code>，接着1bit未被使用（某种场景下被用作<code>cms_free</code>），之后的存储同上。</strong></p>
 <p><strong>对象HashCode（identitry_hashcode）：</strong>是当前对象存储在内存地址中的值</p>
-<p><strong>对象分代年龄（age）：</strong>在常规的策略中，一个对象创建后将存放在新生代中，度过了15次Young GC之后，将会存储到老年代中，而对象分代年龄则标记着当前对象经历过几次GC。由于对象分代年龄占了4bit，其范围是【0000<del>1111】，也就是【0</del>15】，也正是如此，新生代升级老年代的默认年龄由此得来。</p>
+<p><strong>对象分代年龄（age）：</strong>在常规的策略中，一个对象创建后将存放在新生代中，度过了15次Young GC之后，将会存储到老年代中，而对象分代年龄则标记着当前对象经历过几次GC。由于对象分代年龄占了4bit，其范围是【0000 - 1111】，也就是【0 -15】，也正是如此，新生代升级老年代的默认年龄由此得来。</p>
 <p><strong>是否偏向锁（biased_lock）：</strong>对象<strong>是否启用偏向锁标记</strong>，为1时表示对象启用偏向锁，为0时表示对象没有偏向锁。<strong>lock</strong> 和 <strong>biased_lock</strong>共同表示对象处于什么锁状态</p>
 <p><strong>锁标志位（lock）：</strong>由于希望用尽可能少的二进制位表示尽可能多的信息，所以设置了 lock标记。该标记的值不同，整个 Mark Word表示的含义不同。<strong>biased_lock</strong> 和 <strong>lock</strong>一起，表达的锁状态含义。</p>
 <hr>
@@ -367,7 +382,7 @@
 
 <p>可以看到，前8个字节的数据，分别占了两行，但是结果集和预想的不太一样，如果按照格式规定，应该有31位的HashCode，但是从结果上都是0，并没有发现所谓的HashCode，这是为什么呢？</p>
 <p>因为HashCode存储的是地址，地址需要通过计算得出，通过观察hashCode方法，发现是个<code>public native int hashCode();</code>本地方法，底层通过<code>C++</code>实现计算出来的。</p>
-<p>我们通过调度<code>hashCode()</code>方法计算对象的<code>Hashcode</code>后，再观看一下对象头的变化</p>
+<p>我们通过调度<code>hashCode()</code>方法计算对象的<code>Hashcode</code>后，才会将<code>Hashcode</code>存储在对象头中，这时候再观看一下对象头的变化</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LockDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> L l = <span class="keyword">new</span> L();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"HashCode："</span> + Integer.toHexString(l.hashCode()));</span><br><span class="line">        System.out.println(ClassLayout.parseInstance(l).toPrintable());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><img src="/images/synchronized-process/sync-04.png" alt="sync-04"></p>
@@ -393,14 +408,158 @@
 </tr>
 </tbody></table>
 <p>也正是这样，可以看到，当前对象处于无锁状态，其对应的锁标志位是【01】</p>
+<h2 id="锁的升级过程"><a href="#锁的升级过程" class="headerlink" title="锁的升级过程"></a>锁的升级过程</h2><h3 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h3><p>CAS：<code>Compare and Swap</code>，即比较再交换。</p>
+<p>jdk5增加了并发包java.util.concurrent.*,其下面的类使用CAS算法实现了区别于synchronouse同步锁的一种乐观锁。JDK 5之前Java语言是靠synchronized关键字保证同步的，这是一种独占锁，也是是悲观锁。</p>
+<p>CAS是一种无锁算法，<strong>CAS执行CPU指令的过程时是一个原子操作</strong>，CAS有3个操作数，内存值V，旧的预期值A，要修改的新值B。当且仅当预期值A和内存值V相同时，将内存值V修改为B，否则什么都不做。</p>
+<p><img src="/images/synchronized-process/sync-06.png" alt="sync-06"></p>
+<p>多线程情况下，通常使用<code>AtomicInteger</code>来计算自增操作，其中就使用了CAS算法进行实现。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">    * Atomically sets the value to the given updated value</span></span><br><span class="line"><span class="comment">    * if the current value &#123;<span class="doctag">@code</span> ==&#125; the expected value.</span></span><br><span class="line"><span class="comment">    *</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@param</span> expect the expected value</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@param</span> update the new value</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@return</span> &#123;<span class="doctag">@code</span> true&#125; if successful. False return indicates that</span></span><br><span class="line"><span class="comment">    * the actual value was not equal to the expected value.</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">compareAndSet</span><span class="params">(<span class="keyword">int</span> expect, <span class="keyword">int</span> update)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> unsafe.compareAndSwapInt(<span class="keyword">this</span>, valueOffset, expect, update);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>AtomicInteger.incrementAndGet</code>的实现用了乐观锁技术，调用了类<code>sun.misc.Unsafe</code>库里面的 CAS算法，该方法是一个本地方法，由C++实现的逻辑，通过调用CPU（<code>lock_cmpxchg</code>）指令来实现无锁自增。所以，<code>AtomicInteger.incrementAndGet</code>的自增效率很高。</p>
+<h3 id="偏向锁"><a href="#偏向锁" class="headerlink" title="偏向锁"></a>偏向锁</h3><p>初次执行到synchronized代码块的时候，锁对象变成偏向锁（通过CAS修改对象头里的锁标志位），字面意思是“偏向于第一个获得它的线程”的锁。执行完同步代码块后，线程并不会主动释放偏向锁。当第二次到达同步代码块时，线程会判断此时持有锁的线程是否就是自己（持有锁的线程ID也在对象头里），如果是则正常往下执行。由于之前没有释放锁，这里也就不需要重新加锁。如果自始至终使用锁的线程只有一个，很明显偏向锁几乎没有额外开销，性能极高。</p>
+<p>偏向锁是指当一段同步代码一直被同一个线程所访问时，即不存在多个线程的竞争时，那么该线程在后续访问时便会自动获得锁，从而降低获取锁带来的消耗，即提高性能。</p>
+<p>当一个线程访问同步代码块并获取锁时，会在 Mark Word 里存储锁偏向的线程 ID。在线程进入和退出同步块时不再通过 CAS 操作来加锁和解锁，而是检测 Mark Word 里是否存储着指向当前线程的偏向锁。轻量级锁的获取及释放依赖多次 CAS 原子指令，而偏向锁只需要在置换 ThreadID 的时候依赖一次 CAS 原子指令即可。</p>
+<blockquote>
+<p>偏向锁的加锁步骤：</p>
+<ul>
+<li>Load-and-test，也就是简单判断一下当前线程id是否与Markword当中的线程id是否一致.</li>
+<li>如果一致，则说明此线程已经成功获得了锁，继续执行下面的代码.</li>
+<li>如果不一致，则要检查一下对象是否还是可偏向，即“是否偏向锁”标志位的值。</li>
+<li>如果还未偏向，则利用CAS操作来竞争锁，也即是第一次获取锁时的操作。</li>
+</ul>
+</blockquote>
+<p>偏向锁只有遇到其他线程尝试竞争偏向锁时，持有偏向锁的线程才会释放锁，线程是不会主动释放偏向锁的。</p>
+<p>关于偏向锁的撤销，需要等待全局安全点，即在某个时间点上没有字节码正在执行时，它会先暂停拥有偏向锁的线程，然后判断锁对象是否处于被锁定状态。如果线程不处于活动状态，则将对象头设置成无锁状态，并撤销偏向锁，恢复到无锁（标志位为01）或轻量级锁（标志位为00）的状态。</p>
+<p>当发生锁竞争时，偏向锁会变为轻量级锁，这时需要先将偏向锁进行锁撤销，这一步骤也会消耗不少的性能，轻量级锁的Mark Word中，lock标志位为00，其余内容被替换为一个指针，指向了栈里面的锁记录。</p>
+<blockquote>
+<p>锁撤销的过程如下：</p>
+<ul>
+<li>在一个安全点停止拥有锁的线程。</li>
+<li>遍历线程栈，如果存在锁记录的话，需要修复锁记录和Markword，使其变成无锁状态。</li>
+<li>唤醒当前线程，将当前锁升级成轻量级锁。</li>
+</ul>
+</blockquote>
+<p><strong>如果计算过对象的hashCode，则对象无法进入偏向状态！</strong></p>
+<blockquote>
+<p>轻量级锁重量级锁的hashCode存在与什么地方？</p>
+<p>答案：线程的栈帧中，轻量级锁的LockRecord中，或是代表重量级锁的ObjectMonitor的成员中</p>
+</blockquote>
+<p>关于epoch: (不重要)</p>
+<blockquote>
+<p><strong>批量重偏向与批量撤销</strong>渊源：从偏向锁的加锁解锁过程中可看出，当只有一个线程反复进入同步块时，偏向锁带来的性能开销基本可以忽略，但是当有其他线程尝试获得锁时，就需要等到safe point时，再将偏向锁撤销为无锁状态或升级为轻量级，会消耗一定的性能，所以在多线程竞争频繁的情况下，偏向锁不仅不能提高性能，还会导致性能下降。于是，就有了批量重偏向与批量撤销的机制。</p>
+<p><strong>原理</strong>以class为单位，为每个class维护<strong>解决场景</strong>批量重偏向（bulk rebias）机制是为了解决：一个线程创建了大量对象并执行了初始的同步操作，后来另一个线程也来将这些对象作为锁对象进行操作，这样会导致大量的偏向锁撤销操作。批量撤销（bulk revoke）机制是为了解决：在明显多线程竞争剧烈的场景下使用偏向锁是不合适的。</p>
+<p>一个偏向锁撤销计数器，每一次该class的对象发生偏向撤销操作时，该计数器+1，当这个值达到重偏向阈值（默认20）时，JVM就认为该class的偏向锁有问题，因此会进行批量重偏向。每个class对象会有一个对应的epoch字段，每个处于偏向锁状态对象的Mark Word中也有该字段，其初始值为创建该对象时class中的epoch的值。每次发生批量重偏向时，就将该值+1，同时遍历JVM中所有线程的栈，找到该class所有正处于加锁状态的偏向锁，将其epoch字段改为新值。下次获得锁时，发现当前对象的epoch值和class的epoch不相等，那就算当前已经偏向了其他线程，也不会执行撤销操作，而是直接通过CAS操作将其Mark Word的Thread Id 改成当前线程Id。当达到重偏向阈值后，假设该class计数器继续增长，当其达到批量撤销的阈值后（默认40），JVM就认为该class的使用场景存在多线程竞争，会标记该class为不可偏向，之后，对于该class的锁，直接走轻量级锁的逻辑。</p>
+</blockquote>
+<h3 id="轻量级锁"><a href="#轻量级锁" class="headerlink" title="轻量级锁"></a>轻量级锁</h3><p><img src="/images/synchronized-process/sync-08.png" alt="sync-08"></p>
+<p>轻量级锁是指当锁是偏向锁的时候，却被另外的线程所访问，此时偏向锁就会升级为轻量级锁，其他线程会通过自旋（关于自旋的介绍见文末）的形式尝试获取锁，线程不会阻塞，从而提高性能。</p>
+<p>轻量级锁的获取主要由两种情况：<br>① 当关闭偏向锁功能时；<br>② 由于多个线程竞争偏向锁导致偏向锁升级为轻量级锁。</p>
+<p>一旦有第二个线程加入锁竞争，偏向锁就升级为轻量级锁（自旋锁）。这里要明确一下什么是锁竞争：如果多个线程轮流获取一个锁，但是每次获取锁的时候都很顺利，没有发生阻塞，那么就不存在锁竞争。只有当某线程尝试获取锁的时候，发现该锁已经被占用，只能等待其释放，这才发生了锁竞争。</p>
+<p>在轻量级锁状态下继续锁竞争，没有抢到锁的线程将自旋，即不停地循环判断锁是否能够被成功获取。获取锁的操作，其实就是通过CAS修改对象头里的锁标志位。先比较当前锁标志位是否为“释放”，如果是则将其设置为“锁定”，比较并设置是原子性发生的。这就算抢到锁了，然后线程将当前锁的持有者信息修改为自己。</p>
+<p>长时间的自旋操作是非常消耗资源的，一个线程持有锁，其他线程就只能在原地空耗CPU，执行不了任何有效的任务，这种现象叫做忙等（busy-waiting）。如果多个线程用一个锁，但是没有发生锁竞争，或者发生了很轻微的锁竞争，那么synchronized就用轻量级锁，允许短时间的忙等现象。这是一种折衷的想法，短时间的忙等，换取线程在用户态和内核态之间切换的开销。</p>
+<p>轻量级锁也被称为自旋锁或无锁，原因在于它在循环等待获得锁的线程释放该锁。</p>
+<blockquote>
+<p>轻量级锁的加锁步骤：</p>
+<ul>
+<li>线程在自己的<strong>栈桢</strong>中创建锁记录LockRecord。</li>
+<li>将锁对象的对象头中的MarkWord复制到线程的刚刚创建的锁记录中。</li>
+<li>将锁记录中的Owner指针指向锁对象。</li>
+<li>将锁对象的对象头的MarkWord替换为指向锁记录的指针。</li>
+</ul>
+</blockquote>
+<p>轻量级锁主要有两种：自旋锁和自适应自旋锁。自旋锁会导致空耗CPU且很可能锁不公平；自适应是指根据上一次该线程是否成功或者多久获取过该锁设置旋转次数，若上次失败很可能直接进入重量级锁。</p>
+<h3 id="重量级锁"><a href="#重量级锁" class="headerlink" title="重量级锁"></a>重量级锁</h3><p>重量级锁显然，此忙等是有限度的（有个计数器记录自旋次数，默认允许循环10次，可以通过虚拟机参数更改）。如果锁竞争情况严重，某个达到最大自旋次数的线程，会将轻量级锁升级为重量级锁，也称为阻塞同步、悲观锁、互斥锁。其lock标志位为10，Mark Word其余内容被替换为一个指向对象监视器Monitor的指针。特殊的是，如果此对象已经被GC标记过，lock会变为11，不含其余内容。</p>
+<p>当后续线程尝试获取锁时，发现被占用的锁是重量级锁，则直接将自己挂起（而不是忙等），等待将来被唤醒。</p>
+<p>偏向锁、轻量级锁都是JVM在用户态上进行资源分配的一种手段，而当申请了重量级锁，代表着JVM虚拟机向操作系统的内核态申请了加锁，将控制权都交给了操作系统，由操作系统来负责线程间的调度和线程的状态变更。而这样会出现频繁地对线程运行状态的切换，线程的挂起和唤醒，从而消耗大量的系统资源。</p>
+<h3 id="Monitor"><a href="#Monitor" class="headerlink" title="Monitor"></a>Monitor</h3><h2 id="Cache-Line"><a href="#Cache-Line" class="headerlink" title="Cache Line"></a>Cache Line</h2><p>存储器是分层次的，离CPU越近的存储器，速度越快，每字节的成本越高，同时容量也因此越小。寄存器速度最快，离CPU最近，成本最高，所以个数容量有限，其次是高速缓存（缓存也是分级，有L1，L2等缓存），再次是主存（普通内存），再次是本地磁盘。</p>
+<p><img src="/images/synchronized-process/sync-08.png" alt="sync-08"></p>
+<p>比如这时候有个应用程序<code>xxx.exe</code>，这时候启动该程序，操作系统的加载步骤如下：</p>
+<blockquote>
+<p>1、程序指令加载到内存当中</p>
+<p>2、PC指令寄存器存储了下一条即将运行的指令地址，根据地址从内存中读取一条一条的计算机指令到Registers寄存器组中进行运算</p>
+<p>3、通过ALU运算逻辑单元进行运算</p>
+<p>4、将结果回写到内存中</p>
+</blockquote>
+<p>一个CPU在同一个时刻只能运行一个线程的指令，当有另外一条线程申请时，它会将之前的线程运行的相关数据保存起来，然后运行另外一条线程，来回交替执行，这种行为叫做线程上下文切换（<code>Context Switch</code>）。</p>
+<p>而一个CPU中有多个PC指令寄存器时，也就等于CPU可以通过在CPU内部切换不同的PC指令寄存器来切换线程交替运行，能够更有效的提高CPU的速度。</p>
+<p>其中的ALU交替得进行多个PC寄存器的工作时，叫做超线程，即一个ALU对应多个PC|Registers，如所谓的四核八线程。</p>
+<p>而这时候涉及到了一个概念，<code>Cache</code>，CPU到内存之间的缓存分为三层：</p>
+<p><img src="/images/synchronized-process/sync-13.png" alt="sync-13"></p>
+<p>CPU的运行周期是内存的100倍，所以需要进行缓存来让CPU进行更高效的工作，以下是三层缓存的结构图：</p>
+<p><img src="/images/synchronized-process/sync-11.png" alt="sync-11"></p>
+<p><img src="/images/synchronized-process/sync-12.png" alt="sync-12"></p>
+<p>局部性原理是指CPU访问存储器时，无论是存取指令还是存取数据，所访问的存储单元都趋于聚集在一个较小的连续区域中，因为如果一个信息项正在被访问，那么在近期它很可能还会被再次访问。</p>
+<p>CPU到内存之间有很多层的内存，如图所示，CPU需要经过L1，L2，L3及主内存才能读到数据。从主内存读取数据时的过程如下：</p>
+<p>　　当我左侧的CPU读取x的值的时候，首先会去L1缓存中去找x的值，如果没有，那么取L2，L3依次去找。最后从主内存读入的时候，首先将内存数据读入L3，然后L2最后L1，然后再进行运算。但是读取的时候，并不是只读一个X的值，而是按块去读取（跟电脑的总线宽度有关，一次读取一块的数据，效率更高）。CPU读取X后，很可能会用到相邻的数据，所以在读X的时候，会把同一块中的Y数据也读进来。这样在用Y的时候，直接从L1中取数据就可以了。</p>
+<p>　　读取的块就叫做缓存行，cache line 。缓存行越大，局部性空间效率越高，但读取时间慢。缓存行越小，局部性空间效率越低，但读取时间快。目前多取一个平衡的值，64字节。</p>
+<p>高速缓存其实就是一组称之为缓存行(cache line)的固定大小的数据块，其大小是以突发读或者突发写周期的大小为基础的。</p>
+<p>  每个高速缓存行完全是在一个突发读操作周期中进行填充或者下载的。即使处理器只存取一个字节的存储器，高速缓存控制器也启动整个存取器访问周期并请求整个数据块。缓存行第一个字节的地址总是突发周期尺寸的倍数。缓存行的起始位置总是与突发周期的开头保持一致。</p>
+<p>当从内存中取单元到cache中时，会一次取一个cacheline大小的内存区域到cache中，然后存进相应的cacheline中。</p>
+<p><strong>所以数据的读取是通过分块来读的，每块的大小是64Byte。</strong></p>
+<h2 id="缓存对齐"><a href="#缓存对齐" class="headerlink" title="缓存对齐"></a>缓存对齐</h2><p>在java中，jdk一些涉及到多线程的类，有时候会看到类似于<code>public volatile long p1,p2,p3,p4,p5,p6,p7;</code>这样的代码，有的就是做的缓存行对齐。</p>
+<p>　　我们设计一个实验去验证缓存行对齐的导致的性能问题，及相关的解决后的效率问题。具体代码见第三小节。这里的思路是，首先，我们写一个类T，这个类里面有一个用volatile修饰的long属性的值，这个值占用8个字节。然后声明一个静态数组，包含两个元素，分别T的两个对象。然后开启两个线程，让两个线程分别给数组的第一个值和第二个值赋值，执行一百万次，看执行的耗时。</p>
+<p>　　这个时候，代码执行的时候如1.2的图中所示，假设数组中第一个值为X，第二个值为Y。左侧框内为第一个线程，执行修改X值的操作，右侧框内为第二个线程，修改Y的值。因为两个值在同一个缓存行中，所以在X值在读取的时候，同时将X值和Y值一起读入缓存。第二个线程只修改Y的值，但是同样将XY全部读入缓存。线程1中X值发生修改后，第二个线程中的X值需要进行更新。而线程2修改Y的值后也需要同样的操作，但是这个更新不是必要的，而且会影响执行的效率。</p>
+<p>　　解决方法是：我们给第T的long值之前加入8个long值，这样Y值就会被挤到其他缓存行，这样彼此修改的时候就不会产生干扰，提高代码执行效率。</p>
+<p>　　下面是具体验证的代码，其中在没有加入父类的时候，是相互干扰时的执行耗时。第二个是加入父类后，不再干扰时的耗时，执行后可以看出，第二套代码在执行的时候，代码要优于第一套代码的执行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T01_CacheLinePadding</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">T</span></span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">volatile</span> <span class="keyword">long</span> x = <span class="number">0L</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> T[] orr = <span class="keyword">new</span> T[<span class="number">2</span>];</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        orr[<span class="number">0</span>]= <span class="keyword">new</span> T();</span><br><span class="line">        orr[<span class="number">1</span>]= <span class="keyword">new</span> T();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(()-&gt;&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">long</span> i = <span class="number">0</span>; i &lt; <span class="number">1000_000L</span>; i++) &#123;</span><br><span class="line">                orr[<span class="number">0</span>].x = i;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(()-&gt;&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">long</span> i = <span class="number">0</span>; i &lt; <span class="number">1000_000L</span>; i++) &#123;</span><br><span class="line">                orr[<span class="number">1</span>].x = i;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">long</span> start = System.nanoTime();</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        t1.join();</span><br><span class="line">        t2.join();</span><br><span class="line">        <span class="comment">//200ms左右</span></span><br><span class="line">        System.out.println((System.nanoTime()-start)/<span class="number">100_000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">  * 缓存行对齐问题代码</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T02_CacheLinePadding</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Padding</span></span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">volatile</span> <span class="keyword">long</span> p1,p2,p3,p4,p5,p6,p7;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">T</span> <span class="keyword">extends</span> <span class="title">Padding</span></span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">volatile</span> <span class="keyword">long</span> x = <span class="number">0L</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> T[] orr = <span class="keyword">new</span> T[<span class="number">2</span>];</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        orr[<span class="number">0</span>]= <span class="keyword">new</span> T();</span><br><span class="line">        orr[<span class="number">1</span>]= <span class="keyword">new</span> T();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(()-&gt;&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">long</span> i = <span class="number">0</span>; i &lt; <span class="number">1000_000L</span>; i++) &#123;</span><br><span class="line">                orr[<span class="number">0</span>].x = i;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(()-&gt;&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">long</span> i = <span class="number">0</span>; i &lt; <span class="number">1000_000L</span>; i++) &#123;</span><br><span class="line">                orr[<span class="number">1</span>].x = i;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">long</span> start = System.nanoTime();</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        t1.join();</span><br><span class="line">        t2.join();</span><br><span class="line">        <span class="comment">//80ms左右</span></span><br><span class="line">        System.out.println((System.nanoTime()-start)/<span class="number">100_000</span>); </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Voliate"><a href="#Voliate" class="headerlink" title="Voliate"></a>Voliate</h2><p>volatile关键字有两个作用：</p>
+<blockquote>
+<p>1、确保一个变量的更新对其他线程可见性</p>
+<p>2、禁止指令重排序</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloVolatile</span> </span>&#123;</span><br><span class="line">    <span class="keyword">boolean</span> flag = <span class="keyword">true</span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">circle</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"start"</span>);</span><br><span class="line">        <span class="keyword">while</span>(flag) &#123;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">"end"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        HelloVolatile helloVolatile = <span class="keyword">new</span> HelloVolatile();</span><br><span class="line">        <span class="keyword">new</span> Thread(helloVolatile::circle, <span class="string">"t1"</span>).start();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        helloVolatile.flag = <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">输出结果：</span><br><span class="line">start</span><br></pre></td></tr></table></figure>
+
+<p>代码通过一个flag表示来控制循环是否停止，按我们理解主线程flag变为true之后，应该循环停止，会打印出end出来，可是事实没有打印？为什么？</p>
+<p><img src="/images/synchronized-process/sync-14.png" alt="sync-14"></p>
+<p>计算机 <code>CPU</code> 与 <code>主存</code> 交互的逻辑大致如图，<code>CPU</code> 的运算速度是 <code>主存</code> 的 100 倍左右，为了避免 <code>CPU</code> 被主存拖慢速度。当<code>CPU</code> 需要一个数据的时候，会先从 <code>L1</code> 找，找到直接使用；<code>L1</code> 中未找到，会去 <code>L2</code> 中，<code>L2</code> 中找不到会去 <code>L3</code> ，L3 找不到再去主存加载到 <code>L3</code>，再从 <code>L3</code>加载到 <code>L2</code> ，再从 <code>L2</code> 加载到 <code>L1</code>；</p>
+<p>这样提高的计算速度，同时也面临数据不一致问题。</p>
+<p>如上例子，主存中现在有一个变量 <code>flag = true</code>，CPU1 修改<code>flag = false</code> 之后，将结果放入到 <code>L1</code> 去，但是后续代码计算还会用到 flag，这时 CPU1 不会将<code>flag = false</code> 同步到主存中去。之后 <code>CPU2</code> 也从主存中取出变量 flag（<code>flag = true</code>），CPU2 将自己计算的结果放入到 L1 中。这样就造成了数据不一致问题。缓存一致性协议就是为了解决这个问题的。</p>
+<p>以上是计算机底层的实现原理，JAVA 在自己的虚拟机中执行，也有自己的内存模型，但不管怎么样，底层还是依靠的 <code>CPU</code> 指令集达到缓存一致性。JAVA 的内存模型屏蔽了不同平台缓存一致性协议的不同实现细节，定义了一套自己的内存模型。</p>
+<p><img src="/images/synchronized-process/sync-15.png" alt="sync-15"></p>
+<p>java 虚拟机中的变量全部储存在主存中，每个线程都有自己的工作内存，工作内存中的变量是主存变量的副本拷贝（使用那些变量，拷贝那些），每个线程只会操作工作内存的变量，当需要保存数据一致性的时候，线程会将工作内存中的变量同步到主存中去。<code>volatile</code> 就是让线程改变了 flag 之后，回写到主存中，已达到缓存一致。</p>
+<blockquote>
+<ol>
+<li><strong>保证修改的值会立即被更新到主存；</strong></li>
+<li><strong>一个处理器的缓存回写到内存会导致其他处理器的缓存失效；</strong></li>
+<li><strong>当处理器发现本地缓存失效后，就会从内存中重读该变量数据，即可以获取当前最新值；</strong></li>
+</ol>
+</blockquote>
+<p>在多线程情况下，CPU为了提高效率，会从多个线程中读取数据到CPU的缓存Cache中，而Volatile确保了线程的可见性，当CPU修改了该值之后，回写到内存后，会马上通知其他线程内存读取。</p>
+<p>代码修改后：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloVolatile</span> </span>&#123;</span><br><span class="line">    <span class="keyword">volatile</span> <span class="keyword">boolean</span> flag = <span class="keyword">true</span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">circle</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"start"</span>);</span><br><span class="line">        <span class="keyword">while</span>(flag) &#123;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">"end"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        HelloVolatile helloVolatile = <span class="keyword">new</span> HelloVolatile();</span><br><span class="line">        <span class="keyword">new</span> Thread(helloVolatile::circle, <span class="string">"t1"</span>).start();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        helloVolatile.flag = <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">输出结果：</span><br><span class="line">start</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+
+
+<p>java 中的字节码最终都会编译成机器码（CPU 指令）执行，CPU 在保证单线程中执行结果不变的情况下，可以对指令进行指令重排已达到提高执行效率。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T04_Disorder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> x = <span class="number">0</span>, y = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> a = <span class="number">0</span>, b =<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(;;) &#123;</span><br><span class="line">            i++;</span><br><span class="line">            x = <span class="number">0</span>; y = <span class="number">0</span>;</span><br><span class="line">            a = <span class="number">0</span>; b = <span class="number">0</span>;</span><br><span class="line">            Thread one = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    <span class="comment">//由于线程one先启动，下面这句话让它等一等线程two. 读着可根据自己电脑的实际性能适当调整等待时间.</span></span><br><span class="line">                    <span class="comment">//shortWait(100000);</span></span><br><span class="line">                    a = <span class="number">1</span>;</span><br><span class="line">                    x = b;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            Thread other = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    b = <span class="number">1</span>;</span><br><span class="line">                    y = a;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            one.start();other.start();</span><br><span class="line">            one.join();other.join();</span><br><span class="line">            String result = <span class="string">"第"</span> + i + <span class="string">"次 ("</span> + x + <span class="string">","</span> + y + <span class="string">"）"</span>;</span><br><span class="line">            <span class="keyword">if</span>(x == <span class="number">0</span> &amp;&amp; y == <span class="number">0</span>) &#123;</span><br><span class="line">                System.err.println(result);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">//System.out.println(result);</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">shortWait</span><span class="params">(<span class="keyword">long</span> interval)</span></span>&#123;</span><br><span class="line">        <span class="keyword">long</span> start = System.nanoTime();</span><br><span class="line">        <span class="keyword">long</span> end;</span><br><span class="line">        <span class="keyword">do</span>&#123;</span><br><span class="line">            end = System.nanoTime();</span><br><span class="line">        &#125;<span class="keyword">while</span>(start + interval &gt;= end);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">上述代码指令重排执行顺序的可能：</span><br><span class="line">x &#x3D; b</span><br><span class="line">b &#x3D; 1</span><br><span class="line">y &#x3D; a</span><br><span class="line">a &#x3D; 1</span><br></pre></td></tr></table></figure>
+
+<p>假设指令重排不会发生，那么 <code>result</code> 将不会打印，实际循环一定次数之后会打印 <code>result</code>。</p>
+<p><code>volatile</code> 可以禁止指令重排，对<code>lolatile</code>修饰变量的读写访问，都不可以重排序。</p>
+<p><img src="/images/synchronized-process/sync-16.png" alt="sync-16"></p>
+<p>大致简单理解，加了内存屏障（内存屏障是特殊指令，当CPU看到该指令，前面的必须执行完，后面的才能执行。）之后，代码分成 1，2，3部分。1 部分代码你怎么指令重排我不管，但是 1 部分代码执行完了之后，必须执行 2 部分代码，再执行 3 部分代码。</p>
 <hr>
 <blockquote>
-<p>“本篇文章主要参考<a href="https://blog.csdn.net/javazejian/article/details/72828483" target="_blank" rel="noopener">参考资料</a>”</p>
+<p>本篇文章主要参考：</p>
+<p><a href="https://www.bilibili.com/video/av83301785/" target="_blank" rel="noopener">对象头的概念</a></p>
+<p><a href="https://www.bilibili.com/video/BV1xK4y1C7aT?p=4" target="_blank" rel="noopener">多线程并发编程讲解</a></p>
+<p><a href="https://www.processon.com/view/5c25db87e4b016324f447c95" target="_blank" rel="noopener">偏向锁轻量锁获取流程</a></p>
+<p><a href="https://blog.csdn.net/javazejian/article/details/72828483" target="_blank" rel="noopener">深入理解Java并发之synchronized实现原理</a></p>
+<p><a href="https://blog.csdn.net/wangkonghe/article/details/105402275" target="_blank" rel="noopener">Voliate关键字</a></p>
 </blockquote>
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年09月23日 18:11</p>
+        <p>最后更新： 2020年09月24日 21:17</p>
         <p>原始链接： <a class="post-url" href="/2020/09/22/synchronized-process/" title="&#39;锁升级的过程&#39;">https://midkuro.github.io/2020/09/22/synchronized-process/</a></p>
         <footer>
             <a href="https://midkuro.github.io">
@@ -520,7 +679,7 @@
 
     <aside class="post-toc-pos post-toc-top" id="post-toc">
         <nav class="post-toc-wrap">
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#锁升级的过程"><span class="post-toc-text">锁升级的过程</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#对象组成"><span class="post-toc-text">对象组成</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#案例分析"><span class="post-toc-text">案例分析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#申明"><span class="post-toc-text">申明</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#对象头"><span class="post-toc-text">对象头</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#无锁状态"><span class="post-toc-text">无锁状态</span></a></li></ol></li></ol></li></ol>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#锁升级的过程"><span class="post-toc-text">锁升级的过程</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#对象组成"><span class="post-toc-text">对象组成</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#案例分析"><span class="post-toc-text">案例分析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#申明"><span class="post-toc-text">申明</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#对象头"><span class="post-toc-text">对象头</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#无锁状态"><span class="post-toc-text">无锁状态</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#锁的升级过程"><span class="post-toc-text">锁的升级过程</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#CAS"><span class="post-toc-text">CAS</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#偏向锁"><span class="post-toc-text">偏向锁</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#轻量级锁"><span class="post-toc-text">轻量级锁</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#重量级锁"><span class="post-toc-text">重量级锁</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Monitor"><span class="post-toc-text">Monitor</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Cache-Line"><span class="post-toc-text">Cache Line</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#缓存对齐"><span class="post-toc-text">缓存对齐</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Voliate"><span class="post-toc-text">Voliate</span></a></li></ol>
         </nav>
     </aside>
     

@@ -8,15 +8,15 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
-  <meta name="description" content="线程安全性什么是线程安全性多线程访问某个类时，不管运行环境采用何种调度方式或者这些线程将如何交替执行，并且在主调代码中不需要任何额外的同步或者异步，这个类都能表现出正确的行为，那么就称这个类是线程安全的。 示例：一个无状态的Servlet 123456&#x2F;&#x2F;Servlet容器是一个单例多线程的容器对象public class StatelessServlet implements Servlet &amp;">
+  <meta name="description" content="线程安全性什么是线程安全性线程是CPU执行的基本单位，进程是CPU分配的基本单位。 多线程访问某个类时，不管运行环境采用何种调度方式或者这些线程将如何交替执行，并且在主调代码中不需要任何额外的同步或者异步，这个类都能表现出正确的行为，那么就称这个类是线程安全的。 示例：一个无状态的Servlet 123456&#x2F;&#x2F;Servlet容器是一个单例多线程的容器对象public class Stateles">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;Thread（一） 线程安全性&#39;">
 <meta property="og:url" content="https://midkuro.github.io/2020/05/21/thread-safety/index.html">
 <meta property="og:site_name" content="Kuro&#39;s Blog">
-<meta property="og:description" content="线程安全性什么是线程安全性多线程访问某个类时，不管运行环境采用何种调度方式或者这些线程将如何交替执行，并且在主调代码中不需要任何额外的同步或者异步，这个类都能表现出正确的行为，那么就称这个类是线程安全的。 示例：一个无状态的Servlet 123456&#x2F;&#x2F;Servlet容器是一个单例多线程的容器对象public class StatelessServlet implements Servlet &amp;">
+<meta property="og:description" content="线程安全性什么是线程安全性线程是CPU执行的基本单位，进程是CPU分配的基本单位。 多线程访问某个类时，不管运行环境采用何种调度方式或者这些线程将如何交替执行，并且在主调代码中不需要任何额外的同步或者异步，这个类都能表现出正确的行为，那么就称这个类是线程安全的。 示例：一个无状态的Servlet 123456&#x2F;&#x2F;Servlet容器是一个单例多线程的容器对象public class Stateles">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-05-21T15:20:00.000Z">
-<meta property="article:modified_time" content="2020-05-26T04:01:20.446Z">
+<meta property="article:modified_time" content="2020-09-24T10:37:10.540Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="Thread">
@@ -145,7 +145,8 @@
     <div class="article-entry post-content" itemprop="articleBody">
       
             
-            <h2 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h2><h3 id="什么是线程安全性"><a href="#什么是线程安全性" class="headerlink" title="什么是线程安全性"></a>什么是线程安全性</h3><p>多线程访问某个类时，不管运行环境采用何种调度方式或者这些线程将如何交替执行，并且在主调代码中不需要任何额外的同步或者异步，这个类都能表现出正确的行为，那么就称这个类是线程安全的。</p>
+            <h2 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h2><h3 id="什么是线程安全性"><a href="#什么是线程安全性" class="headerlink" title="什么是线程安全性"></a>什么是线程安全性</h3><p>线程是CPU执行的基本单位，进程是CPU分配的基本单位。</p>
+<p>多线程访问某个类时，不管运行环境采用何种调度方式或者这些线程将如何交替执行，并且在主调代码中不需要任何额外的同步或者异步，这个类都能表现出正确的行为，那么就称这个类是线程安全的。</p>
 <p>示例：一个无状态的Servlet</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Servlet容器是一个单例多线程的容器对象</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StatelessServlet</span> <span class="keyword">implements</span> <span class="title">Servlet</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">service</span><span class="params">(String param)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//多线程调度该方法</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -255,7 +256,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年05月26日 12:01</p>
+        <p>最后更新： 2020年09月24日 18:37</p>
         <p>原始链接： <a class="post-url" href="/2020/05/21/thread-safety/" title="&#39;Thread（一） 线程安全性&#39;">https://midkuro.github.io/2020/05/21/thread-safety/</a></p>
         <footer>
             <a href="https://midkuro.github.io">
