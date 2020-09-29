@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;JDK1.7 HashMap和ConcurrentHashMap 源码和实现&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="HashMap的源码和分析JDK1.7HashMap 问题：JDK1.7中，HashMap是通过什么原理实现的呢？ 答案：数组+链表 问题：什么叫哈希碰撞（哈希冲突）？ 不同的键值通过哈希函数运算得到相同的哈希值，解决哈希冲突的方式有开放寻址法和链表法，ThreadLocalMap由于其元素个数较少，采用的是开放寻址法，而HashMap采用的是链表法来解决哈希冲突，即所有散列值相同的元素都放在相同">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;JDK1.7 HashMap和ConcurrentHashMap 源码和实现&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/09/28/jdk7-hashmap/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="HashMap的源码和分析JDK1.7HashMap 问题：JDK1.7中，HashMap是通过什么原理实现的呢？ 答案：数组+链表 问题：什么叫哈希碰撞（哈希冲突）？ 不同的键值通过哈希函数运算得到相同的哈希值，解决哈希冲突的方式有开放寻址法和链表法，ThreadLocalMap由于其元素个数较少，采用的是开放寻址法，而HashMap采用的是链表法来解决哈希冲突，即所有散列值相同的元素都放在相同">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-01.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-02.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-03.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-04.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-05.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-06.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-07.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-08.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-09.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-10.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-12.jpg">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-13.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-11.png">
+<meta property="article:published_time" content="2020-09-28T14:30:00.000Z">
+<meta property="article:modified_time" content="2020-09-29T11:15:45.789Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="HashMap">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/jdk7-hashmap/source-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-jdk7-hashmap" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;JDK1.7 HashMap和ConcurrentHashMap 源码和实现&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/HashMap/">HashMap</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-09-28
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="HashMap的源码和分析"><a href="#HashMap的源码和分析" class="headerlink" title="HashMap的源码和分析"></a>HashMap的源码和分析</h1><h2 id="JDK1-7"><a href="#JDK1-7" class="headerlink" title="JDK1.7"></a>JDK1.7</h2><h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><blockquote>
+<p>问题：JDK1.7中，HashMap是通过什么原理实现的呢？</p>
+<p>答案：数组+链表</p>
+<p>问题：什么叫哈希碰撞（哈希冲突）？</p>
+<p>不同的键值通过哈希函数运算得到相同的哈希值，解决哈希冲突的方式有开放寻址法和链表法，ThreadLocalMap由于其元素个数较少，采用的是开放寻址法，而HashMap采用的是链表法来解决哈希冲突，即所有散列值相同的元素都放在相同槽对应的链表中（也就是数组+链表的方式）。</p>
+</blockquote>
+<p>先分析一下HashMap的关键属性：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* The default initial capacity - MUST be a power of two.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//HashMap初始化容量大小，默认是16</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_INITIAL_CAPACITY = <span class="number">1</span> &lt;&lt; <span class="number">4</span>; <span class="comment">// aka 16</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* The maximum capacity, used if a higher value is implicitly specified</span></span><br><span class="line"><span class="comment">* by either of the constructors with arguments.</span></span><br><span class="line"><span class="comment">* MUST be a power of two &lt;= 1&lt;&lt;30.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//HashMap最大的容量大小</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAXIMUM_CAPACITY = <span class="number">1</span> &lt;&lt; <span class="number">30</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* The load factor used when none specified in constructor.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//HashMap的扩容因子，默认是0.75</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> DEFAULT_LOAD_FACTOR = <span class="number">0.75f</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* The next size value at which to resize (capacity * load factor).</span></span><br><span class="line"><span class="comment">* <span class="doctag">@serial</span></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">// If table == EMPTY_TABLE then this is the initial capacity at which the</span></span><br><span class="line"><span class="comment">// table will be created when inflated.</span></span><br><span class="line"><span class="comment">//阈值，当table == &#123;&#125;时，该值为初始容量（初始容量默认为16）；</span></span><br><span class="line"><span class="comment">//当table被填充了，也就是为table分配内存空间后，threshold一般为 capacity*loadFactory。</span></span><br><span class="line"><span class="comment">//HashMap在进行扩容时需要参考threshold</span></span><br><span class="line"><span class="keyword">int</span> threshold;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* The number of key-value mappings contained in this map.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//当前HashMap存储的键值对数量</span></span><br><span class="line"><span class="keyword">transient</span> <span class="keyword">int</span> size;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* The number of times this HashMap has been structurally modified</span></span><br><span class="line"><span class="comment">* Structural modifications are those that change the number of mappings in</span></span><br><span class="line"><span class="comment">* the HashMap or otherwise modify its internal structure (e.g.,</span></span><br><span class="line"><span class="comment">* rehash).  This field is used to make iterators on Collection-views of</span></span><br><span class="line"><span class="comment">* the HashMap fail-fast.  (See ConcurrentModificationException).</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//用于计算链表中的修改次数</span></span><br><span class="line"><span class="keyword">transient</span> <span class="keyword">int</span> modCount;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* An empty table instance to share when the table is not inflated.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//HashMap内部的存储结构是一个数组，此处数组为空，即没有初始化之前的状态  </span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> Entry&lt;?,?&gt;[] EMPTY_TABLE = &#123;&#125;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* The table, resized as necessary. Length MUST Always be a power of two.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//HashMap的主干数组，就是一个Entry数组，初始值为空数组&#123;&#125;，主干数组的长度一定是2的次幂</span></span><br><span class="line"><span class="keyword">transient</span> Entry&lt;K,V&gt;[] table = (Entry&lt;K,V&gt;[]) EMPTY_TABLE;</span><br></pre></td></tr></table></figure>
+
+<p>HashMap的主干是一个<strong>Entry数组</strong>。Entry是HashMap的基本组成单元，Entry是一个链表，每一个Entry包含一个<code>key-value</code>键值对，每一个Entry都有一个<code>next</code>属性指向下一个<code>Entry</code>对象。</p>
+<p>Entry是HashMap中的一个静态内部类。代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Entry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">Map</span>.<span class="title">Entry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> K key;</span><br><span class="line">    V value;</span><br><span class="line">    Entry&lt;K,V&gt; next;<span class="comment">//存储指向下一个Entry的引用，单链表结构</span></span><br><span class="line">    <span class="keyword">int</span> hash;<span class="comment">//对key的hashcode值进行hash运算后得到的值，存储在Entry，避免重复计算</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * Creates new entry.</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">    Entry(<span class="keyword">int</span> h, K k, V v, Entry&lt;K,V&gt; n) &#123;</span><br><span class="line">        value = v;</span><br><span class="line">        next = n;</span><br><span class="line">        key = k;</span><br><span class="line">        hash = h;</span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，Entry有一个构造函数，该构造函数第三个参数是<code>Entry&lt;K,V&gt; n</code>，<strong>主要用于链表的头插入，传入链表的链表头，将新生成的Entry对象作为链表的头部，<code>next</code>属性指向原链表头。</strong></p>
+<p><img src="/images/jdk7-hashmap/source-01.png" alt="source-01"></p>
+<hr>
+<p>接着看一下<code>HashMap</code>的构造函数：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">HashMap</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">HashMap</span><span class="params">(<span class="keyword">int</span> initialCapacity)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(initialCapacity, DEFAULT_LOAD_FACTOR);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">HashMap</span><span class="params">(<span class="keyword">int</span> initialCapacity, <span class="keyword">float</span> loadFactor)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//当初始化的容量小于0时抛出异常</span></span><br><span class="line">    <span class="keyword">if</span> (initialCapacity &lt; <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Illegal initial capacity: "</span> +</span><br><span class="line">                                           initialCapacity);</span><br><span class="line">    <span class="comment">//当初始化容量大于最大值时，修改成最大值</span></span><br><span class="line">    <span class="keyword">if</span> (initialCapacity &gt; MAXIMUM_CAPACITY)</span><br><span class="line">        initialCapacity = MAXIMUM_CAPACITY;</span><br><span class="line">    <span class="keyword">if</span> (loadFactor &lt;= <span class="number">0</span> || Float.isNaN(loadFactor))</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Illegal load factor: "</span> +</span><br><span class="line">                                           loadFactor);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.loadFactor = loadFactor;</span><br><span class="line">    <span class="comment">//这里先把初始化的容量大小赋值给 threshold阈值</span></span><br><span class="line">    threshold = initialCapacity;</span><br><span class="line">    <span class="comment">//LinkedHashMap初始化的使用，HashMap类是个空方法</span></span><br><span class="line">    init();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>在看HashMap的<code>put</code>方法之前，先看一个例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    HashMap&lt;String, String&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">    map.put(<span class="string">"1"</span>, <span class="string">"2"</span>);</span><br><span class="line">    String a = map.put(<span class="string">"1"</span>, <span class="string">"3"</span>);</span><br><span class="line">    System.out.println(a);   <span class="comment">//输出结果：2</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为什么会输出结果是【2】呢？来HashMap的<code>put</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> V <span class="title">put</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//采用了懒加载，初始化HashMap对象时并未真正赋予其数组大小</span></span><br><span class="line">    <span class="keyword">if</span> (table == EMPTY_TABLE) &#123;</span><br><span class="line">        inflateTable(threshold);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//当Key等于null时，默认其存储的数组下标是0</span></span><br><span class="line">    <span class="keyword">if</span> (key == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">return</span> putForNullKey(value);</span><br><span class="line">    <span class="comment">//计算Key的Hash值</span></span><br><span class="line">    <span class="keyword">int</span> hash = hash(key);</span><br><span class="line">    <span class="comment">//将Hash值进行算法计算，得出存储的数组下标</span></span><br><span class="line">    <span class="keyword">int</span> i = indexFor(hash, table.length);</span><br><span class="line">    <span class="comment">//遍历寻找key值是否存在于链表中，存在则替换value成新值，并且返回旧值</span></span><br><span class="line">    <span class="keyword">for</span> (Entry&lt;K,V&gt; e = table[i]; e != <span class="keyword">null</span>; e = e.next) &#123;</span><br><span class="line">        Object k;</span><br><span class="line">        <span class="keyword">if</span> (e.hash == hash &amp;&amp; ((k = e.key) == key || key.equals(k))) &#123;</span><br><span class="line">            V oldValue = e.value;</span><br><span class="line">            e.value = value;</span><br><span class="line">            e.recordAccess(<span class="keyword">this</span>);</span><br><span class="line">            <span class="keyword">return</span> oldValue;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="comment">//修改次数++</span></span><br><span class="line">    modCount++;</span><br><span class="line">    <span class="comment">//不存在于链表中，执行添加操作</span></span><br><span class="line">    addEntry(hash, key, value, i);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接着解析一下<code>put</code>方法的逻辑，可以看到它懒加载时调度了<code>inflateTable</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Inflates the table. </span></span><br><span class="line"><span class="comment">* 初始化table数组大小</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">inflateTable</span><span class="params">(<span class="keyword">int</span> toSize)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Find a power of 2 &gt;= toSize</span></span><br><span class="line">    <span class="comment">// 用于获取toSize 大于或等于的 2的次方数 HashMap规定了容量大小必须是2个次方倍</span></span><br><span class="line">    <span class="keyword">int</span> capacity = roundUpToPowerOf2(toSize);</span><br><span class="line"></span><br><span class="line">    threshold = (<span class="keyword">int</span>) Math.min(capacity * loadFactor, MAXIMUM_CAPACITY + <span class="number">1</span>);</span><br><span class="line">    table = <span class="keyword">new</span> Entry[capacity];</span><br><span class="line">    initHashSeedAsNeeded(capacity);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">roundUpToPowerOf2</span><span class="params">(<span class="keyword">int</span> number)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// assert number &gt;= 0 : "number must be non-negative";</span></span><br><span class="line">    <span class="keyword">return</span> number &gt;= MAXIMUM_CAPACITY</span><br><span class="line">        ? MAXIMUM_CAPACITY</span><br><span class="line">        : (number &gt; <span class="number">1</span>) ? Integer.highestOneBit((number - <span class="number">1</span>) &lt;&lt; <span class="number">1</span>) : <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//int java.lang.Integer.highestOneBit(int i) </span></span><br><span class="line"><span class="comment">//返回小于等于i的2的次方数</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">highestOneBit</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// HD, Figure 3-1			比如：i=10  binary（10）= 0000 1010</span></span><br><span class="line">    i |= (i &gt;&gt;  <span class="number">1</span>);				<span class="comment">//0000 1010 | 0000 0101 = 0000 1111</span></span><br><span class="line">    i |= (i &gt;&gt;  <span class="number">2</span>);				<span class="comment">//0000 1111 | 0000 0011 = 0000 1111</span></span><br><span class="line">    i |= (i &gt;&gt;  <span class="number">4</span>);				<span class="comment">//以下也如此，主要是为了把后面的位数都填充为1</span></span><br><span class="line">    i |= (i &gt;&gt;  <span class="number">8</span>);</span><br><span class="line">    i |= (i &gt;&gt; <span class="number">16</span>);</span><br><span class="line">    <span class="keyword">return</span> i - (i &gt;&gt;&gt; <span class="number">1</span>);		<span class="comment">//0000 1111 - 0000 0111 = 0000 1000</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>关注代码：<code>Integer.highestOneBit((number - 1) &lt;&lt; 1)</code><br>1、highestOneBit获取的是<strong>小于等于i</strong>的2次方数，而这里需要获取<strong>大于等于i</strong>的2次方数</p>
+<p>2、通过向左位移一位，将数字扩大，如number=10，需要将它扩大区间，让它落在【16 - 32】之间</p>
+<p>3、（number - 1）是为了兼容特殊场景，如number等于2的次方数 </p>
+</blockquote>
+<hr>
+<blockquote>
+<p>思考：HashMap的采用的数组+链表的存储方式，那么当一个键值对put进来时，它的下标是怎么计算的呢？</p>
+<p>思考：为什么HashMap规定了其容量的大小必须是2个次方数？其原因是什么？</p>
+</blockquote>
+<p><code>put</code>方法接着往下看，可以看到，它把<code>Key</code>值拿去做了<code>HashCode</code>运算，并调用<code>indexFor</code>，根据返回的<code>HashCode</code>值<strong>计算该键值对应该存放的Entry数组下标</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Returns index for hash code h.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">indexFor</span><span class="params">(<span class="keyword">int</span> h, <span class="keyword">int</span> length)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// assert Integer.bitCount(length) == 1 : "length must be a non-zero power of 2";</span></span><br><span class="line">    <span class="keyword">return</span> h &amp; (length-<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>举个例子：</p>
+<table>
+<thead>
+<tr>
+<th>意义</th>
+<th>二进制</th>
+<th>十进制</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>length</td>
+<td>0001 0000</td>
+<td>16</td>
+</tr>
+<tr>
+<td>length-1</td>
+<td>0000 1111</td>
+<td>15</td>
+</tr>
+<tr>
+<td>HashCode</td>
+<td>1010 1010</td>
+<td></td>
+</tr>
+<tr>
+<td>hashCode &amp; (length-1)</td>
+<td>0000 1010</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>可以看到下标的结果将落在了【0 - 15】 中，通过<code>length -1</code>，将低位全部变成1，进行与运算后，下标必定落在其范围中，这也是为什么规定了HashMap的容量必须是2的次方数。</p>
+<p>细心的同学可以发现，这里参与计算的只有<code>HashCode</code>的地位，而HashCode的高位并没有参与计算，那么就会导致数据分散在数组中会很不均匀，这时候回过头再来看上一行的<code>hash</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object k)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> h = hashSeed;</span><br><span class="line">    <span class="keyword">if</span> (<span class="number">0</span> != h &amp;&amp; k <span class="keyword">instanceof</span> String) &#123;</span><br><span class="line">        <span class="keyword">return</span> sun.misc.Hashing.stringHash32((String) k);</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="comment">//当hashSeed!=0时，计算时hash值将加入哈希种子打散hash值的分布</span></span><br><span class="line">    h ^= k.hashCode();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// This function ensures that hashCodes that differ only by</span></span><br><span class="line">    <span class="comment">// constant multiples at each bit position have a bounded</span></span><br><span class="line">    <span class="comment">// number of collisions (approximately 8 at default load factor).</span></span><br><span class="line">    h ^= (h &gt;&gt;&gt; <span class="number">20</span>) ^ (h &gt;&gt;&gt; <span class="number">12</span>);</span><br><span class="line">    <span class="keyword">return</span> h ^ (h &gt;&gt;&gt; <span class="number">7</span>) ^ (h &gt;&gt;&gt; <span class="number">4</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，当取到了<code>hashCode</code>之后，对<code>hashCode</code>进行了右移的异或运算，再将得出的结果拿去计算数组下标，这是为了让<code>hashcode</code>的高位也能参与到数组下标的计算过程当中，解决数据分布不均匀的问题。</p>
+<hr>
+<p>再接着往下看<code>put</code>方法的执行，定位到数组下标后遍历其链表，判断链表是否存在相同的<code>key</code>值，如果找到，新值覆盖旧值，并且返回旧值。这也是为什么上文例子中，输出的结果是【2】的原因。</p>
+<p>接着详细看看<code>put</code>方法中执行的<code>addEntry</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* int hash:	当前Key的Hash值</span></span><br><span class="line"><span class="comment">* bucketIndex:	数组下标</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">addEntry</span><span class="params">(<span class="keyword">int</span> hash, K key, V value, <span class="keyword">int</span> bucketIndex)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//判断是否需要扩容</span></span><br><span class="line">    <span class="keyword">if</span> ((size &gt;= threshold) &amp;&amp; (<span class="keyword">null</span> != table[bucketIndex])) &#123;</span><br><span class="line">        <span class="comment">//需要扩容时，传参传入了table.length的长度的两倍</span></span><br><span class="line">        resize(<span class="number">2</span> * table.length);</span><br><span class="line">        hash = (<span class="keyword">null</span> != key) ? hash(key) : <span class="number">0</span>;</span><br><span class="line">        bucketIndex = indexFor(hash, table.length);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    createEntry(hash, key, value, bucketIndex);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">createEntry</span><span class="params">(<span class="keyword">int</span> hash, K key, V value, <span class="keyword">int</span> bucketIndex)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//获取当前链表的表头</span></span><br><span class="line">    Entry&lt;K,V&gt; e = table[bucketIndex];</span><br><span class="line">    <span class="comment">//将key-value键值对赋予到新Entry对象中，并通过头插入法，其Entry的next属性指向原链表表头</span></span><br><span class="line">    <span class="comment">//则新的Entry对象成为了链表的新表头，并将该表头存储在table数组中。</span></span><br><span class="line">    table[bucketIndex] = <span class="keyword">new</span> Entry&lt;&gt;(hash, key, value, e);</span><br><span class="line">    <span class="comment">//添加新元素，hashMap的元素数量++</span></span><br><span class="line">    size++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意：根据源码可以得出，JDK1.7的HashMap插入链表采用的是“头插入”法。</strong></p>
+<p>问题：为什么采用头插法呢？</p>
+<p>答案：因为头插法效率高，不需要遍历链表。</p>
+<p>问题：在添加新的键值对的时候，需要判断是否需要扩容，那么它什么情况下需要扩容？</p>
+<p>答案：</p>
+<p>1.当前HashMap的键值对数量（size）&gt;= <code>threshold</code>【threshold=capacity（当前数组容量）*loadFactory（扩容因子）】</p>
+<p>2.Entry数组上的元素不为空</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>问题：HashMap为什么需要扩容？</p>
+<p>答案：初始化的Entry数组容量是16，元素过多会导致链表过长，当调用get方法遍历链表时会增加耗时，所以需要通过扩容，将一条链表的数据内容分散成多条链表，添加到扩容数组的新下标中。</p>
+</blockquote>
+<p>接下来看看他的扩容逻辑，当满足扩容条件时，调度了<code>resize</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">resize</span><span class="params">(<span class="keyword">int</span> newCapacity)</span> </span>&#123;</span><br><span class="line">    Entry[] oldTable = table;</span><br><span class="line">    <span class="keyword">int</span> oldCapacity = oldTable.length;</span><br><span class="line">    <span class="keyword">if</span> (oldCapacity == MAXIMUM_CAPACITY) &#123;</span><br><span class="line">        threshold = Integer.MAX_VALUE;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Entry[] newTable = <span class="keyword">new</span> Entry[newCapacity];</span><br><span class="line">    transfer(newTable, initHashSeedAsNeeded(newCapacity));</span><br><span class="line">    table = newTable;</span><br><span class="line">    threshold = (<span class="keyword">int</span>)Math.min(newCapacity * loadFactor, MAXIMUM_CAPACITY + <span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Transfers all entries from current table to newTable.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">transfer</span><span class="params">(Entry[] newTable, <span class="keyword">boolean</span> rehash)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> newCapacity = newTable.length;</span><br><span class="line">    <span class="comment">//遍历原Entry数组</span></span><br><span class="line">    <span class="keyword">for</span> (Entry&lt;K,V&gt; e : table) &#123;</span><br><span class="line">        <span class="comment">//遍历链表中的每一个非空Entry</span></span><br><span class="line">        <span class="keyword">while</span>(<span class="keyword">null</span> != e) &#123;</span><br><span class="line">            Entry&lt;K,V&gt; next = e.next;</span><br><span class="line">            <span class="keyword">if</span> (rehash) &#123;</span><br><span class="line">                e.hash = <span class="keyword">null</span> == e.key ? <span class="number">0</span> : hash(e.key);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//重新计算该Entry需要存储的数组下标</span></span><br><span class="line">            <span class="keyword">int</span> i = indexFor(e.hash, newCapacity);</span><br><span class="line">            <span class="comment">//将next属性指向原链表头</span></span><br><span class="line">            e.next = newTable[i];</span><br><span class="line">            <span class="comment">//替换数组中的链表头位置</span></span><br><span class="line">            newTable[i] = e;</span><br><span class="line">            <span class="comment">//将e元素指向下一个链表中的Entry</span></span><br><span class="line">            e = next;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>key的<code>rehash</code>是有条件的</strong>，需要根据参数的布尔值决定它是否需要重新计算hash值，<strong>并不是所有扩容都需要重新计算key的Hash值。</strong></p>
+<blockquote>
+<p>假设链表中有三个元素，分别是【1、2、3】，具体行为如下：</p>
+</blockquote>
+<p><img src="/images/jdk7-hashmap/source-02.png" alt="source-02"></p>
+<p>在遍历过程中，由于数组下标没有发生变化，其Entry对象依旧将指向新数组的同一个下标，接着循环遍历链表的第二个元素。</p>
+<p><img src="/images/jdk7-hashmap/source-03.png" alt="source-03"></p>
+<p>遍历第二个元素时，通过表头插入法，其next指向原链表表头，并将自身作为Entry数组的链表头，最终得出的结果如下：</p>
+<p><img src="/images/jdk7-hashmap/source-04.png" alt="source-04"></p>
+<p>可以看到，<strong>在扩容过程中，计算出来的数组下标没有发生变化时，链表被反序存储了。</strong></p>
+<hr>
+<blockquote>
+<p>问题：怎么将一条链表的数据内容分散成多条链表，添加到扩容数组的新下标中？新下标满足什么规律？</p>
+</blockquote>
+<p>假设原数组长度是16，那么扩容后则等于32，看看其计算下标的变化：</p>
+<table>
+<thead>
+<tr>
+<th>意义</th>
+<th>二进制</th>
+<th>十进制</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>length</td>
+<td>0010 0000</td>
+<td>32</td>
+</tr>
+<tr>
+<td>length-1</td>
+<td>0001 1111</td>
+<td>31</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Akey：HashCode</td>
+<td>1010 1010</td>
+<td></td>
+</tr>
+<tr>
+<td>hashCode &amp; (length-1)</td>
+<td>0000 1010</td>
+<td>index=10</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Bkey：HashCode</td>
+<td>1011 1010</td>
+<td></td>
+</tr>
+<tr>
+<td>hashCode &amp; (length-1)</td>
+<td>0001 1010</td>
+<td>index=26</td>
+</tr>
+</tbody></table>
+<p>可以看到，当<code>Akey=HashCode=1010 1010</code>时，计算的数组下标未发生变化，而当<code>Bkey=HashCode=1011 1010</code>时，计算的等于26，也就是说，<strong>通过这种方式，就能够将属于同一个链表的元素，在重新计算下标的过程中，将链表元素分配到其他新的链表中。</strong></p>
+<p><strong>在Hash值未被重新计算的前提下，若链表元素被分配到其他新链表时，其新链表的下标=原下标+原数组长度</strong>。</p>
+<hr>
+<blockquote>
+<p>问题：HashMap为什么在多线程并发的情况下会出现问题？著名的HashMap死锁问题原因是什么？</p>
+</blockquote>
+<p>假设现在有两条线程同时对同一个HashMap操作，执行<code>put</code>方法，而且<strong>刚好满足扩容条件</strong>时，假设这时候两条线程都运行到了<code>transfer</code>方法的循环语句，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">transfer</span><span class="params">(Entry[] newTable, <span class="keyword">boolean</span> rehash)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> newCapacity = newTable.length;</span><br><span class="line">    <span class="keyword">for</span> (Entry&lt;K,V&gt; e : table) &#123;</span><br><span class="line">        <span class="keyword">while</span>(<span class="keyword">null</span> != e) &#123;</span><br><span class="line">            Entry&lt;K,V&gt; next = e.next;</span><br><span class="line">            <span class="comment">//假设两条多线程都运行到该行位置</span></span><br><span class="line">            <span class="keyword">if</span> (rehash) &#123;	</span><br><span class="line">                e.hash = <span class="keyword">null</span> == e.key ? <span class="number">0</span> : hash(e.key);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">int</span> i = indexFor(e.hash, newCapacity);</span><br><span class="line">            e.next = newTable[i];</span><br><span class="line">            newTable[i] = e;</span><br><span class="line">            e = next;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于<strong>代码中遍历的<code>table</code>数组是一个成员变量，是共享的</strong>，所以循环到该点时的指向如下图：</p>
+<p><img src="/images/jdk7-hashmap/source-05.png" alt="source-05"></p>
+<p>由于Java的多线程并发是通过CPU上下文切换交替执行的，<strong>假设这时候线程2被CPU挂起了，线程1执行完扩容操作，线程2再恢复执行，那么当线程1执行完扩容后，其对应的<code>table</code>数组内容已经发生改变，当线程2被CPU唤醒继续执行扩容时，其结构图如下：</strong></p>
+<p><img src="/images/jdk7-hashmap/source-06.png" alt="source-06"></p>
+<p>按照代码的流程走向，经过一次while循环以后，值得注意的是，其<strong>e对象指向Entry对象（1），其next对象指向Entry（2）</strong>，得到如下：</p>
+<p><img src="/images/jdk7-hashmap/source-07.png" alt="source-07"></p>
+<p>再经过一次while循环以后，其原本的<strong>Entry对象（2）的next属性指向Entry对象（1），所以其next对象将会重新指向Entry对象（1）</strong>，将得到下图：</p>
+<p><img src="/images/jdk7-hashmap/source-08.png" alt="source-08"></p>
+<p>再经过一次while循环以后，<strong>其next对象将会指向null值，而Entry对象（1）的next属性将会指向原表头Entry对象（2）</strong>，将得到下图：</p>
+<p><img src="/images/jdk7-hashmap/source-09.png" alt="source-09"></p>
+<blockquote>
+<p>从逻辑上可以看出，在多线程情况下造成了循环链表，由于最后的循环中的next对象指向了null，所以线程2的扩容是可以执行的，但是当有其他线程遍历该循环链表时，将会造成死循环，耗尽CPU资源，这就是HashMap在多线程并发情况下造成的死锁问题。</p>
+</blockquote>
+<blockquote>
+<p>问题：如何在多线程情况下避免HashMap的死锁问题？</p>
+<p>答案：如果已知了数据长度时，可以使用<code>public HashMap(int initialCapacity, float loadFactor)</code>构造函数设置其大小以及扩容因子，使得<code>size &gt;= threshold</code>条件不成立，避免造成扩容。</p>
+</blockquote>
+<hr>
+<p>接着再回去看看<code>resize</code>和<code>transfer</code>方法，通过源码得知，<code>initHashSeedAsNeeded</code>方法是控制是否需要重算<code>hash</code>值，在它在什么情况下需要重算<code>key</code>的<code>hash</code>值呢？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">initHashSeedAsNeeded</span><span class="params">(<span class="keyword">int</span> capacity)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//初始条件下 哈希种子hashSeed=0，所以currentAltHashing = false;</span></span><br><span class="line">    <span class="keyword">boolean</span> currentAltHashing = hashSeed != <span class="number">0</span>;</span><br><span class="line">    <span class="comment">//具体逻辑：当capacity 大于 Holder.ALTERNATIVE_HASHING_THRESHOLD时，才可能重算Hash</span></span><br><span class="line">    <span class="keyword">boolean</span> useAltHashing = sun.misc.VM.isBooted() &amp;&amp;</span><br><span class="line">        (capacity &gt;= Holder.ALTERNATIVE_HASHING_THRESHOLD);</span><br><span class="line">    <span class="comment">//取异或 不相等才返回true</span></span><br><span class="line">    <span class="keyword">boolean</span> switching = currentAltHashing ^ useAltHashing;</span><br><span class="line">    <span class="keyword">if</span> (switching) &#123;</span><br><span class="line">        hashSeed = useAltHashing</span><br><span class="line">            ? sun.misc.Hashing.randomHashSeed(<span class="keyword">this</span>)</span><br><span class="line">            : <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> switching;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后跟踪源码得知，<strong>在默认情况下，无论怎么扩容都不会造成重算Hash值，除非配置了JVM启动参数<code>jdk.map.althashing.threshold</code>。这里哈希种子的目的就是为了打散链表的hash值，使得每次扩容时，各链表分布更加均匀，</strong>这里就不再详细讨论了。</p>
+<hr>
+<p>在<code>HashMap</code>的属性中，定义了一个<code>transient int modCount;</code>，用来记录该对象的修改次数，<strong>是hashMap提供的一种快速失败机制（<code>fast fail</code>），用于迭代遍历时校验对象是否被修改，当集合在迭代过程中对象被其他线程并发修改时，将会抛出<code>ConcurrentModificationException</code>异常。</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> Entry&lt;K,V&gt; <span class="title">nextEntry</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//在遍历集合之前会将modCount赋值给expectedModCount，接着遍历过程中会不断验证modCount是否发生变化</span></span><br><span class="line">    <span class="keyword">if</span> (modCount != expectedModCount)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentModificationException();</span><br><span class="line">    Entry&lt;K,V&gt; e = next;</span><br><span class="line">    <span class="keyword">if</span> (e == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NoSuchElementException();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((next = e.next) == <span class="keyword">null</span>) &#123;</span><br><span class="line">        Entry[] t = table;</span><br><span class="line">        <span class="keyword">while</span> (index &lt; t.length &amp;&amp; (next = t[index++]) == <span class="keyword">null</span>)</span><br><span class="line">            ;</span><br><span class="line">    &#125;</span><br><span class="line">    current = e;</span><br><span class="line">    <span class="keyword">return</span> e;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>问题：那想要在遍历集合的过程中删除集合的元素，该如何实现？</p>
+<p>答案：通过使用<code>Iterator</code>迭代器遍历集合，调用迭代器的<code>remove</code>方法删除元素，该方法在删除元素的时候会重新对<code>expectedModCount</code>赋值，保证了<code>modCount == expectedModCount</code>。</p>
+</blockquote>
+<h3 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3><p>众做周知，HashMap就算避免了死锁问题，也不是一个线程安全的集合，而<strong><code>HashTable</code>类就是达到通过对HashMap里的各个方法加<code>synchronized</code>锁实现HashMap集合的线程安全，<code>HashTable</code>是一个同步容器类</strong>。</p>
+<p>而<code>ConcurrentHashMap</code>是一个并发容器类，底层使用了<code>Segment</code>分段锁的原理，先从源码中看看它和<code>HashMap</code>相比，属性上的区别：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* The default concurrency level for this table, used when not</span></span><br><span class="line"><span class="comment">* otherwise specified in a constructor.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//并发级别，用于计算一个Segment负责管理多少个Entry数组</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_CONCURRENCY_LEVEL = <span class="number">16</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* The minimum capacity for per-segment tables.  Must be a power</span></span><br><span class="line"><span class="comment">* of two, at least two to avoid immediate resizing on next use</span></span><br><span class="line"><span class="comment">* after lazy construction.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//规定了segment中的HashEntry数组最小容量，数组容量必须是2的次方数</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MIN_SEGMENT_TABLE_CAPACITY = <span class="number">2</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* The maximum number of times to tryLock in a prescan before</span></span><br><span class="line"><span class="comment">* possibly blocking on acquire in preparation for a locked</span></span><br><span class="line"><span class="comment">* segment operation. On multiprocessors, using a bounded</span></span><br><span class="line"><span class="comment">* number of retries maintains cache acquired while locating</span></span><br><span class="line"><span class="comment">* nodes.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//获取锁失败时，tryLock循环的最大次数，获取当前CPU核数，大于1则设置成64</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAX_SCAN_RETRIES =</span><br><span class="line">    Runtime.getRuntime().availableProcessors() &gt; <span class="number">1</span> ? <span class="number">64</span> : <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* The maximum number of segments to allow; used to bound</span></span><br><span class="line"><span class="comment">* constructor arguments. Must be power of two less than 1 &lt;&lt; 24.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//规定了segment数组的最大值不能超过2的16次方</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAX_SEGMENTS = <span class="number">1</span> &lt;&lt; <span class="number">16</span>; <span class="comment">// slightly conservative</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Mask value for indexing into segments. The upper bits of a</span></span><br><span class="line"><span class="comment">* key's hash code are used to choose the segment.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//segmentMask = segment[].length - 1 用来执行【haschCode &amp; segmentMask】计算Hash值</span></span><br><span class="line"><span class="keyword">final</span> <span class="keyword">int</span> segmentMask;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* The segments, each of which is a specialized hash table.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="comment">//ConcurrentHashMap的分段锁对象，自身带了一把锁且存储了链表结构</span></span><br><span class="line"><span class="keyword">final</span> Segment&lt;K,V&gt;[] segments;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>在<code>HashEntry</code>类<code>ConcurrentHashMap</code>是的基础单元(节点)，是实际数据的载体，等同于<code>HashMap</code>中的<code>Entry</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">HashEntry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">int</span> hash;</span><br><span class="line">    <span class="keyword">final</span> K key;</span><br><span class="line">    <span class="keyword">volatile</span> V value;</span><br><span class="line">    <span class="keyword">volatile</span> HashEntry&lt;K,V&gt; next;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/jdk7-hashmap/source-10.png" alt="source-10"></p>
+<hr>
+<p><code>Segment</code> 继承 <code>ReentrantLock</code> 锁,用于存放数组 <code>HashEntry[]</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Segments are specialized versions of hash tables.  This</span></span><br><span class="line"><span class="comment">* subclasses from ReentrantLock opportunistically, just to</span></span><br><span class="line"><span class="comment">* simplify some locking and avoid separate construction.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Segment</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; <span class="keyword">extends</span> <span class="title">ReentrantLock</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">    * The maximum number of times to tryLock in a prescan before</span></span><br><span class="line"><span class="comment">    * possibly blocking on acquire in preparation for a locked</span></span><br><span class="line"><span class="comment">    * segment operation. On multiprocessors, using a bounded</span></span><br><span class="line"><span class="comment">    * number of retries maintains cache acquired while locating</span></span><br><span class="line"><span class="comment">    * nodes.</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAX_SCAN_RETRIES =</span><br><span class="line">        Runtime.getRuntime().availableProcessors() &gt; <span class="number">1</span> ? <span class="number">64</span> : <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//HashEntry数组，ConcurrentHashMap数据的存储的载体</span></span><br><span class="line">    <span class="keyword">transient</span> <span class="keyword">volatile</span> HashEntry&lt;K,V&gt;[] table;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">    * The number of elements. Accessed only either within locks</span></span><br><span class="line"><span class="comment">    * or among other volatile reads that maintain visibility.</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="comment">//HashEntry的数组中的所有HashEntry大小（包括链表）</span></span><br><span class="line">    <span class="keyword">transient</span> <span class="keyword">int</span> count;</span><br><span class="line">    <span class="comment">//HashEntry数组的变化次数</span></span><br><span class="line">    <span class="keyword">transient</span> <span class="keyword">int</span> modCount;</span><br><span class="line">  <span class="comment">//扩容阈值</span></span><br><span class="line">    <span class="keyword">transient</span> <span class="keyword">int</span> threshold;</span><br><span class="line">  <span class="comment">//扩容因子</span></span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">float</span> loadFactor;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/jdk7-hashmap/source-12.jpg" alt="source-12"></p>
+<hr>
+<p>在看看<code>ConcurrentHashMap</code>的构造函数：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Creates a new, empty map with a default initial capacity (16),</span></span><br><span class="line"><span class="comment">     * load factor (0.75) and concurrencyLevel (16).</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ConcurrentHashMap</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR, DEFAULT_CONCURRENCY_LEVEL);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ConcurrentHashMap</span><span class="params">(<span class="keyword">int</span> initialCapacity)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(initialCapacity, DEFAULT_LOAD_FACTOR, DEFAULT_CONCURRENCY_LEVEL);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ConcurrentHashMap</span><span class="params">(<span class="keyword">int</span> initialCapacity, <span class="keyword">float</span> loadFactor)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(initialCapacity, loadFactor, DEFAULT_CONCURRENCY_LEVEL);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ConcurrentHashMap</span><span class="params">(<span class="keyword">int</span> initialCapacity,</span></span></span><br><span class="line"><span class="function"><span class="params">                         <span class="keyword">float</span> loadFactor, <span class="keyword">int</span> concurrencyLevel)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!(loadFactor &gt; <span class="number">0</span>) || initialCapacity &lt; <span class="number">0</span> || concurrencyLevel &lt;= <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">    <span class="comment">//规定了不能大于2的16次方</span></span><br><span class="line">    <span class="keyword">if</span> (concurrencyLevel &gt; MAX_SEGMENTS)</span><br><span class="line">        concurrencyLevel = MAX_SEGMENTS;</span><br><span class="line">    <span class="comment">// Find power-of-two sizes best matching arguments</span></span><br><span class="line">    <span class="comment">//该值用于存储segment数组容量的次方数</span></span><br><span class="line">    <span class="keyword">int</span> sshift = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> ssize = <span class="number">1</span>;</span><br><span class="line">     <span class="comment">//该循环主要是找大于等于concurrencyLevel的2的次方数</span></span><br><span class="line">    <span class="comment">//默认的concurrencyLevel=16，循环4次后，sshift=4,ssize=16</span></span><br><span class="line">    <span class="keyword">while</span> (ssize &lt; concurrencyLevel) &#123;</span><br><span class="line">        ++sshift;</span><br><span class="line">        ssize &lt;&lt;= <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">this</span>.segmentShift = <span class="number">32</span> - sshift;</span><br><span class="line">    <span class="comment">//计算hash值= hashCode &amp; (segment.length -1) ，这里segmentMask=segment.length-1</span></span><br><span class="line">    <span class="keyword">this</span>.segmentMask = ssize - <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">if</span> (initialCapacity &gt; MAXIMUM_CAPACITY)</span><br><span class="line">        initialCapacity = MAXIMUM_CAPACITY;</span><br><span class="line">    <span class="comment">//计算的segment对象的HashEntry数组大小=初始容量大小/并发级别</span></span><br><span class="line">    <span class="keyword">int</span> c = initialCapacity / ssize;</span><br><span class="line">    <span class="comment">//由于是向上取整，所以如果segment所有HashEntry数组之和小于初始容量大小，则自增数组大小</span></span><br><span class="line">    <span class="keyword">if</span> (c * ssize &lt; initialCapacity)</span><br><span class="line">        ++c;</span><br><span class="line">    <span class="comment">//规定最小的HashEntry数组大小=2</span></span><br><span class="line">    <span class="keyword">int</span> cap = MIN_SEGMENT_TABLE_CAPACITY;</span><br><span class="line">    <span class="comment">//规定HashEntry数组必须是2的次方数，所以循环获取大于等于计算的HashEntry数组大小的2的次方数</span></span><br><span class="line">    <span class="keyword">while</span> (cap &lt; c)</span><br><span class="line">        cap &lt;&lt;= <span class="number">1</span>;</span><br><span class="line">    <span class="comment">// create segments and segments[0]</span></span><br><span class="line">    <span class="comment">//在初始化Segment数组时默认初始化segment[0]，主要是为了生成原型，当初始化其他segment对象时无需再计算HashEntry数组大小</span></span><br><span class="line">    Segment&lt;K,V&gt; s0 =</span><br><span class="line">        <span class="keyword">new</span> Segment&lt;K,V&gt;(loadFactor, (<span class="keyword">int</span>)(cap * loadFactor),</span><br><span class="line">                         (HashEntry&lt;K,V&gt;[])<span class="keyword">new</span> HashEntry[cap]);</span><br><span class="line">    Segment&lt;K,V&gt;[] ss = (Segment&lt;K,V&gt;[])<span class="keyword">new</span> Segment[ssize];</span><br><span class="line">    UNSAFE.putOrderedObject(ss, SBASE, s0); <span class="comment">// ordered write of segments[0]</span></span><br><span class="line">    <span class="keyword">this</span>.segments = ss;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到其构造函数相比<code>HashMap</code>，多了一个<code>concurrencyLevel</code>参数，该参数主要是用来设置并发级别，用于</p>
+<p>计算每个<code>segment</code>的<code>HashEntry</code>数组大小，<code>ConcurrentHashMap</code>规定了<code>segment</code>数组和<code>HashEntry</code>数组的大小必须是2的次方数，其缘由与<code>HashMap</code>一致。</p>
+<blockquote>
+<p><code>ConcurrentHashMap</code>构造方法的执行步骤：</p>
+<p>1.判断参数的范围合法性</p>
+<p>2.计算<code>concurrencyLevel</code>大于等于2的次方数</p>
+<p>3.设置<code>segmentMask</code>的值</p>
+<p>4.计算<code>segment</code>对象的<code>HashEntry</code>数组长度</p>
+<p>5.设置<code>HashEntry</code>数组长度的合理长度（2&lt;=计算的HashEntry数组长度&lt;=合理长度=2的次方数）</p>
+<p>6.根据合理的<code>segment</code>数组长度及<code>HashEntry</code>数组长度初始化<code>Segment[]</code>和<code>Segment[0]</code></p>
+</blockquote>
+<hr>
+<p>接着看<code>ConcurrentHashMap</code>的<code>put</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> V <span class="title">put</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line">    Segment&lt;K,V&gt; s;</span><br><span class="line">    <span class="comment">//concurrentHashMap规定了Key和Value不能为NULL</span></span><br><span class="line">    <span class="keyword">if</span> (value == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">    <span class="comment">//计算Key的Hash值</span></span><br><span class="line">    <span class="keyword">int</span> hash = hash(key);</span><br><span class="line">    <span class="comment">//计算需要存储的segment数组中的下标</span></span><br><span class="line">    <span class="keyword">int</span> j = (hash &gt;&gt;&gt; segmentShift) &amp; segmentMask;</span><br><span class="line">    <span class="comment">//获取segment数组中的第j个位置的segment对象并赋值给对象s，如果为null，则初始化segment对象并存储进数组中</span></span><br><span class="line">    <span class="keyword">if</span> ((s = (Segment&lt;K,V&gt;)UNSAFE.getObject          <span class="comment">// nonvolatile; recheck</span></span><br><span class="line">         (segments, (j &lt;&lt; SSHIFT) + SBASE)) == <span class="keyword">null</span>) <span class="comment">//  in ensureSegment</span></span><br><span class="line">        s = ensureSegment(j);</span><br><span class="line">    <span class="comment">//将key-value键值对存储到segment中的HashEntry数组中</span></span><br><span class="line">    <span class="keyword">return</span> s.put(key, hash, value, <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上文中通过调用<code>UNSAFE.getObject(segments, (j &lt;&lt; SSHIFT) + SBASE)</code>获取<code>Segment</code>数组中的第<code>j</code>个下标的<code>segment</code>对象，因为通过这种偏移量获取对象效率会高很多。</p>
+<blockquote>
+<p>问题：在计算segment数组下标时，为什么需要执行<code>(hash &gt;&gt;&gt; segmentShift)</code>向右位移呢？</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//通过观察ConcurrentHashMap的构造函数，其中有部分代码如下：</span></span><br><span class="line"><span class="keyword">while</span> (ssize &lt; concurrencyLevel) &#123;</span><br><span class="line">    ++sshift;</span><br><span class="line">    ssize &lt;&lt;= <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">this</span>.segmentShift = <span class="number">32</span> - sshift;</span><br></pre></td></tr></table></figure>
+
+<p>上文分析了构造函数，该循环用于计算大于等于<code>concurrencyLevel</code>的2的次方数，假设<code>concurrencyLevel=16</code>，那么通过循环得知<code>sshift=4</code>，<code>segmentShift = 32 - sshift = 28</code>。</p>
+<p><img src="/images/jdk7-hashmap/source-13.png" alt="source-13"></p>
+<p>如上图，其向右无符号位移28（<code>segmentShift=28</code>）位，最后将保留<code>HashCode</code>的高4（<code>sshift=4</code>）位，并使用<code>HashCode</code>的高位和<code>segmentMark</code>相与计算所在的<code>segment</code>数组下标。</p>
+<p><strong>总而言之，就是取了<code>HashCode</code>的高位，和<code>segmentMask</code>计算数组下标</strong>，向右偏移获取<code>HashCode</code>高位的数量取决于初始化的<code>concurrencyLevel</code>的值，是2的几次方。</p>
+<hr>
+<p>当<code>put</code>方法执行计算<code>Segment[]</code>下标后，获取的<code>segment</code>对象有可能尚未初始化，根据逻辑会调度<code>ensureSegment</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Segment&lt;K,V&gt; <span class="title">ensureSegment</span><span class="params">(<span class="keyword">int</span> k)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Segment&lt;K,V&gt;[] ss = <span class="keyword">this</span>.segments;</span><br><span class="line">    <span class="keyword">long</span> u = (k &lt;&lt; SSHIFT) + SBASE; <span class="comment">// raw offset</span></span><br><span class="line">    Segment&lt;K,V&gt; seg;</span><br><span class="line">    <span class="comment">//进入方法后重新判断是否被其他线程初始化，若被初始化，则直接赋值seg对象并返回</span></span><br><span class="line">    <span class="keyword">if</span> ((seg = (Segment&lt;K,V&gt;)UNSAFE.getObjectVolatile(ss, u)) == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">//获取segment[0]对象，以它为原型初始化segment对象</span></span><br><span class="line">        Segment&lt;K,V&gt; proto = ss[<span class="number">0</span>]; <span class="comment">// use segment 0 as prototype</span></span><br><span class="line">        <span class="comment">//获取原型的HashEntry数组长度</span></span><br><span class="line">        <span class="keyword">int</span> cap = proto.table.length;</span><br><span class="line">        <span class="comment">//获取扩容因子</span></span><br><span class="line">        <span class="keyword">float</span> lf = proto.loadFactor;</span><br><span class="line">        <span class="comment">//计算阈值</span></span><br><span class="line">        <span class="keyword">int</span> threshold = (<span class="keyword">int</span>)(cap * lf);</span><br><span class="line">        HashEntry&lt;K,V&gt;[] tab = (HashEntry&lt;K,V&gt;[])<span class="keyword">new</span> HashEntry[cap];</span><br><span class="line">        <span class="comment">//double Check，再次判断是否已被其他线程初始化</span></span><br><span class="line">        <span class="keyword">if</span> ((seg = (Segment&lt;K,V&gt;)UNSAFE.getObjectVolatile(ss, u))</span><br><span class="line">            == <span class="keyword">null</span>) &#123; <span class="comment">// recheck</span></span><br><span class="line">            <span class="comment">//创建Segment对象</span></span><br><span class="line">            Segment&lt;K,V&gt; s = <span class="keyword">new</span> Segment&lt;K,V&gt;(lf, threshold, tab);</span><br><span class="line">            <span class="comment">//采用CAS自旋，将新生成的Segment对象塞进数组中，若失败，则获取数组对象返回</span></span><br><span class="line">            <span class="keyword">while</span> ((seg = (Segment&lt;K,V&gt;)UNSAFE.getObjectVolatile(ss, u))</span><br><span class="line">                   == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (UNSAFE.compareAndSwapObject(ss, u, <span class="keyword">null</span>, seg = s))</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> seg;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过分析，当有多个线程同时并发执行创建同一个数组下标的<code>segment</code>对象时，由于<code>CAS</code>自旋机制，最终只会有一个线程创建成功，其他线程将获取数组对象并返回，从而达到在并发情况下的线程安全。</p>
+<hr>
+<p>创建完<code>segment</code>对象后，将调用<code>Segment.put()</code>方法，添加<code>key-value</code>键值对到<code>Segment</code>对象中，我们来看看<code>Segment</code>类的<code>put</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> V <span class="title">put</span><span class="params">(K key, <span class="keyword">int</span> hash, V value, <span class="keyword">boolean</span> onlyIfAbsent)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//尝试加锁 tryLock不阻塞</span></span><br><span class="line">    HashEntry&lt;K,V&gt; node = tryLock() ? <span class="keyword">null</span> : scanAndLockForPut(key, hash, value);</span><br><span class="line">    V oldValue;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        HashEntry&lt;K,V&gt;[] tab = table;</span><br><span class="line">        <span class="comment">//计算存储的HashEntry数组下标</span></span><br><span class="line">        <span class="keyword">int</span> index = (tab.length - <span class="number">1</span>) &amp; hash;</span><br><span class="line">        <span class="comment">//获取HashEntry数组中的index下标，这里命名的first指的是HashEntry中的链表的头结点</span></span><br><span class="line">        HashEntry&lt;K,V&gt; first = entryAt(tab, index);</span><br><span class="line">        <span class="comment">//遍历链表</span></span><br><span class="line">        <span class="keyword">for</span> (HashEntry&lt;K,V&gt; e = first;;) &#123;</span><br><span class="line">            <span class="keyword">if</span> (e != <span class="keyword">null</span>) &#123;</span><br><span class="line">                K k;</span><br><span class="line">                <span class="keyword">if</span> ((k = e.key) == key ||</span><br><span class="line">                    (e.hash == hash &amp;&amp; key.equals(k))) &#123;</span><br><span class="line">                    oldValue = e.value;</span><br><span class="line">                    <span class="comment">//如果是ifAbsent,则不更新值，直接返回旧值</span></span><br><span class="line">                    <span class="keyword">if</span> (!onlyIfAbsent) &#123;</span><br><span class="line">                        e.value = value;</span><br><span class="line">                        ++modCount;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">//假设遍历到最后节点均未匹配到相同的key由于它是最后的链表节点，e.next==null</span></span><br><span class="line">                <span class="comment">//再次循环时，将会运行到下面的else条件新建节点</span></span><br><span class="line">                e = e.next;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">//当获取锁失败时，会调用scanAndLockForPut提前生成node对象，这里只需设置链表头即可</span></span><br><span class="line">                <span class="keyword">if</span> (node != <span class="keyword">null</span>)</span><br><span class="line">                    node.setNext(first);</span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                    <span class="comment">//创建HashEntry对象，采用头插法，新的HashEntry对象的next属性指向first</span></span><br><span class="line">                    node = <span class="keyword">new</span> HashEntry&lt;K,V&gt;(hash, key, value, first);</span><br><span class="line">                <span class="comment">//HashEntry总数+1</span></span><br><span class="line">                <span class="keyword">int</span> c = count + <span class="number">1</span>;</span><br><span class="line">                <span class="comment">//如果数量达到了扩容的阈值，则进行扩容</span></span><br><span class="line">                <span class="keyword">if</span> (c &gt; threshold &amp;&amp; tab.length &lt; MAXIMUM_CAPACITY)</span><br><span class="line">                    rehash(node);</span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                    <span class="comment">//添加HashEntry对象到数组中，并替换数组中的链表头（替换成新创建的HashEntry对象）</span></span><br><span class="line">                    setEntryAt(tab, index, node);</span><br><span class="line">                <span class="comment">//Setment中累加变化次数</span></span><br><span class="line">                ++modCount;</span><br><span class="line">                <span class="comment">//赋值新计算的count值</span></span><br><span class="line">                count = c;</span><br><span class="line">                oldValue = <span class="keyword">null</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="comment">//解锁ReentrantLock</span></span><br><span class="line">        unlock();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> oldValue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于<code>Segment</code>继承了<code>ReentrantLock</code>，当它在插入元素时会调用<code>tryLock</code>非阻塞尝试获取锁，当获取锁失败时，调用<code>scanAndLockForPut</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Scans for a node containing given key while trying to</span></span><br><span class="line"><span class="comment">* acquire lock, creating and returning one if not found. Upon</span></span><br><span class="line"><span class="comment">* return, guarantees that lock is held. UNlike in most</span></span><br><span class="line"><span class="comment">* methods, calls to method equals are not screened: Since</span></span><br><span class="line"><span class="comment">* traversal speed doesn't matter, we might as well help warm</span></span><br><span class="line"><span class="comment">* up the associated code and accesses as well.</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* <span class="doctag">@return</span> a new node if key not found, else null</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> HashEntry&lt;K,V&gt; <span class="title">scanAndLockForPut</span><span class="params">(K key, <span class="keyword">int</span> hash, V value)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//根据Hash值计算数组下标并获取链表的表头</span></span><br><span class="line">    HashEntry&lt;K,V&gt; first = entryForHash(<span class="keyword">this</span>, hash);</span><br><span class="line">    HashEntry&lt;K,V&gt; e = first;</span><br><span class="line">    HashEntry&lt;K,V&gt; node = <span class="keyword">null</span>;</span><br><span class="line">    <span class="comment">//用这个变量来控制循环的逻辑</span></span><br><span class="line">    <span class="keyword">int</span> retries = -<span class="number">1</span>; <span class="comment">// negative while locating node</span></span><br><span class="line">    <span class="comment">//循环尝试获取锁</span></span><br><span class="line">    <span class="keyword">while</span> (!tryLock()) &#123;</span><br><span class="line">        HashEntry&lt;K,V&gt; f; <span class="comment">// to recheck first below</span></span><br><span class="line">        <span class="keyword">if</span> (retries &lt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">//当链表的表头 == null 或者遍历链表后未匹配到元素时，创建HashEntry对象</span></span><br><span class="line">            <span class="keyword">if</span> (e == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (node == <span class="keyword">null</span>) <span class="comment">// speculatively create node</span></span><br><span class="line">                    node = <span class="keyword">new</span> HashEntry&lt;K,V&gt;(hash, key, value, <span class="keyword">null</span>);</span><br><span class="line">                <span class="comment">//设置retries=0用以下次循环时调用其他逻辑</span></span><br><span class="line">                retries = <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//当链表表头不为空时，遍历链表，寻址到链表元素时设置retries=0调用其他逻辑</span></span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (key.equals(e.key))</span><br><span class="line">                retries = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                <span class="comment">//当链表遍历到最后一个节点，e.next=null,当再次循环时，会调用创建HashEntry对象的逻辑</span></span><br><span class="line">                e = e.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//当重试次数大于一定的次数时，直接调用阻塞的Lock方法</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (++retries &gt; MAX_SCAN_RETRIES) &#123;</span><br><span class="line">            lock();</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//(retries &amp; 1) == 0 ：当retries是偶数时，返回true，表示每隔一次才去判断链表表头是否发生变化</span></span><br><span class="line">        <span class="comment">//重新获取链表表头，当链表表头与原来获取的first不同时，设置retries=-1，重新遍历</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> ((retries &amp; <span class="number">1</span>) == <span class="number">0</span> &amp;&amp;</span><br><span class="line">                 (f = entryForHash(<span class="keyword">this</span>, hash)) != first) &#123;</span><br><span class="line">            e = first = f; <span class="comment">// re-traverse if entry changed</span></span><br><span class="line">            retries = -<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> node;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>说白了，当尝试获取锁失败而调度<code>scanAndLockForPut</code>方法，其目的是为了在无法获取锁的时候能够提前创建<code>HashEntry</code>对象并返回。</p>
+<hr>
+<blockquote>
+<p>回头接着看<code>Segment</code>的<code>put</code>方法的步骤：</p>
+<p>1.当<code>Segment</code>获取到锁之后，先进行遍历，判断<code>HashEntry</code>是否有同样的<code>key</code>值存在</p>
+<p>2.若key值存在，根据参数<code>onlyIfAbsent</code>判断是否覆盖<code>value</code>值，并返回旧值</p>
+<p>3.若key值不存在，则创建HashEntry对象并设置链表头（有可能在获取锁时创建）</p>
+<p>4.判断其扩容条件，若需要扩容，则进行链表重排</p>
+<p>5.若不需要扩容，则添加HashEntry对象到数组中，并替换数组中的链表头</p>
+<p>6.更新count值和modCount值</p>
+</blockquote>
+<hr>
+<p>接着来看看其扩容的方法，当满足<code>count + 1 &gt; threshold &amp;&amp; tab.length &lt; MAXIMUM_CAPACITY</code>条件时，将调用<code>rehash</code>扩容方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//注意：这里传的参数是新的HashEntry对象，其next属性指向原链表的头部</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">rehash</span><span class="params">(HashEntry&lt;K,V&gt; node)</span> </span>&#123;</span><br><span class="line">    HashEntry&lt;K,V&gt;[] oldTable = table;</span><br><span class="line">    <span class="keyword">int</span> oldCapacity = oldTable.length;</span><br><span class="line">    <span class="comment">//向左偏移1位，扩容一倍大小</span></span><br><span class="line">    <span class="keyword">int</span> newCapacity = oldCapacity &lt;&lt; <span class="number">1</span>;</span><br><span class="line">    <span class="comment">//重新计算阈值</span></span><br><span class="line">    threshold = (<span class="keyword">int</span>)(newCapacity * loadFactor);</span><br><span class="line">    <span class="comment">//初始化新的HashEntry数组</span></span><br><span class="line">    HashEntry&lt;K,V&gt;[] newTable =</span><br><span class="line">        (HashEntry&lt;K,V&gt;[]) <span class="keyword">new</span> HashEntry[newCapacity];</span><br><span class="line">    <span class="comment">//HashEntry[].length - 1 用于计算Hash值</span></span><br><span class="line">    <span class="keyword">int</span> sizeMask = newCapacity - <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; oldCapacity ; i++) &#123;</span><br><span class="line">        <span class="comment">//遍历旧的HashEntry数组</span></span><br><span class="line">        HashEntry&lt;K,V&gt; e = oldTable[i];</span><br><span class="line">        <span class="keyword">if</span> (e != <span class="keyword">null</span>) &#123;</span><br><span class="line">            HashEntry&lt;K,V&gt; next = e.next;</span><br><span class="line">            <span class="comment">//计算出新的HashEntry数组下标</span></span><br><span class="line">            <span class="keyword">int</span> idx = e.hash &amp; sizeMask;</span><br><span class="line">            <span class="comment">//当链表中只有一个元素时，直接将该元素赋值到数组中</span></span><br><span class="line">            <span class="keyword">if</span> (next == <span class="keyword">null</span>)   <span class="comment">//  Single node on list</span></span><br><span class="line">                newTable[idx] = e;</span><br><span class="line">            <span class="keyword">else</span> &#123; <span class="comment">// Reuse consecutive sequence at same slot</span></span><br><span class="line">                HashEntry&lt;K,V&gt; lastRun = e;</span><br><span class="line">                <span class="keyword">int</span> lastIdx = idx;</span><br><span class="line">                <span class="comment">//该循环的目的是从链表尾部截取出一条与链表末尾节点的新数组下标相同，并且相连的链表</span></span><br><span class="line">                <span class="comment">//并存储该截取链表的头对象到lastRun对象，存储新数组下标到lastIdx中</span></span><br><span class="line">                <span class="keyword">for</span> (HashEntry&lt;K,V&gt; last = next;</span><br><span class="line">                     last != <span class="keyword">null</span>;</span><br><span class="line">                     last = last.next) &#123;</span><br><span class="line">                    <span class="keyword">int</span> k = last.hash &amp; sizeMask;</span><br><span class="line">                    <span class="keyword">if</span> (k != lastIdx) &#123;</span><br><span class="line">                        lastIdx = k;</span><br><span class="line">                        lastRun = last;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">//直接移动尾部截取的链表到新的数组下标中</span></span><br><span class="line">                newTable[lastIdx] = lastRun;</span><br><span class="line">                <span class="comment">// Clone remaining nodes</span></span><br><span class="line">                <span class="comment">//重新顺着从原链表头开始遍历，遍历到lastRun，也就是链表截取处时，跳出循环</span></span><br><span class="line">                <span class="keyword">for</span> (HashEntry&lt;K,V&gt; p = e; p != lastRun; p = p.next) &#123;</span><br><span class="line">                    V v = p.value;</span><br><span class="line">                    <span class="keyword">int</span> h = p.hash;</span><br><span class="line">                    <span class="keyword">int</span> k = h &amp; sizeMask;</span><br><span class="line">                    HashEntry&lt;K,V&gt; n = newTable[k];</span><br><span class="line">                    <span class="comment">//采用头插法讲一个个元素分别插入到链表头中，并赋值给HashEntry数组</span></span><br><span class="line">                    newTable[k] = <span class="keyword">new</span> HashEntry&lt;K,V&gt;(h, p.key, v, n);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//对原链表扩容完成之后，计算新的HashEntry的下标</span></span><br><span class="line">    <span class="keyword">int</span> nodeIndex = node.hash &amp; sizeMask; <span class="comment">// add the new node</span></span><br><span class="line">    <span class="comment">//替换链表头</span></span><br><span class="line">    node.setNext(newTable[nodeIndex]);</span><br><span class="line">    <span class="comment">//赋值到HashEntry数组中</span></span><br><span class="line">    newTable[nodeIndex] = node;</span><br><span class="line">    table = newTable;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的扩容逻辑和<code>HashMap</code>不太一样，<code>HashMap</code>存在逻辑判断可能会重新计算<code>key</code>的<code>hash</code>值，而<code>ConcurrentHashMap</code>并没有，所以它的必定满足<strong>新数组下标=原下标+原数组长度</strong>。</p>
+<p><strong>它的扩容并非直接遍历整张链表，而是先遍历一次链表，计算每个元素的新数组下标，如果从某个A元素开始，一直到链表遍历完成，他们计算的新数组下标均相同，意味着可以直接截取该链表，从A元素开始一致到末尾，整条迁移到新节点上，如下图：</strong></p>
+<p><img src="/images/jdk7-hashmap/source-11.png" alt="source-11"></p>
+<p><strong>当迁截取部分链表赋值到新数组之后，遍历原链表，采用头插法插入链表，并赋值到新数组中，一直遍历到截取的A元素位置时挑出循环。最后才将新增的元素对象插入到扩容的数组中。</strong></p>
+<hr>
+<p>最后看看<code>Segment</code>类中的<code>put</code>方法中调用的<code>setEntryAt</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Sets the ith element of given table, with volatile write</span></span><br><span class="line"><span class="comment">     * semantics. (See above about use of putOrderedObject.)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> &lt;K,V&gt; <span class="function"><span class="keyword">void</span> <span class="title">setEntryAt</span><span class="params">(HashEntry&lt;K,V&gt;[] tab, <span class="keyword">int</span> i,</span></span></span><br><span class="line"><span class="function"><span class="params">                                   HashEntry&lt;K,V&gt; e)</span> </span>&#123;</span><br><span class="line">    UNSAFE.putOrderedObject(tab, ((<span class="keyword">long</span>)i &lt;&lt; TSHIFT) + TBASE, e);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过使用<code>UNSAFE</code>调用CPU指令，意思是将<code>HashEntry</code>对象赋值到<code>HashEntry</code>数组的<code>index</code>下标中。</p>
+<hr>
+<p>接着看看<code>ConcurrentHashMap</code>的<code>size</code>方法，它的设计思想可以在编码中借鉴：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> RETRIES_BEFORE_LOCK = <span class="number">2</span>; </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">size</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// Try a few times to get accurate count. On failure due to</span></span><br><span class="line">        <span class="comment">// continuous async changes in table, resort to locking.</span></span><br><span class="line">        <span class="keyword">final</span> Segment&lt;K,V&gt;[] segments = <span class="keyword">this</span>.segments;</span><br><span class="line">        <span class="keyword">int</span> size;</span><br><span class="line">        <span class="keyword">boolean</span> overflow; <span class="comment">// true if size overflows 32 bits</span></span><br><span class="line">        <span class="keyword">long</span> sum;         <span class="comment">// sum of modCounts</span></span><br><span class="line">        <span class="keyword">long</span> last = <span class="number">0L</span>;   <span class="comment">// previous sum</span></span><br><span class="line">        <span class="keyword">int</span> retries = -<span class="number">1</span>; <span class="comment">// first iteration isn't retry</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">                <span class="comment">//当重试次数超过2次时，开启加锁计算</span></span><br><span class="line">                <span class="keyword">if</span> (retries++ == RETRIES_BEFORE_LOCK) &#123;</span><br><span class="line">                    <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; segments.length; ++j)</span><br><span class="line">                        ensureSegment(j).lock(); <span class="comment">// force creation</span></span><br><span class="line">                &#125;</span><br><span class="line">                sum = <span class="number">0L</span>;</span><br><span class="line">                size = <span class="number">0</span>;</span><br><span class="line">                overflow = <span class="keyword">false</span>;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; segments.length; ++j) &#123;</span><br><span class="line">                    Segment&lt;K,V&gt; seg = segmentAt(segments, j);</span><br><span class="line">                    <span class="keyword">if</span> (seg != <span class="keyword">null</span>) &#123;</span><br><span class="line">                        <span class="comment">//累加各个segment的修改次数</span></span><br><span class="line">                        sum += seg.modCount;</span><br><span class="line">                        <span class="comment">//累加各个segment的元素数量</span></span><br><span class="line">                        <span class="keyword">int</span> c = seg.count;</span><br><span class="line">                        <span class="keyword">if</span> (c &lt; <span class="number">0</span> || (size += c) &lt; <span class="number">0</span>)</span><br><span class="line">                            overflow = <span class="keyword">true</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">//第一次循环：当ConcurrentHashMap的modCount=0时，代表没元素，跳出循环</span></span><br><span class="line">                <span class="comment">//第二次循环：和上一次循环计算的元素总数量数比较，如果相同返回，不同则加锁</span></span><br><span class="line">                <span class="keyword">if</span> (sum == last)</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="comment">//第一次循环计算的元素总数量赋值给last</span></span><br><span class="line">                last = sum;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (retries &gt; RETRIES_BEFORE_LOCK) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; segments.length; ++j)</span><br><span class="line">                    segmentAt(segments, j).unlock();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> overflow ? Integer.MAX_VALUE : size;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>其实它的实现逻辑很简单，先在不加锁的情况下，进行计算，第一次计算的结果和第二次计算的结果相同时，就认为这个结果是稳定的，直接返回，当两次计算的结果不相同时，则进行加锁计算。</p>
+<hr>
+<blockquote>
+<p>“本篇文章主要摘自<a href="https://www.bilibili.com/video/BV1x741117jq?p=3" target="_blank" rel="noopener">参考资料</a>”</p>
+</blockquote>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年09月29日 19:15</p>
+        <p>原始链接： <a class="post-url" href="/2020/09/28/jdk7-hashmap/" title="&#39;JDK1.7 HashMap和ConcurrentHashMap 源码和实现&#39;">https://midkuro.gitee.io/2020/09/28/jdk7-hashmap/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/09/28/jdk7-hashmap/&title=《'JDK1.7 HashMap和ConcurrentHashMap 源码和实现'》 — Kuro's Blog&pic=images/java.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/09/28/jdk7-hashmap/&title=《'JDK1.7 HashMap和ConcurrentHashMap 源码和实现'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/09/28/jdk7-hashmap/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'JDK1.7 HashMap和ConcurrentHashMap 源码和实现'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/09/28/jdk7-hashmap/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/09/28/jdk7-hashmap/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/09/28/jdk7-hashmap/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Java/" class="color5">Java</a>
+      
+    <a href="/tags/HashMap/" class="color3">HashMap</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#HashMap的源码和分析"><span class="post-toc-text">HashMap的源码和分析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#JDK1-7"><span class="post-toc-text">JDK1.7</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#HashMap"><span class="post-toc-text">HashMap</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#ConcurrentHashMap"><span class="post-toc-text">ConcurrentHashMap</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/09/23/binary-endian/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;字节顺序&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="jdk7-hashmap" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.57px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/HashMap/" style="font-size: 10px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/MySql/" style="font-size: 10px;">MySql</a> <a href="/tags/NIO/" style="font-size: 12.86px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.43px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.86px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Synchronized/" style="font-size: 10px;">Synchronized</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.57px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/HashMap/" style="font-size: 10px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/MySql/" style="font-size: 10px;">MySql</a> <a href="/tags/NIO/" style="font-size: 12.86px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.43px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.86px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Synchronized/" style="font-size: 10px;">Synchronized</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

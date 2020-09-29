@@ -11,23 +11,25 @@
   <meta name="description" content="垃圾回收机制想要了解垃圾收集策略，需要先了解 Java内存区域 说起垃圾收集（Garbage Collection，GC），经过半个多世纪的发展，目前的内存的动态分配与内存回收技术已经相当成熟，一切看起来都进入了 “ 自动化 ” 时代，那为什么还要去了解GC和内存分配呢？ 答案很简单：需要排查各种内存溢出、内存泄漏问题时，当垃圾收集称为系统达到更高并发量的瓶颈时，就需要对这些 “ 自动化 ” 的技">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;JVM（二） 垃圾回收机制&#39;">
-<meta property="og:url" content="https://midkuro.github.io/2020/05/21/garbage-collection/index.html">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/05/21/garbage-collection/index.html">
 <meta property="og:site_name" content="Kuro&#39;s Blog">
 <meta property="og:description" content="垃圾回收机制想要了解垃圾收集策略，需要先了解 Java内存区域 说起垃圾收集（Garbage Collection，GC），经过半个多世纪的发展，目前的内存的动态分配与内存回收技术已经相当成熟，一切看起来都进入了 “ 自动化 ” 时代，那为什么还要去了解GC和内存分配呢？ 答案很简单：需要排查各种内存溢出、内存泄漏问题时，当垃圾收集称为系统达到更高并发量的瓶颈时，就需要对这些 “ 自动化 ” 的技">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://midkuro.github.io/images/garbage-collection/collection-1.png">
-<meta property="og:image" content="https://midkuro.github.io/images/garbage-collection/collection-2.png">
-<meta property="og:image" content="https://midkuro.github.io/images/garbage-collection/collection-3.png">
-<meta property="og:image" content="https://midkuro.github.io/images/garbage-collection/collection-4.png">
-<meta property="og:image" content="https://midkuro.github.io/images/garbage-collection/collection-5.png">
-<meta property="og:image" content="https://midkuro.github.io/images/garbage-collection/collection-6.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/garbage-collection/collection-1.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/garbage-collection/collection-8.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/garbage-collection/collection-7.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/garbage-collection/collection-2.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/garbage-collection/collection-3.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/garbage-collection/collection-4.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/garbage-collection/collection-5.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/garbage-collection/collection-6.png">
 <meta property="article:published_time" content="2020-05-21T14:30:00.000Z">
-<meta property="article:modified_time" content="2020-09-23T08:23:23.968Z">
+<meta property="article:modified_time" content="2020-09-28T01:26:16.757Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="JVM">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://midkuro.github.io/images/garbage-collection/collection-1.png">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/garbage-collection/collection-1.png">
   
   
     <link rel="icon" href="/favicon.ico">
@@ -104,7 +106,7 @@
             <nav class="header-nav">
                 <div class="social">
                     
-                        <a title="Kuro"  href="//midkuro.gitee.io" target="_blank" rel="noopener">
+                        <a title="Kuro"  href="//midkuro.gitee.io">
                             <i class="fa fa-home fa-2x"></i></a>
                     
                         <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
@@ -183,16 +185,32 @@
 <p>其中虚拟机栈和本地方法栈都是线程私有的内存区域，只要线程没有终止，就能确保它们中引用的对象的存活。而方法区中类静态属性引用的对象是显然存活的。常量引用的对象在当前可能存活，因此，也可能是 <code>GC roots</code> 的一部分。</p>
 <h4 id="再谈引用"><a href="#再谈引用" class="headerlink" title="再谈引用"></a>再谈引用</h4><p><code>JDK1.2</code> 以前，一个对象只有被引用和没有被引用两种状态。</p>
 <p>后来，Java 对引用的概念进行了扩充，将引用分为强引用（<code>Strong Reference</code>）、软引用（<code>Soft Reference</code>）、弱引用（<code>Weak Reference</code>）、虚引用（<code>Phantom Reference</code>）4 种，这 4 种引用强度依次逐渐减弱。</p>
+<blockquote>
 <ul>
-<li><p>强引用：指在程序代码之中普遍存在的，类似 “ <code>Object obj=new Object()</code> ” 这类的引用，垃圾收集器永远不会回收存活的强引用对象。</p>
-</li>
-<li><p>软引用：还有用但并非必需的对象。在系统<strong>将要发生内存溢出异常之前</strong> ，将会把这些对象列进回收范围之中进行第二次回收。</p>
-</li>
-<li><p>弱引用：也是用来描述非必需对象的，被弱引用关联的对象 <strong>只能生存到下一次垃圾收集发生之前</strong> 。当垃圾收集器工作时，无论内存是否足够，都会回收掉只被弱引用关联的对象。</p>
-</li>
-<li><p>虚引用：是最弱的一种引用关系。 <strong>无法通过虚引用来取得一个对象实例</strong> 。为一个对象设置虚引用关联的唯一目的就是能在这个对象被收集器回收时收到一个系统通知。</p>
-</li>
+<li>强引用：指在程序代码之中普遍存在的，类似 “ <code>Object obj=new Object()</code> ” 这类的引用，垃圾收集器永远不会回收存活的强引用对象。</li>
+<li>软引用：还有用但并非必需的对象。在系统<strong>将要发生内存溢出异常之前</strong> ，将会把这些对象列进回收范围之中进行第二次回收，<strong>主要用于缓存内存</strong>。</li>
+<li>弱引用：也是用来描述非必需对象的，被弱引用关联的对象 <strong>只能生存到下一次垃圾收集发生之前</strong> 。当垃圾收集器工作时，无论内存是否足够，都会回收掉只被弱引用关联的对象，有个著名的ThreadLocal线程泄露问题。</li>
+<li>虚引用：是最弱的一种引用关系。 <strong>无法通过虚引用来取得一个对象实例</strong> 。为一个对象设置虚引用关联的唯一目的就是能在这个对象被收集器回收时收到一个系统通知。</li>
 </ul>
+</blockquote>
+<p>java中的<code>ThreadLocal</code>中的set方法就是使用了弱引用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">       Thread t = Thread.currentThread();</span><br><span class="line">       ThreadLocalMap map = getMap(t);</span><br><span class="line">       <span class="keyword">if</span> (map != <span class="keyword">null</span>)</span><br><span class="line">           map.set(<span class="keyword">this</span>, value);</span><br><span class="line">       <span class="keyword">else</span></span><br><span class="line">           createMap(t, value);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到其<code>set</code>方法将获取当前线程中的<code>ThreadLocalMap</code>属性，然后把自身<code>this</code>,也就是这个<code>ThreadLocal</code>对象当做<code>key</code>，设置到<code>ThreadLocalMap</code>属性中,而<code>ThreadLocalMap</code>类的<code>set</code>方法中，会把<code>Key</code>和<code>Value</code>封装成一个<code>Entry</code>对象存放在数组里。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Entry</span> <span class="keyword">extends</span> <span class="title">WeakReference</span>&lt;<span class="title">ThreadLocal</span>&lt;?&gt;&gt; </span>&#123;</span><br><span class="line">            <span class="comment">/** The value associated with this ThreadLocal. */</span></span><br><span class="line">            Object value;</span><br><span class="line"></span><br><span class="line">            Entry(ThreadLocal&lt;?&gt; k, Object v) &#123;</span><br><span class="line">                <span class="keyword">super</span>(k);</span><br><span class="line">                value = v;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+<p>该<code>Entry</code>继承了<code>WeakReference</code>，并在构造方法时调用了其<code>super</code>方法，也就是说，调用了<code>ThreadLocal</code>后，会有一个虚引用指向<code>ThreadLocal</code>。</p>
+<p><img src="/images/garbage-collection/collection-8.png" alt="collection-8"></p>
+<blockquote>
+<p>问题：为什么这里要用虚引用呢？</p>
+<p>答案：为了让ThreadLocal对象的强引用失效后，GC可以回收，如果这里用了强引用，则ThreadLocal无法被回收。</p>
+<p>问题：那ThreadLocal的内存泄漏原因是什么呢？</p>
+<p>答案：由于ThreadLocal被作为一个Entry的<code>key</code>，而当ThreadLocal被回收了之后，其<code>key</code>变为NULL值，但是其<code>Value</code>的关联关系依旧存在，无法从ThreadLocalMap中移出，会导致内存泄漏。</p>
+<p>问题：那ThreadLocal如何避免内存泄漏？</p>
+<p>答案：当要释放ThreadLocal时，需要手动调用<code>ThreadLocal.remove()</code>方法，手动释放设置的属性内容。</p>
+</blockquote>
+<p><img src="/images/garbage-collection/collection-7.png" alt="collection-7"></p>
+<p>如java的直接缓冲区<code>DirectByteBuffer</code>，它关联了对外内存，JVM通过初始化<code>DirectByteBuffer</code>对象时设置一个虚引用，当<code>DirectByteBuffer</code>对象被回收时，将会把<code>DirectByteBuffer</code>关联的堆外内存信息存放到一个<code>Queue</code>队列中，GC通过监控这个队列能够将<code>DirectByteBuffer</code>对象关联的堆外内存给回收。</p>
 <p><img src="/images/garbage-collection/collection-2.png" alt="collection-2"></p>
 <h4 id="生存与死亡"><a href="#生存与死亡" class="headerlink" title="生存与死亡"></a>生存与死亡</h4><p>不可达的对象将暂时处于“ 缓刑 ”阶段，要真正宣告一个对象死亡，至少要经历两次标记过程：</p>
 <ul>
@@ -288,10 +306,10 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年09月23日 16:23</p>
-        <p>原始链接： <a class="post-url" href="/2020/05/21/garbage-collection/" title="&#39;JVM（二） 垃圾回收机制&#39;">https://midkuro.github.io/2020/05/21/garbage-collection/</a></p>
+        <p>最后更新： 2020年09月28日 09:26</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/21/garbage-collection/" title="&#39;JVM（二） 垃圾回收机制&#39;">https://midkuro.gitee.io/2020/05/21/garbage-collection/</a></p>
         <footer>
-            <a href="https://midkuro.github.io">
+            <a href="https://midkuro.gitee.io">
                 <img src="/images/logo.png" alt="Kuro">
                 Kuro
             </a>
@@ -346,7 +364,7 @@
     <div class="post-share-list" id="share-list">
         <ul class="share-icons">
           <li>
-            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.github.io/2020/05/21/garbage-collection/&title=《'JVM（二） 垃圾回收机制'》 — Kuro's Blog&pic=images/jvm.jpg" data-title="微博">
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/05/21/garbage-collection/&title=《'JVM（二） 垃圾回收机制'》 — Kuro's Blog&pic=images/jvm.jpg" data-title="微博">
               <i class="fa fa-weibo"></i>
             </a>
           </li>
@@ -356,22 +374,22 @@
             </a>
           </li>
           <li>
-            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.github.io/2020/05/21/garbage-collection/&title=《'JVM（二） 垃圾回收机制'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/05/21/garbage-collection/&title=《'JVM（二） 垃圾回收机制'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
               <i class="fa fa-qq"></i>
             </a>
           </li>
           <li>
-            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.github.io/2020/05/21/garbage-collection/" data-title="Facebook">
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/05/21/garbage-collection/" data-title="Facebook">
               <i class="fa fa-facebook"></i>
             </a>
           </li>
           <li>
-            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'JVM（二） 垃圾回收机制'》 — Kuro's Blog&url=https://midkuro.github.io/2020/05/21/garbage-collection/&via=https://midkuro.github.io" data-title="Twitter">
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'JVM（二） 垃圾回收机制'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/05/21/garbage-collection/&via=https://midkuro.gitee.io" data-title="Twitter">
               <i class="fa fa-twitter"></i>
             </a>
           </li>
           <li>
-            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.github.io/2020/05/21/garbage-collection/" data-title="Google+">
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/05/21/garbage-collection/" data-title="Google+">
               <i class="fa fa-google-plus"></i>
             </a>
           </li>
@@ -381,7 +399,7 @@
 <div class="post-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;" id="wxShare-close">×</a>
     <p>扫一扫，分享到微信</p>
-    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.github.io/2020/05/21/garbage-collection/" alt="微信分享二维码">
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/05/21/garbage-collection/" alt="微信分享二维码">
 </div>
 
 <div class="mask"></div>
@@ -474,7 +492,7 @@
 <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
 <script>
   var mihoConfig = {
-      root: "https://midkuro.github.io",
+      root: "https://midkuro.gitee.io",
       animate: true,
       isHome: false,
       share: true,
@@ -498,10 +516,10 @@
 <div class="sidebar-menu-box" id="sidebar-menu-box">
     <div class="sidebar-menu-box-container">
         <div id="sidebar-menu-box-categories">
-            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
         </div>
         <div id="sidebar-menu-box-tags">
-            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 13.33px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 20px;">MQ</a> <a href="/tags/MySql/" style="font-size: 10px;">MySql</a> <a href="/tags/NIO/" style="font-size: 13.33px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.67px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 13.33px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 16.67px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 13.33px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 15px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 15px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Synchronized/" style="font-size: 10px;">Synchronized</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a>
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.57px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/HashMap/" style="font-size: 10px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/MySql/" style="font-size: 10px;">MySql</a> <a href="/tags/NIO/" style="font-size: 12.86px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.43px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.86px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Synchronized/" style="font-size: 10px;">Synchronized</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a>
         </div>
     </div>
     <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
@@ -534,7 +552,7 @@
     <div class="mobile-header-tag-container">
         <span class="title">Tags</span>
         <div id="mobile-header-container-tags">
-            <a href="/tags/ActiveMQ/" style="font-size: 18.33px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 13.33px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 20px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 15px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 15px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.67px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 13.33px;">Linux</a> <a href="/tags/MQ/" style="font-size: 20px;">MQ</a> <a href="/tags/MySql/" style="font-size: 10px;">MySql</a> <a href="/tags/NIO/" style="font-size: 13.33px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.67px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 13.33px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 16.67px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 13.33px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 15px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 15px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Synchronized/" style="font-size: 10px;">Synchronized</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.67px;">Thread</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a>
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.57px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/HashMap/" style="font-size: 10px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/MySql/" style="font-size: 10px;">MySql</a> <a href="/tags/NIO/" style="font-size: 12.86px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.43px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.86px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Synchronized/" style="font-size: 10px;">Synchronized</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a>
         </div>
     </div>
 </div>
