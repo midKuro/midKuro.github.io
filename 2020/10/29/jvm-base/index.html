@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;JVM class文件格式&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="JVM Class格式Java虚拟机规范规定，Class文件格式采用类似C语言结构体的伪结构来存储数据，这种结构只有两种数据类型：无符号数和表。 无符号数属于基本数据类型，主要可以用来描述数字、索引符号、数量值或者按照UTF-8编码构成的字符串值，大小使用u1、u2、u4、u8分别表示1字节、2字节、4字节和8字节。 表是由多个无符号数或者其他表作为数据项构成的复合数据类型，所有的表都习惯以“_i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;JVM class文件格式&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/10/29/jvm-base/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="JVM Class格式Java虚拟机规范规定，Class文件格式采用类似C语言结构体的伪结构来存储数据，这种结构只有两种数据类型：无符号数和表。 无符号数属于基本数据类型，主要可以用来描述数字、索引符号、数量值或者按照UTF-8编码构成的字符串值，大小使用u1、u2、u4、u8分别表示1字节、2字节、4字节和8字节。 表是由多个无符号数或者其他表作为数据项构成的复合数据类型，所有的表都习惯以“_i">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-01.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-03.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-02.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-06.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-04.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-05.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-07.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-08.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-09.png">
+<meta property="article:published_time" content="2020-10-29T14:31:00.000Z">
+<meta property="article:modified_time" content="2020-11-01T01:27:48.800Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="algorithm">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-jvm-base" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;JVM class文件格式&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/algorithm/">algorithm</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-10-29
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h1><p><img src="/images/jvm-base/jvm-01.png" alt="jvm"></p>
+<h2 id="Class格式"><a href="#Class格式" class="headerlink" title="Class格式"></a>Class格式</h2><p>Java虚拟机规范规定，Class文件格式采用类似C语言结构体的伪结构来存储数据，这种结构只有两种数据类型：无符号数和表。</p>
+<h3 id="无符号数"><a href="#无符号数" class="headerlink" title="无符号数"></a><strong>无符号数</strong></h3><p>属于基本数据类型，主要可以用来描述数字、索引符号、数量值或者按照UTF-8编码构成的字符串值，大小使用u1、u2、u4、u8分别表示1字节、2字节、4字节和8字节。</p>
+<h3 id="表"><a href="#表" class="headerlink" title="表"></a><strong>表</strong></h3><p>是由多个无符号数或者其他表作为数据项构成的复合数据类型，所有的表都习惯以“_info”结尾。表主要用于描述有层次关系的复合结构的数据，比如方法、字段。需要注意的是class文件是没有分隔符的，所以每个的二进制数据类型都是严格定义的。具体的顺序定义如下：</p>
+<p><img src="/images/jvm-base/jvm-03.png" alt="jvm"></p>
+<p>从二进制的数据来看：</p>
+<p><img src="/images/jvm-base/jvm-02.png" alt="jvm"></p>
+<p>通过<code>javap</code>编译成可视化语言来看：</p>
+<p><img src="/images/jvm-base/jvm-06.png" alt="jvm"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">cafe babe 0000 0034 000f 0a00 0300 0c07</span><br><span class="line">000d 0700 0e01 0006 3c69 6e69 743e 0100</span><br><span class="line">0328 2956 0100 0443 6f64 6501 000f 4c69</span><br><span class="line">6e65 4e75 6d62 6572 5461 626c 6501 0004</span><br><span class="line">6d61 696e 0100 1628 5b4c 6a61 7661 2f6c</span><br><span class="line">616e 672f 5374 7269 6e67 3b29 5601 000a</span><br><span class="line">536f 7572 6365 4669 6c65 0100 134a 766d</span><br><span class="line">436c 6173 7346 6f72 6d61 742e 6a61 7661</span><br><span class="line">0c00 0400 0501 0013 6b75 726f 2f4a 766d</span><br><span class="line">436c 6173 7346 6f72 6d61 7401 0010 6a61</span><br><span class="line">7661 2f6c 616e 672f 4f62 6a65 6374 0021</span><br><span class="line">0002 0003 0000 0000 0002 0001 0004 0005</span><br><span class="line">0001 0006 0000 001d 0001 0001 0000 0005</span><br><span class="line">2ab7 0001 b100 0000 0100 0700 0000 0600</span><br><span class="line">0100 0000 0300 0900 0800 0900 0100 0600</span><br><span class="line">0000 1900 0000 0100 0000 01b1 0000 0001</span><br><span class="line">0007 0000 0006 0001 0000 0006 0001 000a</span><br><span class="line">0000 0002 000b</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">魔法数字：cafe babe</span><br><span class="line">次版本号： 0000</span><br><span class="line">主版本号： 0034			JDK1.8</span><br><span class="line">常量数量： 000f			从1开始</span><br><span class="line">#1常量 ： 0a			 表示表中第十项（CONSTANT_Methodref_info）</span><br><span class="line">      :  00 03		   指向#3常量</span><br><span class="line">      ： 00 0c		  指向#13常量</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/jvm-base/jvm-04.png" alt="jvm"></p>
+<p>详情可查阅查阅：</p>
+<p><img src="/images/jvm-base/jvm-05.png" alt="jvm"></p>
+<h2 id="类初始化的过程"><a href="#类初始化的过程" class="headerlink" title="类初始化的过程"></a>类初始化的过程</h2><p><img src="/images/jvm-base/jvm-07.png" alt="jvm"></p>
+<h3 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h3><blockquote>
+<p>1.通过一个类的全限定名来获取定义此类的二进制字节流。</p>
+<p>2.将这个字节流所代表的的静态存储结构转化成访问区的运行时数据结构。</p>
+<p>3.在内存中生成一个代表这个类的java.lang.Class对象，作为方法区这个类的各种数据的访问入口。</p>
+</blockquote>
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>文件格式验证、元数据验证、字节码验证、符号引用验证等等。</p>
+<p>如验证是否以0xCAFEBABE开头</p>
+<h3 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h3><p>为类变量分配内存并设置类变量初始值的阶段，这些变量所使用的内存都将在方法区中进行分配。</p>
+<p><strong>这时候进行内存分配的仅包括类变量（被static修饰的变量），而不包括实例变量，实例变量将会在对象实例化时随着对象一起分配到Java堆中。</strong></p>
+<p><strong>正常情况下，这里初始化的值是静态变量的数据类型的默认值，而不是属性指定的值，如果它还被final修饰了，那么将会在这个阶段直接初始化成属性指定的值。</strong></p>
+<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p>解析阶段是虚拟机将常量池内的符号引用替换为直接引用的过程。</p>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>执行类构造器<clinit>()方法，<clinit>()方法是由编译器自动收集类中的所有类变量的复制动作和静态语句块中的语句合并产生的，<strong>静态语句块中只能访问到定义在静态语句之前的变量</strong>。</p>
+<p>也就是说，静态属性和静态代码块的赋值和调用在<strong>初始化</strong>过程中执行，先执行父类的，再执行子类的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T001_ClassLoadingProcedure</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//ClassLoader加载T对象：</span></span><br><span class="line">        <span class="comment">//1.加载--初始化静态变量默认值count = 0; T t = null</span></span><br><span class="line">    <span class="comment">//2.验证</span></span><br><span class="line">        <span class="comment">//3.准备</span></span><br><span class="line">        <span class="comment">//4.解析--按照顺序赋值静态变量 count = 2; T t = new T();---&gt;调用构造方法--&gt;count++;</span></span><br><span class="line">        System.out.println(T.count); <span class="comment">//输出3</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">T</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> count = <span class="number">2</span>; <span class="comment">//0</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> T t = <span class="keyword">new</span> T(); <span class="comment">// null</span></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">T</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        count ++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T001_ClassLoadingProcedure</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">         <span class="comment">//ClassLoader加载T对象：</span></span><br><span class="line">        <span class="comment">//1.加载--初始化静态变量默认值count = 0; T t = null</span></span><br><span class="line">    <span class="comment">//2.验证</span></span><br><span class="line">        <span class="comment">//3.准备</span></span><br><span class="line">        <span class="comment">//4.解析--按照顺序赋值静态变量 T t = new T();---&gt;调用构造方法--&gt;count++; count = 1;</span></span><br><span class="line">        <span class="comment">//     --按照顺序赋值静态变量 count = 2;（覆盖掉之前的值）</span></span><br><span class="line">        System.out.println(T.count); <span class="comment">//输出2</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">T</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> T t = <span class="keyword">new</span> T(); <span class="comment">// null</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> count = <span class="number">2</span>; <span class="comment">//0</span></span><br><span class="line">   </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">T</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        count ++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T001_ClassLoadingProcedure</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">         <span class="comment">//ClassLoader加载T对象：</span></span><br><span class="line">        <span class="comment">//1.加载--初始化静态变量默认值count = 2; T t = null</span></span><br><span class="line">    <span class="comment">//2.验证</span></span><br><span class="line">        <span class="comment">//3.准备</span></span><br><span class="line">        <span class="comment">//4.解析--按照顺序赋值静态变量 T t = new T();---&gt;调用构造方法--&gt;count++; count = 3;</span></span><br><span class="line">        System.out.println(T.count); <span class="comment">//输出2</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">T</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> T t = <span class="keyword">new</span> T(); <span class="comment">// null</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">int</span> count = <span class="number">2</span>; <span class="comment">//2</span></span><br><span class="line">   </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">T</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        count ++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>如果是<code>Object o = new Object()</code>，有以下几步：</strong></p>
+<p>1、申请内存空间，这时候成员变量均是默认值</p>
+<p>2、调用构造方法，初始化成员变量值</p>
+<p>3、建立栈上和堆内存对象的关联关系</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//当我们调用构造方法时，java的底层的字节码指令如下：</span></span><br><span class="line">0: new           #2                  // class java/lang/Object		申请内存空间</span><br><span class="line"><span class="number">3</span>: dup</span><br><span class="line">4: invokespecial #1                  // Method java/lang/Object."&lt;init&gt;":()V    调用构造方法</span><br><span class="line"><span class="number">7</span>: astore_1							 <span class="comment">// Object o 指向开辟的内存地址</span></span><br><span class="line"><span class="number">8</span>: <span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h2><p><img src="/images/jvm-base/jvm-08.png" alt="jvm"></p>
+<p><img src="/images/jvm-base/jvm-09.png" alt="jvm"></p>
+<p>如果一个类加载器收到了类加载的请求，它首先不会先尝试加载这个类，而是把这个请求委派给父类加载器去完成，每一层次的类加载器都是如此，因此所有的加载请求最终都应该传送到顶层的启动类加载器中，只有当父类加载器反馈自己无法完成这个加载请求（它的搜索范围中没有找到所需的类）时，子加载器才会尝试自己加载。</p>
+<p><strong>这里的父-子是通过使用组合关系，而不是使用继承关系。</strong></p>
+<p><strong>父类加载器不是类加载器的加载器，也不是类加载器的父类加载器。双拼委派是一个孩子向父亲方向，然后父亲向孩子方向的双亲委派过程。</strong></p>
+<blockquote>
+<p>为什么用双亲委派机制？</p>
+<p>安全，保证了Java程序的稳定运行。避免核心类库被用户覆盖。</p>
+</blockquote>
+<p>查看各个类加载器加载的路径及信息可以查阅<code>Launcher.java</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">BootStrap ClassLoader:sun.boot.class.path</span><br><span class="line">ExtClassLoader:java.ext.dirs</span><br><span class="line">AppClassLoader：java.class.path</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>JDK破坏双亲委派机制的历史</p>
+<p>双亲委派模型的第一次被破坏发生在双亲委派模型出现之前，由于双亲委派模型在JDK1.2之后才被引入，为了向前兼容，JDK1.2之后添加了一个findClass()方法。</p>
+<p>双亲委派模型的第二次被破坏是由于模型自身的缺陷导致的，有些标准服务是由启动类加载器（Bootstrap）去加载的，但它又需要调用独立厂商实现并部署在应用程序的ClassPath下的代码，为了解决这个问题，引入了<strong>线程上下文类加载器</strong>，如果有了线程上下文类加载器，父类加载器将会请求子类加载器去完成类加载动作。</p>
+<p>双亲委派模型的第三次被破坏是由于用户对程序动态性的追求导致的。如热替换、热部署。</p>
+<p>假设每个程序都有一个自己的类加载器，当需要更换一个代码片段时，就把这个代码片段连同类加载器一起换掉实现代码的热替换。</p>
+</blockquote>
+<p>自定义类加载器的实现是通过继承<code>ClassLoader</code>并复写它的<code>findClass</code>方法即可。若要破坏双亲委派模型，则还需要重写<code>loadClass</code>方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">protected</span> Class&lt;?&gt; findClass(String name) <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//File To byte[]</span></span><br><span class="line">        <span class="keyword">byte</span>[] bytes = FileUtils.readFileToByteArray(<span class="keyword">new</span> File(<span class="string">"xxx"</span>));</span><br><span class="line">        <span class="comment">//调用父类的defineClass装载</span></span><br><span class="line">        <span class="keyword">return</span> defineClass(name, bytes, <span class="number">0</span>, bytes.length);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">super</span>.findClass(name); <span class="comment">//throws ClassNotFoundException</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="编译器和解释器"><a href="#编译器和解释器" class="headerlink" title="编译器和解释器"></a>编译器和解释器</h2><p>Java默认采用混合模式，初期通过编译器编译Class文件的代码，当出现热点代码时，会通过<code>JIT</code>解释器把热点代码解释成本地代码，提高运行效率。</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 热点代码的阈值频次</span></span><br><span class="line"><span class="meta">-XX</span>:<span class="string">CompileThreshold = 10000</span></span><br><span class="line"><span class="comment"># 使用编译器运行</span></span><br><span class="line"><span class="attr">-Xcomp</span></span><br><span class="line"><span class="comment">#使用解释器运行</span></span><br><span class="line"><span class="attr">-Xint</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="内存模型"><a href="#内存模型" class="headerlink" title="内存模型"></a>内存模型</h2><blockquote>
+<p>Synchronized加锁原语、CPU缓存、MESI、缓存行、缓存对齐 <a href="/2020/09/22/synchronized-process/">链接</a></p>
+</blockquote>
+<h2 id="对象定位"><a href="#对象定位" class="headerlink" title="对象定位"></a>对象定位</h2><p>句柄池、直接指针</p>
+<h2 id="原语指令"><a href="#原语指令" class="headerlink" title="原语指令"></a>原语指令</h2><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#main方法</span></span><br><span class="line"><span class="comment">#开辟堆上的内存空间，并压入栈中</span></span><br><span class="line"> <span class="attr">0</span> <span class="string">new #2 &lt;com/jvm/c4_RuntimeDataAreaAndInstructionSet/Hello_03&gt;</span></span><br><span class="line"><span class="comment"> #复制栈中的内存空间对象地址，并压入栈中</span></span><br><span class="line"> <span class="attr">3</span> <span class="string">dup</span></span><br><span class="line"><span class="comment"> #弹出赋值的栈中的对象，调用构造方法&lt;init&gt;初始化属性</span></span><br><span class="line"> <span class="attr">4</span> <span class="string">invokespecial #3 &lt;com/jvm/c4_RuntimeDataAreaAndInstructionSet/Hello_03.&lt;init&gt;&gt;</span></span><br><span class="line"><span class="comment"> #弹出内存空间对象地址，赋值地址给局部变量表中index=1的对象</span></span><br><span class="line"> <span class="attr">7</span> <span class="string">astore_1</span></span><br><span class="line"><span class="comment"> #把局部变量表index=1的对象压入操作数栈中</span></span><br><span class="line"> <span class="attr">8</span> <span class="string">aload_1</span></span><br><span class="line"><span class="comment"> #使用invokevirtual执行m1方法，将返回值压入栈中</span></span><br><span class="line"> <span class="attr">9</span> <span class="string">invokevirtual #4 &lt;com/jvm/c4_RuntimeDataAreaAndInstructionSet/Hello_03.m1&gt;</span></span><br><span class="line"><span class="comment">#把方法返回的结果集弹出操作数栈，赋值局部变量表中index=2的对象</span></span><br><span class="line"><span class="attr">12</span> <span class="string">istore_2</span></span><br><span class="line"><span class="comment">#结束方法</span></span><br><span class="line"><span class="attr">13</span> <span class="string">return</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#m1方法</span></span><br><span class="line"><span class="comment">#压入常量值 1入操作数栈</span></span><br><span class="line"><span class="attr">0</span> <span class="string">iconst_1</span></span><br><span class="line"><span class="comment">#常量值1出栈，赋值局部变量表中index=1的对象</span></span><br><span class="line"><span class="attr">1</span> <span class="string">istore_1</span></span><br><span class="line"><span class="comment">#把局部变量表中index=1的对象压入栈中</span></span><br><span class="line"><span class="attr">2</span> <span class="string">iload_1</span></span><br><span class="line"><span class="comment">#局部变量表中的index=1的对象自增1</span></span><br><span class="line"><span class="attr">3</span> <span class="string">iinc 1 by 1</span></span><br><span class="line"><span class="comment">#弹出栈，赋值给局部变量表中index=1对象</span></span><br><span class="line"><span class="attr">6</span> <span class="string">istore_1</span></span><br><span class="line"><span class="comment">#把i压入操作数栈中（压入调用该方法的操作数栈中）</span></span><br><span class="line"><span class="attr">7</span> <span class="string">iload_1</span></span><br><span class="line"><span class="attr">8</span> <span class="string">ireturn</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#局部变量表</span></span><br><span class="line"><span class="comment">#main方法---静态方法没有this</span></span><br><span class="line"><span class="attr">index</span>		<span class="string">name</span></span><br><span class="line"><span class="attr">0</span>			<span class="string">args</span></span><br><span class="line"><span class="attr">1</span>			<span class="string">h</span></span><br><span class="line"><span class="attr">2</span>			<span class="string">i</span></span><br><span class="line"><span class="comment">#m1方法---index=0是this对象</span></span><br><span class="line"><span class="attr">index</span>		<span class="string">name</span></span><br><span class="line"><span class="attr">0</span>			<span class="string">this</span></span><br><span class="line"><span class="attr">1</span>			<span class="string">i</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">invokeinterface:</span><br><span class="line">用以调用接口方法，在运行时搜索一个实现了这个接口方法的对象，找出适合的方法进行调用。</span><br><span class="line">invokevirtual:</span><br><span class="line">指令用于调用对象的实例方法，根据对象的实际类型进行分派,用于多态，public方法</span><br><span class="line">invokestatic：</span><br><span class="line">调用一个类的静态方法</span><br><span class="line">invokespecial:</span><br><span class="line">指令用于调用一些需要特殊处理的实例方法，包括实例初始化方法（构造方法）、私有方法和父类方法。</span><br><span class="line">invokedynamic：</span><br><span class="line">JDK1.7新加入的一个虚拟机指令，它允许应用级别的代码来确定执行哪一个方法调用，只有在调用要执行的时候，才会进行这种判断,从而达到动态语言的支持。如lumbda的函数式接口（A::a）</span><br></pre></td></tr></table></figure>
+
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年11月01日 09:27</p>
+        <p>原始链接： <a class="post-url" href="/2020/10/29/jvm-base/" title="&#39;JVM class文件格式&#39;">https://midkuro.gitee.io/2020/10/29/jvm-base/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/10/29/jvm-base/&title=《'JVM class文件格式'》 — Kuro's Blog&pic=images/java.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/10/29/jvm-base/&title=《'JVM class文件格式'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/10/29/jvm-base/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'JVM class文件格式'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/10/29/jvm-base/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/10/29/jvm-base/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/10/29/jvm-base/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Java/" class="color5">Java</a>
+      
+    <a href="/tags/algorithm/" class="color5">algorithm</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#JVM"><span class="post-toc-text">JVM</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Class格式"><span class="post-toc-text">Class格式</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#无符号数"><span class="post-toc-text">无符号数</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#表"><span class="post-toc-text">表</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#类初始化的过程"><span class="post-toc-text">类初始化的过程</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#加载"><span class="post-toc-text">加载</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#验证"><span class="post-toc-text">验证</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#准备"><span class="post-toc-text">准备</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#解析"><span class="post-toc-text">解析</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#初始化"><span class="post-toc-text">初始化</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#类加载器"><span class="post-toc-text">类加载器</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#编译器和解释器"><span class="post-toc-text">编译器和解释器</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#内存模型"><span class="post-toc-text">内存模型</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#对象定位"><span class="post-toc-text">对象定位</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#原语指令"><span class="post-toc-text">原语指令</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/10/29/juc-base/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;多线程与高并发&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="jvm-base" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/algorithm/">algorithm</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.57px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/HashMap/" style="font-size: 11.43px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/MySql/" style="font-size: 11.43px;">MySql</a> <a href="/tags/NIO/" style="font-size: 12.86px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.43px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.86px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/Spring/" style="font-size: 15.71px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Synchronized/" style="font-size: 10px;">Synchronized</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a> <a href="/tags/algorithm/" style="font-size: 11.43px;">algorithm</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.57px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/HashMap/" style="font-size: 11.43px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/MySql/" style="font-size: 11.43px;">MySql</a> <a href="/tags/NIO/" style="font-size: 12.86px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.43px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.86px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/Spring/" style="font-size: 15.71px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Synchronized/" style="font-size: 10px;">Synchronized</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a> <a href="/tags/algorithm/" style="font-size: 11.43px;">algorithm</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
