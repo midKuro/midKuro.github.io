@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   
-  <title>&#39;JVM class文件格式&#39; | Kuro&#39;s Blog</title>
+  <title>&#39;JVM 虚拟机&#39; | Kuro&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
   <meta name="description" content="JVM Class格式Java虚拟机规范规定，Class文件格式采用类似C语言结构体的伪结构来存储数据，这种结构只有两种数据类型：无符号数和表。 无符号数属于基本数据类型，主要可以用来描述数字、索引符号、数量值或者按照UTF-8编码构成的字符串值，大小使用u1、u2、u4、u8分别表示1字节、2字节、4字节和8字节。 表是由多个无符号数或者其他表作为数据项构成的复合数据类型，所有的表都习惯以“_i">
 <meta property="og:type" content="article">
-<meta property="og:title" content="&#39;JVM class文件格式&#39;">
+<meta property="og:title" content="&#39;JVM 虚拟机&#39;">
 <meta property="og:url" content="https://midkuro.gitee.io/2020/10/29/jvm-base/index.html">
 <meta property="og:site_name" content="Kuro&#39;s Blog">
 <meta property="og:description" content="JVM Class格式Java虚拟机规范规定，Class文件格式采用类似C语言结构体的伪结构来存储数据，这种结构只有两种数据类型：无符号数和表。 无符号数属于基本数据类型，主要可以用来描述数字、索引符号、数量值或者按照UTF-8编码构成的字符串值，大小使用u1、u2、u4、u8分别表示1字节、2字节、4字节和8字节。 表是由多个无符号数或者其他表作为数据项构成的复合数据类型，所有的表都习惯以“_i">
@@ -24,8 +24,9 @@
 <meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-07.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-08.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-09.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-10.png">
 <meta property="article:published_time" content="2020-10-29T14:31:00.000Z">
-<meta property="article:modified_time" content="2020-11-01T01:27:48.800Z">
+<meta property="article:modified_time" content="2020-11-06T15:52:10.345Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="algorithm">
@@ -126,7 +127,7 @@
         
   
     <h1 class="post-title" itemprop="name">
-      &#39;JVM class文件格式&#39;
+      &#39;JVM 虚拟机&#39;
     </h1>
     <div class="post-title-bar">
       <ul>
@@ -236,11 +237,212 @@
 
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">invokeinterface:</span><br><span class="line">用以调用接口方法，在运行时搜索一个实现了这个接口方法的对象，找出适合的方法进行调用。</span><br><span class="line">invokevirtual:</span><br><span class="line">指令用于调用对象的实例方法，根据对象的实际类型进行分派,用于多态，public方法</span><br><span class="line">invokestatic：</span><br><span class="line">调用一个类的静态方法</span><br><span class="line">invokespecial:</span><br><span class="line">指令用于调用一些需要特殊处理的实例方法，包括实例初始化方法（构造方法）、私有方法和父类方法。</span><br><span class="line">invokedynamic：</span><br><span class="line">JDK1.7新加入的一个虚拟机指令，它允许应用级别的代码来确定执行哪一个方法调用，只有在调用要执行的时候，才会进行这种判断,从而达到动态语言的支持。如lumbda的函数式接口（A::a）</span><br></pre></td></tr></table></figure>
 
+<h2 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h2><blockquote>
+<p><a href="/2020/05/21/garbage-collector/">详细内容</a></p>
+</blockquote>
+<h2 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h2><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#小型程序。默认情况下不会是这种选项，HotSpot会根据计算及配置和JDK版本自动选择收集器</span></span><br><span class="line"><span class="meta">-XX</span>:<span class="string">+UseSerialGC = Serial New (DefNew) + Serial Old</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#这个组合已经很少用（在某些版本中已经废弃）</span></span><br><span class="line"><span class="meta">-XX</span>:<span class="string">+UseParNewGC = ParNew + SerialOld</span></span><br><span class="line"></span><br><span class="line"><span class="meta">-XX</span>:<span class="string">+UseConc(urrent)MarkSweepGC = ParNew + CMS + Serial Old</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#JDK1.8默认</span></span><br><span class="line"><span class="meta">-XX</span>:<span class="string">+UseParallelGC = Parallel Scavenge + Parallel Old (1.8默认) 【PS + SerialOld】</span></span><br><span class="line"></span><br><span class="line"><span class="meta">-XX</span>:<span class="string">+UseParallelOldGC = Parallel Scavenge + Parallel Old</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#JDK1.9默认</span></span><br><span class="line"><span class="meta">-XX</span>:<span class="string">+UseG1GC = G1</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">查看默认参数配置</span></span><br><span class="line"><span class="meta">+XX</span>:<span class="string">+PrintCommandLineFlags -version</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>标准： - 开头，所有的HotSpot都支持</p>
+<p>非标准：-X 开头，特定版本HotSpot支持特定命令</p>
+<p>不稳定：-XX 开头，下个版本可能取消</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloGC</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"HelloGC!"</span>);</span><br><span class="line">        List list = <span class="keyword">new</span> LinkedList();</span><br><span class="line">        <span class="keyword">for</span>(;;) &#123;</span><br><span class="line">            <span class="keyword">byte</span>[] b = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span>*<span class="number">1024</span>];</span><br><span class="line">            list.add(b);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#区分概念：内存泄漏memory leak，内存溢出out of memory</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-XX:+PrintCommandLineFlags HelloGC</span></span><br><span class="line"><span class="comment">#-Xmn10M 新生代大小 -Xms40M 堆最小内存  -Xmx60M 堆最大内存 -XX:+PrintGC输出GC信息</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-Xmn10M -Xms40M -Xmx60M -XX:+PrintCommandLineFlags -XX:+PrintGC  HelloGC </span></span><br><span class="line"><span class="comment">#打印GC详细信息    打印GC时间     打印GC的原因</span></span><br><span class="line"><span class="attr">PrintGCDetails</span> <span class="string">PrintGCTimeStamps PrintGCCauses</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-XX:+UseConcMarkSweepGC -XX:+PrintCommandLineFlags HelloGC</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-XX:+PrintFlagsInitial 默认参数值</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-XX:+PrintFlagsFinal 最终参数值</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-XX:+PrintFlagsFinal | grep xxx 找到对应的参数</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-XX:+PrintFlagsFinal -version |grep GC</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">eden space 5632K, 94% used [0x00000000ff980000,0x00000000ffeb3e28,0x00000000fff00000)</span><br><span class="line">                            后面的内存地址指的是，起始地址，使用空间结束地址，整体空间结束地址</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/jvm-base/jvm-10.png" alt="jvm"></p>
+<h2 id="调优"><a href="#调优" class="headerlink" title="调优"></a>调优</h2><blockquote>
+<ol>
+<li>吞吐量：用户代码时间 /（用户代码执行时间 + 垃圾回收时间）</li>
+<li>响应时间：STW越短，响应时间越好</li>
+</ol>
+</blockquote>
+<p>所谓调优，首先确定，追求吞吐量优先，还是响应时间优先？还是在满足一定的响应时间的情况下，要求达到多大的吞吐量…，吞吐量优先 一般（PS + PO），响应时间 一般（1.8 G1）</p>
+<h3 id="什么是调优？"><a href="#什么是调优？" class="headerlink" title="什么是调优？"></a>什么是调优？</h3><ol>
+<li>根据需求进行JVM规划和预调优</li>
+<li>优化运行JVM运行环境（慢，卡顿）</li>
+<li>解决JVM运行过程中出现的各种问题(OOM)</li>
+</ol>
+<h3 id="规划调优"><a href="#规划调优" class="headerlink" title="规划调优"></a>规划调优</h3><ul>
+<li><p>调优，从业务场景开始，没有业务场景的调优都是耍流氓</p>
+</li>
+<li><p>无监控（压力测试，能看到结果），不调优</p>
+</li>
+<li><p>步骤：</p>
+<ol>
+<li><p>熟悉业务场景（没有最好的垃圾回收器，只有最合适的垃圾回收器）</p>
+<ol>
+<li>响应时间、停顿时间 [CMS G1 ZGC] （需要给用户作响应）</li>
+<li>吞吐量 = 用户时间 /( 用户时间 + GC时间) [PS]</li>
+</ol>
+<blockquote>
+<p>预调优</p>
+</blockquote>
+</li>
+<li><p><strong>选择回收器组合</strong></p>
+</li>
+<li><p><strong>计算内存需求</strong>（经验值 1.5G 16G）</p>
+</li>
+<li><p><strong>选定CPU</strong>（越高越好）</p>
+</li>
+<li><p>设定年代大小、升级年龄</p>
+</li>
+<li><p>设定日志参数（循环5个日志文件，100M）</p>
+<ol>
+<li><strong>-Xloggc:/opt/xxx/logs/xxx-xxx-gc-%t.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=20M -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCCause</strong></li>
+<li>或者每天产生一个日志文件</li>
+</ol>
+</li>
+<li><p>观察日志情况</p>
+</li>
+</ol>
+</li>
+</ul>
+<h3 id="预调优"><a href="#预调优" class="headerlink" title="预调优"></a>预调优</h3><blockquote>
+<p>QPS:一秒内查询的并发量      TPS：一秒内业务的并发量</p>
+</blockquote>
+<p>案例1：垂直电商，最高每日百万订单，处理订单系统需要什么样的服务器配置？</p>
+<blockquote>
+<p>这个问题比较业余，因为很多不同的服务器配置都能支撑(1.5G 16G)</p>
+<p>1小时360000集中时间段， 100个订单/秒，（找一小时内的高峰期，1000订单/秒）</p>
+<p>经验值，</p>
+<p>非要计算：一个订单产生需要多少内存？512K * 1000 500M内存</p>
+<p>专业一点儿问法：要求响应时间100ms</p>
+<p>压测！</p>
+</blockquote>
+<p>案例2：12306遭遇春节大规模抢票应该如何支撑？</p>
+<blockquote>
+<p>12306应该是中国并发量最大的秒杀网站：</p>
+<p>号称并发量100W最高</p>
+<p>CDN -&gt; LVS -&gt; NGINX -&gt; 业务系统 -&gt; 每台机器1W并发（10K问题） 100台机器</p>
+<p>普通电商订单 -&gt; 下单 -&gt;订单系统（IO）减库存 -&gt;等待用户付款</p>
+<p>12306的一种可能的模型： 下单 -&gt; 减库存 和 订单(redis kafka) 同时异步进行 -&gt;等付款</p>
+<p>减库存最后还会把压力压到一台服务器</p>
+<p>可以做分布式本地库存 + 单独服务器做库存均衡</p>
+<p>大流量的处理方法：分而治之</p>
+</blockquote>
+<p>怎么得到一个事务会消耗多少内存？</p>
+<blockquote>
+<ol>
+<li>弄台机器，看能承受多少TPS？是不是达到目标？扩容或调优，让它达到</li>
+<li>用压测来确定</li>
+</ol>
+</blockquote>
+<h3 id="优化环境"><a href="#优化环境" class="headerlink" title="优化环境"></a>优化环境</h3><blockquote>
+<p>有一个50万PV的资料类网站（从磁盘提取文档到内存）原服务器32位，1.5G 的堆，用户反馈网站比较缓慢，因此公司决定升级，新的服务器为64位，16G 的堆内存，结果用户反馈卡顿十分严重，反而比以前效率更低了</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1.为什么原网站慢? </span><br><span class="line">很多用户浏览数据，很多数据load到内存，内存不足，频繁GC，STW长，响应时间变慢</span><br><span class="line"></span><br><span class="line">2.为什么会更卡顿？ </span><br><span class="line">内存越大，FGC时间越长</span><br><span class="line"></span><br><span class="line">3.咋办？ </span><br><span class="line">PS -&gt; PN + CMS 或者 G1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>系统CPU经常100%，如何调优？</strong></p>
+</blockquote>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="strong">**CPU100%那么一定有线程在占用系统资源**</span></span><br><span class="line"><span class="bullet">1. </span>找出哪个进程cpu高（top）</span><br><span class="line"><span class="bullet">2. </span>该进程中的哪个线程cpu高（top -Hp）</span><br><span class="line"><span class="bullet">3. </span>导出该线程的堆栈 (jstack)</span><br><span class="line"><span class="bullet">4. </span>查找哪个方法（栈帧）消耗时间 (jstack)</span><br><span class="line"><span class="bullet">5. </span>工作线程占比高 | 垃圾回收线程占比高</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>系统内存飙高，如何查找问题？</strong></p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1. 导出堆内存 (jmap)</span><br><span class="line">2. 分析 (jhat jvisualvm mat jprofiler ... )</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如何监控JVM？</p>
+<p>jstat jvisualvm jprofiler arthas top…</p>
+</blockquote>
+<h3 id="jstack"><a href="#jstack" class="headerlink" title="jstack"></a>jstack</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">jstack </span><br><span class="line">Usage:</span><br><span class="line">    jstack [-l] &lt;pid&gt;</span><br><span class="line">        (to connect to running process)</span><br><span class="line">    jstack -F [-m] [-l] &lt;pid&gt;</span><br><span class="line">        (to connect to a hung process)</span><br><span class="line">    jstack [-m] [-l] &lt;executable&gt; &lt;core&gt;</span><br><span class="line">        (to connect to a core file)</span><br><span class="line">    jstack [-m] [-l] [server_id@]&lt;remote server IP or hostname&gt;</span><br><span class="line">        (to connect to a remote debug server)</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">    -F  to force a thread dump. Use when jstack &lt;pid&gt; does not respond (process is hung)</span><br><span class="line">    -m  to print both java and native frames (mixed mode)</span><br><span class="line">    -l  long listing. Prints additional information about locks</span><br><span class="line">    -h or -help to print this help message</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# jstack -l &lt;pid&gt;</span><br><span class="line"><span class="comment">//JVM内部的Reference Handler的守护线程  线程号 nid=0x12f27   十六进制</span></span><br><span class="line">"Reference Handler" #2 daemon prio=10 os_prio=0 tid=0x00007f00e41d1000 nid=0x12f27 in Object.wait() [0x00007f00ad648000]</span><br><span class="line">    <span class="comment">//线程状态WAITING，等待其他线程nonitor唤醒</span></span><br><span class="line">   java.lang.Thread.State: WAITING (on object monitor)</span><br><span class="line">  at java.lang.Object.wait(Native Method)</span><br><span class="line">  at java.lang.Object.wait(Object.java:<span class="number">502</span>)</span><br><span class="line">  at java.lang.ref.Reference.tryHandlePending(Reference.java:<span class="number">191</span>)</span><br><span class="line">  - locked &lt;<span class="number">0x00000006c80eada8</span>&gt; (a java.lang.ref.Reference$Lock)</span><br><span class="line">  at java.lang.ref.Reference$ReferenceHandler.run(Reference.java:<span class="number">153</span>)</span><br><span class="line">   <span class="comment">//持有的锁</span></span><br><span class="line">   Locked ownable synchronizers:</span><br><span class="line">  - None</span><br><span class="line"></span><br><span class="line"><span class="string">"VM Thread"</span> os_prio=<span class="number">0</span> tid=<span class="number">0x00007f00e41c7000</span> nid=<span class="number">0x12f26</span> runnable </span><br><span class="line"></span><br><span class="line"><span class="comment">//GC线程正在运行</span></span><br><span class="line"><span class="string">"GC task thread#0 (ParallelGC)"</span> os_prio=<span class="number">0</span> tid=<span class="number">0x00007f00e401e800</span> nid=<span class="number">0x12f1e</span> runnable</span><br></pre></td></tr></table></figure>
+
+<p><strong>两个线程都互相等待锁信息，死锁。</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"Thread-1"</span>:</span><br><span class="line">    at com.kuro.concurrent.LockedOwnThread.run(LockedOwnThread.java:<span class="number">47</span>)</span><br><span class="line">    - waiting to lock &lt;<span class="number">0x000000076c5806f8</span>&gt; (a java.lang.Class <span class="keyword">for</span> java.lang.Object)</span><br><span class="line">    - locked &lt;<span class="number">0x000000076c636568</span>&gt; (a java.lang.Class <span class="keyword">for</span> com.mirana.concurrent.LockedOwnThread)</span><br><span class="line">    - locked &lt;<span class="number">0x000000076c6392f0</span>&gt; (a com.kuro.concurrent.LockedOwnThread)</span><br><span class="line"><span class="string">"Thread-0"</span>:</span><br><span class="line">    at com.kuro.concurrent.LockedOwnThread$AThread.run(LockedOwnThread.java:<span class="number">27</span>)</span><br><span class="line">    - waiting to lock &lt;<span class="number">0x000000076c636568</span>&gt; (a java.lang.Class <span class="keyword">for</span> com.mirana.concurrent.LockedOwnThread)</span><br><span class="line">    - locked &lt;<span class="number">0x000000076c5806f8</span>&gt; (a java.lang.Class <span class="keyword">for</span> java.lang.Object)</span><br><span class="line"></span><br><span class="line">Found <span class="number">1</span> deadlock.</span><br></pre></td></tr></table></figure>
+
+<h3 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 从数据库中读取信用数据，套用模型，并把结果进行记录和传输</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T15_FullGC_Problem01</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">CardInfo</span> </span>&#123;</span><br><span class="line">        BigDecimal price = <span class="keyword">new</span> BigDecimal(<span class="number">0.0</span>);</span><br><span class="line">        String name = <span class="string">"张三"</span>;</span><br><span class="line">        <span class="keyword">int</span> age = <span class="number">5</span>;</span><br><span class="line">        Date birthdate = <span class="keyword">new</span> Date();</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">m</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ScheduledThreadPoolExecutor executor = <span class="keyword">new</span> ScheduledThreadPoolExecutor(<span class="number">50</span>,</span><br><span class="line">                                                                                          <span class="keyword">new</span> ThreadPoolExecutor.DiscardOldestPolicy());</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        executor.setMaximumPoolSize(<span class="number">50</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (;;)&#123;</span><br><span class="line">            modelFit();</span><br><span class="line">            Thread.sleep(<span class="number">100</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">modelFit</span><span class="params">()</span></span>&#123;</span><br><span class="line">        List&lt;CardInfo&gt; taskList = getAllCardInfo();</span><br><span class="line">        taskList.forEach(info -&gt; &#123;</span><br><span class="line">            <span class="comment">// do something</span></span><br><span class="line">            executor.scheduleWithFixedDelay(() -&gt; &#123;</span><br><span class="line">                <span class="comment">//do sth with info</span></span><br><span class="line">                info.m();</span><br><span class="line"></span><br><span class="line">            &#125;, <span class="number">2</span>, <span class="number">3</span>, TimeUnit.SECONDS);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;CardInfo&gt; <span class="title">getAllCardInfo</span><span class="params">()</span></span>&#123;</span><br><span class="line">        List&lt;CardInfo&gt; taskList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">            CardInfo ci = <span class="keyword">new</span> CardInfo();</span><br><span class="line">            taskList.add(ci);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> taskList;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">1.java -Xms200M -Xmx200M -XX:+PrintGC T15<span class="emphasis">_FullGC_</span>Problem01</span><br><span class="line"></span><br><span class="line">2.一般是运维团队首先受到报警信息（CPU Memory）</span><br><span class="line"></span><br><span class="line">3.top命令观察到问题：内存不断增长 CPU占用率居高不下</span><br><span class="line"></span><br><span class="line">4.top -Hp 观察进程中的线程，哪个线程CPU和内存占比高</span><br><span class="line"></span><br><span class="line">5.jps定位具体java进程</span><br><span class="line">jstack 定位线程状况</span><br><span class="line"><span class="strong">**重点关注：WAITING BLOCKED**</span></span><br><span class="line"><span class="strong">**waiting on &lt;0x0000000088ca3310&gt; (a java.lang.Object)**</span></span><br><span class="line">**假如有一个进程中100个线程，很多线程都在waiting on  ，一定要找到是哪个线程持有这把锁</span><br><span class="line">怎么找？搜索jstack dump的信息，找 ，看哪个线程持有这把锁RUNNABLE**</span><br><span class="line"></span><br><span class="line">为什么阿里规范里规定，线程的名称（尤其是线程池）都要写有意义的名称</span><br><span class="line">怎么样自定义线程池里的线程名称？（自定义ThreadFactory）</span><br><span class="line"></span><br><span class="line">6.jinfo pid</span><br><span class="line"></span><br><span class="line">7.jstat -gc 动态观察gc情况 / 阅读GC日志发现频繁GC / arthas观察 / jconsole/jvisualVM/ Jprofiler（最好用）</span><br><span class="line">jstat -gc 4655 500 : 每个500个毫秒打印GC的情况</span><br><span class="line"></span><br><span class="line">8.jmap - histo 4655 | head -20，查找有多少对象产生</span><br><span class="line"></span><br><span class="line">9<span class="strong">**jmap -dump:format=b,file=xxx pid**</span> ：</span><br><span class="line">线上系统，内存特别大，jmap执行期间会对进程产生很大影响，甚至卡顿（电商不适合）</span><br><span class="line">1：设定了参数HeapDump，OOM的时候会自动产生堆转储文件</span><br><span class="line">2：很多服务器备份（高可用），停掉这台服务器对其他服务器不影响</span><br><span class="line">3：在线定位(一般小点儿公司用不到)</span><br><span class="line"></span><br><span class="line">10.java -Xms20M -Xmx20M -XX:+UseParallelGC -XX:+HeapDumpOnOutOfMemoryError T15<span class="emphasis">_FullGC_</span>Problem01</span><br><span class="line"></span><br><span class="line">11.使用MAT / jhat /jvisualvm 进行dump文件分析</span><br><span class="line">jhat -J-mx512M xxx.dump http://localhost:7000</span><br><span class="line">拉到最后：找到对应链接 可以使用OQL查找特定问题对象</span><br><span class="line"></span><br><span class="line">12.找到代码的问题</span><br><span class="line"><span class="strong">**原因是因为创建线程的频率比消费线程的频率高，线程池队列上锁引起等待的线程堆积过多，才造成的对象过多内存泄漏**</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="远程连接"><a href="#远程连接" class="headerlink" title="远程连接"></a>远程连接</h3><blockquote>
+<p>jconsole远程服务器程序，程序启动需要增加以下参数：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Djava.rmi.server.hostname&#x3D;192.168.17.11 -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port&#x3D;11111 -Dcom.sun.management.jmxremote.authenticate&#x3D;false -Dcom.sun.management.jmxremote.ssl&#x3D;false XXX</span><br></pre></td></tr></table></figure>
+
+<h2 id="案例汇总"><a href="#案例汇总" class="headerlink" title="案例汇总"></a>案例汇总</h2><p>OOM产生的原因多种多样，有些程序未必产生OOM，不断FGC(CPU飙高，但内存回收特别少) （上面案例）</p>
+<ol>
+<li><p>硬件升级系统反而卡顿的问题（见上）</p>
+</li>
+<li><p>线程池不当运用产生OOM问题（见上） </p>
+</li>
+<li><p>tomcat http-header-size过大问题</p>
+</li>
+<li><p>lambda表达式导致方法区溢出问题(MethodArea / Perm Metaspace) </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">java.lang.reflect.InvocationTargetException</span><br><span class="line">    at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)</span><br><span class="line">    at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:<span class="number">62</span>)</span><br><span class="line">    at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:<span class="number">43</span>)</span><br><span class="line">    at java.lang.reflect.Method.invoke(Method.java:<span class="number">498</span>)</span><br><span class="line">    at sun.instrument.InstrumentationImpl.loadClassAndStartAgent(InstrumentationImpl.java:<span class="number">388</span>)</span><br><span class="line">    at sun.instrument.InstrumentationImpl.loadClassAndCallAgentmain(InstrumentationImpl.java:<span class="number">411</span>)</span><br><span class="line">    Caused by: java.lang.OutOfMemoryError: Compressed <span class="class"><span class="keyword">class</span> <span class="title">space</span></span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>栈溢出问题 -Xss设定太小</p>
+</li>
+<li><p>比较一下这两段程序的异同，分析哪一个是更优的写法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Object o = <span class="keyword">null</span>;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">100</span>; i++) &#123;</span><br><span class="line">    o = <span class="keyword">new</span> Object();</span><br><span class="line">    <span class="comment">//业务处理</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">100</span>; i++) &#123;</span><br><span class="line">    Object o = <span class="keyword">new</span> Object();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>重写finalize引发频繁GC 小米云，HBase同步系统，系统通过nginx访问超时报警，最后排查，C++程序员重写finalize引发频繁GC问题 为什么C++程序员会重写finalize？（new delete） finalize耗时比较长（200ms）</p>
+</li>
+<li><p>如果有一个系统，内存一直消耗不超过10%，但是观察GC日志，发现FGC总是频繁产生，会是什么引起的？ System.gc() </p>
+</li>
+</ol>
+<h2 id="参数汇总"><a href="#参数汇总" class="headerlink" title="参数汇总"></a>参数汇总</h2><h3 id="GC常用参数"><a href="#GC常用参数" class="headerlink" title="GC常用参数"></a>GC常用参数</h3><ul>
+<li>-Xmn -Xms -Xmx -Xss 年轻代 最小堆 最大堆 栈空间</li>
+<li>-XX:+UseTLAB 使用TLAB，默认打开</li>
+<li>-XX:+PrintTLAB 打印TLAB的使用情况</li>
+<li>-XX:TLABSize 设置TLAB大小</li>
+<li>-XX:+DisableExplictGC System.gc()不管用 ，FGC</li>
+<li>-XX:+PrintGC</li>
+<li>-XX:+PrintGCDetails</li>
+<li>-XX:+PrintHeapAtGC</li>
+<li>-XX:+PrintGCTimeStamps</li>
+<li>-XX:+PrintGCApplicationConcurrentTime (低) 打印应用程序时间</li>
+<li>-XX:+PrintGCApplicationStoppedTime （低） 打印暂停时长</li>
+<li>-XX:+PrintReferenceGC （重要性低） 记录回收了多少种不同引用类型的引用</li>
+<li>-verbose:class 类加载详细过程</li>
+<li>-XX:+PrintVMOptions</li>
+<li>-XX:+PrintFlagsFinal  -XX:+PrintFlagsInitial 必须会用</li>
+<li>-Xloggc:opt/log/gc.log</li>
+<li>-XX:MaxTenuringThreshold 升代年龄，最大值15</li>
+<li>锁自旋次数 -XX:PreBlockSpin 热点代码检测参数-XX:CompileThreshold 逃逸分析 标量替换 … 这些不建议设置</li>
+</ul>
+<h3 id="Parallel常用参数"><a href="#Parallel常用参数" class="headerlink" title="Parallel常用参数"></a>Parallel常用参数</h3><ul>
+<li>-XX:SurvivorRatio</li>
+<li>-XX:PreTenureSizeThreshold 大对象到底多大</li>
+<li>-XX:MaxTenuringThreshold</li>
+<li>-XX:+ParallelGCThreads 并行收集器的线程数，同样适用于CMS，一般设为和CPU核数相同</li>
+<li>-XX:+UseAdaptiveSizePolicy 自动选择各区大小比例</li>
+</ul>
+<h3 id="CMS常用参数"><a href="#CMS常用参数" class="headerlink" title="CMS常用参数"></a>CMS常用参数</h3><ul>
+<li>-XX:+UseConcMarkSweepGC</li>
+<li>-XX:ParallelCMSThreads CMS线程数量</li>
+<li>-XX:CMSInitiatingOccupancyFraction 使用多少比例的老年代后开始CMS收集，默认是68%(近似值)，如果频繁发生SerialOld卡顿，应该调小，（频繁CMS回收）</li>
+<li>-XX:+UseCMSCompactAtFullCollection 在FGC时进行压缩</li>
+<li>-XX:CMSFullGCsBeforeCompaction 多少次FGC之后进行压缩</li>
+<li>-XX:+CMSClassUnloadingEnabled</li>
+<li>-XX:CMSInitiatingPermOccupancyFraction 达到什么比例时进行Perm回收</li>
+<li>GCTimeRatio 设置GC时间占用程序运行时间的百分比</li>
+<li>-XX:MaxGCPauseMillis 停顿时间，是一个建议时间，GC会尝试用各种手段达到这个时间，比如减小年轻代</li>
+</ul>
+<h3 id="G1常用参数"><a href="#G1常用参数" class="headerlink" title="G1常用参数"></a>G1常用参数</h3><ul>
+<li>-XX:+UseG1GC</li>
+<li>-XX:MaxGCPauseMillis 建议值，G1会尝试调整Young区的块数来达到这个值</li>
+<li>-XX:GCPauseIntervalMillis ？GC的间隔时间</li>
+<li>-XX:+G1HeapRegionSize 分区大小，建议逐渐增大该值，1 2 4 8 16 32。 随着size增加，垃圾的存活时间更长，GC间隔更长，但每次GC的时间也会更长 ZGC做了改进（动态区块大小）</li>
+<li>G1NewSizePercent 新生代最小比例，默认为5%</li>
+<li>G1MaxNewSizePercent 新生代最大比例，默认为60%</li>
+<li>GCTimeRatio GC时间建议比例，G1会根据这个值调整堆空间</li>
+<li>ConcGCThreads 线程数量</li>
+<li>InitiatingHeapOccupancyPercent 启动G1的堆空间占用比例</li>
+</ul>
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年11月01日 09:27</p>
-        <p>原始链接： <a class="post-url" href="/2020/10/29/jvm-base/" title="&#39;JVM class文件格式&#39;">https://midkuro.gitee.io/2020/10/29/jvm-base/</a></p>
+        <p>最后更新： 2020年11月06日 23:52</p>
+        <p>原始链接： <a class="post-url" href="/2020/10/29/jvm-base/" title="&#39;JVM 虚拟机&#39;">https://midkuro.gitee.io/2020/10/29/jvm-base/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">
                 <img src="/images/logo.png" alt="Kuro">
@@ -297,7 +499,7 @@
     <div class="post-share-list" id="share-list">
         <ul class="share-icons">
           <li>
-            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/10/29/jvm-base/&title=《'JVM class文件格式'》 — Kuro's Blog&pic=images/java.jpg" data-title="微博">
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/10/29/jvm-base/&title=《'JVM 虚拟机'》 — Kuro's Blog&pic=images/java.jpg" data-title="微博">
               <i class="fa fa-weibo"></i>
             </a>
           </li>
@@ -307,7 +509,7 @@
             </a>
           </li>
           <li>
-            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/10/29/jvm-base/&title=《'JVM class文件格式'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/10/29/jvm-base/&title=《'JVM 虚拟机'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
               <i class="fa fa-qq"></i>
             </a>
           </li>
@@ -317,7 +519,7 @@
             </a>
           </li>
           <li>
-            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'JVM class文件格式'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/10/29/jvm-base/&via=https://midkuro.gitee.io" data-title="Twitter">
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'JVM 虚拟机'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/10/29/jvm-base/&via=https://midkuro.gitee.io" data-title="Twitter">
               <i class="fa fa-twitter"></i>
             </a>
           </li>
@@ -359,12 +561,22 @@
 
     <aside class="post-toc-pos post-toc-top" id="post-toc">
         <nav class="post-toc-wrap">
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#JVM"><span class="post-toc-text">JVM</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Class格式"><span class="post-toc-text">Class格式</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#无符号数"><span class="post-toc-text">无符号数</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#表"><span class="post-toc-text">表</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#类初始化的过程"><span class="post-toc-text">类初始化的过程</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#加载"><span class="post-toc-text">加载</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#验证"><span class="post-toc-text">验证</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#准备"><span class="post-toc-text">准备</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#解析"><span class="post-toc-text">解析</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#初始化"><span class="post-toc-text">初始化</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#类加载器"><span class="post-toc-text">类加载器</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#编译器和解释器"><span class="post-toc-text">编译器和解释器</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#内存模型"><span class="post-toc-text">内存模型</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#对象定位"><span class="post-toc-text">对象定位</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#原语指令"><span class="post-toc-text">原语指令</span></a></li></ol></li></ol>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#JVM"><span class="post-toc-text">JVM</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Class格式"><span class="post-toc-text">Class格式</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#无符号数"><span class="post-toc-text">无符号数</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#表"><span class="post-toc-text">表</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#类初始化的过程"><span class="post-toc-text">类初始化的过程</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#加载"><span class="post-toc-text">加载</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#验证"><span class="post-toc-text">验证</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#准备"><span class="post-toc-text">准备</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#解析"><span class="post-toc-text">解析</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#初始化"><span class="post-toc-text">初始化</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#类加载器"><span class="post-toc-text">类加载器</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#编译器和解释器"><span class="post-toc-text">编译器和解释器</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#内存模型"><span class="post-toc-text">内存模型</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#对象定位"><span class="post-toc-text">对象定位</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#原语指令"><span class="post-toc-text">原语指令</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#垃圾回收"><span class="post-toc-text">垃圾回收</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参数"><span class="post-toc-text">参数</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#调优"><span class="post-toc-text">调优</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#什么是调优？"><span class="post-toc-text">什么是调优？</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#规划调优"><span class="post-toc-text">规划调优</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#预调优"><span class="post-toc-text">预调优</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#优化环境"><span class="post-toc-text">优化环境</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#jstack"><span class="post-toc-text">jstack</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#案例"><span class="post-toc-text">案例</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#远程连接"><span class="post-toc-text">远程连接</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#案例汇总"><span class="post-toc-text">案例汇总</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参数汇总"><span class="post-toc-text">参数汇总</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#GC常用参数"><span class="post-toc-text">GC常用参数</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Parallel常用参数"><span class="post-toc-text">Parallel常用参数</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#CMS常用参数"><span class="post-toc-text">CMS常用参数</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#G1常用参数"><span class="post-toc-text">G1常用参数</span></a></li></ol></li></ol></li></ol>
         </nav>
     </aside>
     
 
 <nav id="article-nav">
+  
+    <a href="/2020/10/29/algorithm-base/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;数据结构与算法&#39;
+        
+      </span>
+    </a>
   
   
     <a href="/2020/10/29/juc-base/" id="article-nav-older" class="article-nav-link-wrap">
@@ -439,10 +651,10 @@
 <div class="sidebar-menu-box" id="sidebar-menu-box">
     <div class="sidebar-menu-box-container">
         <div id="sidebar-menu-box-categories">
-            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/algorithm/">algorithm</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/IO/">IO</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSM/">SSM</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Source/">Source</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/algorithm/">algorithm</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/juc/">juc</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
         </div>
         <div id="sidebar-menu-box-tags">
-            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.57px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/HashMap/" style="font-size: 11.43px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/MySql/" style="font-size: 11.43px;">MySql</a> <a href="/tags/NIO/" style="font-size: 12.86px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.43px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.86px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/Spring/" style="font-size: 15.71px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Synchronized/" style="font-size: 10px;">Synchronized</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a> <a href="/tags/algorithm/" style="font-size: 11.43px;">algorithm</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a>
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.57px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/HashMap/" style="font-size: 11.43px;">HashMap</a> <a href="/tags/IO/" style="font-size: 10px;">IO</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/MySql/" style="font-size: 11.43px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12.86px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 12.86px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.43px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.86px;">RocketMQ</a> <a href="/tags/SSM/" style="font-size: 10px;">SSM</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/Spring/" style="font-size: 15.71px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Synchronized/" style="font-size: 10px;">Synchronized</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a> <a href="/tags/algorithm/" style="font-size: 11.43px;">algorithm</a> <a href="/tags/juc/" style="font-size: 10px;">juc</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a>
         </div>
     </div>
     <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
@@ -475,7 +687,7 @@
     <div class="mobile-header-tag-container">
         <span class="title">Tags</span>
         <div id="mobile-header-container-tags">
-            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.57px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/HashMap/" style="font-size: 11.43px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/MySql/" style="font-size: 11.43px;">MySql</a> <a href="/tags/NIO/" style="font-size: 12.86px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.43px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.86px;">RocketMQ</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/Spring/" style="font-size: 15.71px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Synchronized/" style="font-size: 10px;">Synchronized</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a> <a href="/tags/algorithm/" style="font-size: 11.43px;">algorithm</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a>
+            <a href="/tags/ActiveMQ/" style="font-size: 17.14px;">ActiveMQ</a> <a href="/tags/Cache/" style="font-size: 10px;">Cache</a> <a href="/tags/Cryptography/" style="font-size: 12.86px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.57px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 14.29px;">Docker</a> <a href="/tags/Druid/" style="font-size: 10px;">Druid</a> <a href="/tags/Firewall/" style="font-size: 10px;">Firewall</a> <a href="/tags/HashMap/" style="font-size: 11.43px;">HashMap</a> <a href="/tags/IO/" style="font-size: 10px;">IO</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 14.29px;">Jenkins</a> <a href="/tags/Kubernetes/" style="font-size: 11.43px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 12.86px;">Linux</a> <a href="/tags/MQ/" style="font-size: 18.57px;">MQ</a> <a href="/tags/MySql/" style="font-size: 11.43px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12.86px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 12.86px;">NIO</a> <a href="/tags/Nacos/" style="font-size: 10px;">Nacos</a> <a href="/tags/Netty/" style="font-size: 11.43px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/NoSql/" style="font-size: 12.86px;">NoSql</a> <a href="/tags/Nodejs/" style="font-size: 10px;">Nodejs</a> <a href="/tags/Redis/" style="font-size: 15.71px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.86px;">RocketMQ</a> <a href="/tags/SSM/" style="font-size: 10px;">SSM</a> <a href="/tags/Seata/" style="font-size: 10px;">Seata</a> <a href="/tags/Sentinel/" style="font-size: 10px;">Sentinel</a> <a href="/tags/Source/" style="font-size: 10px;">Source</a> <a href="/tags/Spring/" style="font-size: 15.71px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14.29px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 14.29px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Stream/" style="font-size: 10px;">Stream</a> <a href="/tags/Synchronized/" style="font-size: 10px;">Synchronized</a> <a href="/tags/Systemctl/" style="font-size: 10px;">Systemctl</a> <a href="/tags/Thread/" style="font-size: 11.43px;">Thread</a> <a href="/tags/algorithm/" style="font-size: 11.43px;">algorithm</a> <a href="/tags/juc/" style="font-size: 10px;">juc</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a>
         </div>
     </div>
 </div>
