@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Spring Cloud Eureka &#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="Spring Cloud Eureka 服务注册与发现Eureka 单节点搭建pom.xml 1234&lt;dependency&gt;  &lt;groupId&gt;org.springframework.cloud&lt;&#x2F;groupId&gt;  &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-server&lt;&#x2F;artifa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Spring Cloud Eureka &#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/06/27/springcloud-eureka/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Spring Cloud Eureka 服务注册与发现Eureka 单节点搭建pom.xml 1234&lt;dependency&gt;  &lt;groupId&gt;org.springframework.cloud&lt;&#x2F;groupId&gt;  &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-server&lt;&#x2F;artifa">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/springcloud-eureka/eureka-01.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/springcloud-eureka/eureka-02.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/springcloud-eureka/eureka-03.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/springcloud-eureka/eureka-04.png">
+<meta property="article:published_time" content="2020-06-27T03:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-12T05:48:50.777Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="SpringCloud">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/springcloud-eureka/eureka-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-springcloud-eureka" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Spring Cloud Eureka &#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Eureka/">Eureka</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-06-27
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Spring-Cloud-Eureka"><a href="#Spring-Cloud-Eureka" class="headerlink" title="Spring Cloud Eureka"></a>Spring Cloud Eureka</h1><p><img src="/images/springcloud-eureka/eureka-01.png" alt="eureka"></p>
+<h2 id="服务注册与发现"><a href="#服务注册与发现" class="headerlink" title="服务注册与发现"></a>服务注册与发现</h2><h3 id="Eureka-单节点搭建"><a href="#Eureka-单节点搭建" class="headerlink" title="Eureka 单节点搭建"></a>Eureka 单节点搭建</h3><p><em>pom.xml</em></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-eureka-server<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><em>application.yml</em></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">eureka:</span> </span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="comment">#是否将自己注册到Eureka Server,默认为true，由于当前就是server，故而设置成false，表明该服务不会向eureka注册自己的信息</span></span><br><span class="line">    <span class="attr">register-with-eureka:</span> <span class="literal">false</span></span><br><span class="line">    <span class="comment">#是否从eureka server获取注册信息，由于单节点，不需要同步其他节点数据，用false</span></span><br><span class="line">    <span class="attr">fetch-registry:</span> <span class="literal">false</span></span><br><span class="line">    <span class="comment">#设置服务注册中心的URL，用于client和server端交流</span></span><br><span class="line">    <span class="attr">service-url:</span>                      </span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://localhost:7900/eureka/</span></span><br></pre></td></tr></table></figure>
+
+<p><em>application.properties</em></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#是否将自己注册到Eureka Server,默认为true，由于当前就是server，故而设置成false，表明该服务不会向eureka注册自己的信息</span></span><br><span class="line"><span class="meta">eureka.client.register-with-eureka</span>=<span class="string">false</span></span><br><span class="line"><span class="comment">#是否从eureka server获取注册信息，由于单节点，不需要同步其他节点数据，用false</span></span><br><span class="line"><span class="meta">eureka.client.fetch-registry</span>=<span class="string">false</span></span><br><span class="line"><span class="comment">#设置服务注册中心的URL，用于client和server端交流</span></span><br><span class="line"><span class="meta">eureka.client.service-url.defaultZone</span>=<span class="string">http://localhost:7900/eureka/代码</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//启动类上添加此注解标识该服务为配置中心</span></span><br><span class="line"><span class="meta">@EnableEurekaServer</span></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EurekaServerApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(EurekaServerApplication<span class="class">.<span class="keyword">class</span>, <span class="title">args</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Eureka高可用"><a href="#Eureka高可用" class="headerlink" title="Eureka高可用"></a>Eureka高可用</h3><p>高可用：可以通过运行多个Eureka server实例并相互注册的方式实现。Server节点之间会彼此增量地同步信息，从而确保节点中数据一致。</p>
+<p>修改本机host文件，绑定一个主机名，单机部署时使用ip地址会有问题</p>
+<p><strong>节点 1:</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#是否将自己注册到其他Eureka Server,默认为true 需要</span></span><br><span class="line"><span class="meta">eureka.client.register-with-eureka</span>=<span class="string">true</span></span><br><span class="line"><span class="comment">#是否从eureka server获取注册信息， 需要</span></span><br><span class="line"><span class="meta">eureka.client.fetch-registry</span>=<span class="string">true</span></span><br><span class="line"><span class="comment">#设置服务注册中心的URL，用于client和server端交流</span></span><br><span class="line"><span class="comment">#此节点应向其他节点发起请求</span></span><br><span class="line"><span class="meta">eureka.client.serviceUrl.defaultZone</span>=<span class="string">http://ek2.com:7902/eureka/</span></span><br><span class="line"><span class="comment">#主机名，必填</span></span><br><span class="line"><span class="meta">eureka.instance.hostname</span>=<span class="string">ek1.com</span></span><br><span class="line"><span class="meta">management.endpoint.shutdown.enabled</span>=<span class="string">true</span></span><br><span class="line"><span class="comment">#web端口，服务是由这个端口处理rest请求的</span></span><br><span class="line"><span class="meta">server.port</span>=<span class="string">7901</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>节点 2:</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#是否将自己注册到其他Eureka Server,默认为true 需要</span></span><br><span class="line"><span class="meta">eureka.client.register-with-eureka</span>=<span class="string">true</span></span><br><span class="line"><span class="comment">#是否从eureka server获取注册信息， 需要</span></span><br><span class="line"><span class="meta">eureka.client.fetch-registry</span>=<span class="string">true</span></span><br><span class="line"><span class="comment">#设置服务注册中心的URL，用于client和server端交流</span></span><br><span class="line"><span class="comment">#此节点应向其他节点发起请求</span></span><br><span class="line"><span class="meta">eureka.client.serviceUrl.defaultZone</span>=<span class="string">http://ek1.com:7902/eureka/</span></span><br><span class="line"><span class="comment">#主机名，必填</span></span><br><span class="line"><span class="meta">eureka.instance.hostname</span>=<span class="string">ek2.com</span></span><br><span class="line"><span class="meta">management.endpoint.shutdown.enabled</span>=<span class="string">true</span></span><br><span class="line"><span class="comment">#web端口，服务是由这个端口处理rest请求的</span></span><br><span class="line"><span class="meta">server.port</span>=<span class="string">7902</span></span><br></pre></td></tr></table></figure>
+
+<p>两个节点的话，如下图内容 就算成功了</p>
+<p><img src="/images/springcloud-eureka/eureka-02.png" alt="eureka"></p>
+<h3 id="开启监控"><a href="#开启监控" class="headerlink" title="开启监控"></a>开启监控</h3><p>Spring Boot 2.0 的Actuator只暴露了health和info端点，提供的监控信息无法满足我们的需求</p>
+<p>在1.x中有n多可供我们监控的节点，官方的回答是为了安全….</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-actuator<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#application.properties配置中</span></span><br><span class="line"><span class="comment">#开启所有端点</span></span><br><span class="line"><span class="meta">management.endpoints.web.exposure.include</span>=<span class="string">*</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="服务注册"><a href="#服务注册" class="headerlink" title="服务注册"></a>服务注册</h3><p>新建一个web项目，引入starter<code>spring-cloud-starter-netflix-eureka-client</code></p>
+<p><em>pom.xml</em></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-eureka-client<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><em>application.yml</em></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#注册中心</span></span><br><span class="line"><span class="attr">eureka:</span> </span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="comment">#设置服务注册中心的URL</span></span><br><span class="line">    <span class="attr">service-url:</span>                      </span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://root:root@localhost:7900/eureka/</span></span><br></pre></td></tr></table></figure>
+
+<p>ps:不想注册，设置成false即可，实例演示结果：注册中心没有实例信息。找控制台204信息也没有找到。</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span> </span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">service-registry:</span></span><br><span class="line">      <span class="attr">auto-registration:</span></span><br><span class="line">        <span class="attr">enabled:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>注册成功：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DiscoveryClient_API-LISTEN-ORDER/api-listen-order:30.136.133.9:port - registration status: 204</span><br></pre></td></tr></table></figure>
+
+<p>Eureka Server与Eureka Client之间的联系主要通过心跳的方式实现。心跳(Heartbeat)即Eureka Client定时向Eureka Server汇报本服务实例当前的状态，维护本服务实例在注册表中租约的有效性。</p>
+<p>Eureka Client将定时从Eureka Server中拉取注册表中的信息，并将这些信息缓存到本地，用于服务发现。</p>
+<h2 id="Eureka原理"><a href="#Eureka原理" class="headerlink" title="Eureka原理"></a>Eureka原理</h2><p><strong>Register</strong></p>
+<p><strong>服务注册</strong>：想要参与服务注册发现的实例首先需要向Eureka服务器注册信息，注册在第一次心跳发生时提交。</p>
+<hr>
+<p><strong>Renew</strong></p>
+<p><strong>续租，心跳</strong>：Eureka客户需要每30秒发送一次心跳来续租</p>
+<p>更新通知Eureka服务器实例仍然是活动的。如果服务器在90秒内没有看到更新，它将从其注册表中删除实例</p>
+<p>如 [10:00 00] 第一次，[10:00 30]、[10:01 00]、[10:01:30] 最后一次，将剔除实例。</p>
+<hr>
+<p><strong>Fetch Registry</strong></p>
+<p>Eureka客户端从服务器获取注册表信息并将其缓存在本地。</p>
+<p>之后，客户端使用这些信息来查找其他服务。</p>
+<p>通过获取上一个获取周期和当前获取周期之间的增量更新，可以定期(每30秒)更新此信息。</p>
+<p>节点信息在服务器中保存的时间更长(大约3分钟)，因此获取节点信息时可能会再次返回相同的实例。Eureka客户端自动处理重复的信息。</p>
+<p>在获得增量之后，Eureka客户机通过比较服务器返回的实例计数来与服务器协调信息，如果由于某种原因信息不匹配，则再次获取整个注册表信息。</p>
+<hr>
+<p><strong>Cancel</strong></p>
+<p>Eureka客户端在关闭时向Eureka服务器发送取消请求。这将从服务器的实例注册表中删除实例，从而有效地将实例从通信量中取出。</p>
+<hr>
+<p><strong>Time Lag</strong></p>
+<p>同步时间延迟</p>
+<p>来自Eureka客户端的所有操作可能需要一段时间才能反映到Eureka服务器上，然后反映到其他Eureka客户端上。这是因为eureka服务器上的有效负载缓存，它会定期刷新以反映新信息。Eureka客户端还定期地获取增量。因此，更改传播到所有Eureka客户机可能需要2分钟。</p>
+<hr>
+<p><strong>Communication mechanism</strong></p>
+<p>通讯机制：Http协议下的Rest请求，默认情况下Eureka使用Jersey和Jackson以及JSON完成节点间的通讯</p>
+<hr>
+<h3 id="客户端配置选项"><a href="#客户端配置选项" class="headerlink" title="客户端配置选项"></a>客户端配置选项</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#续约发送间隔默认30秒，心跳间隔</span><br><span class="line">eureka.instance.lease-renewal-interval-in-seconds&#x3D;5</span><br><span class="line">#表示eureka client间隔多久去拉取服务注册信息，默认为30秒，对于api-gateway，如果要迅速获取服务注册状态，可以缩小该值，比如5秒</span><br><span class="line">eureka.client.registry-fetch-interval-seconds&#x3D;5</span><br><span class="line"># 续约到期时间（默认90秒）</span><br><span class="line">eureka.instance.lease-expiration-duration-in-seconds&#x3D;60</span><br></pre></td></tr></table></figure>
+
+<h3 id="服务器端配置选项"><a href="#服务器端配置选项" class="headerlink" title="服务器端配置选项"></a>服务器端配置选项</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#关闭自我保护模式</span><br><span class="line">eureka.server.enable-self-preservation&#x3D;false</span><br><span class="line">#失效服务间隔</span><br><span class="line">eureka.server.eviction-interval-timer-in-ms&#x3D;3000</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://github.com/Netflix/eureka/wiki/Eureka-REST-operations" target="_blank" rel="noopener">Eureka提供的API</a></p>
+<h3 id="元数据"><a href="#元数据" class="headerlink" title="元数据"></a>元数据</h3><p>Eureka的元数据有两种：标准元数据和自定义元数据。<br>标准元数据：主机名、IP地址、端口号、状态页和健康检查等信息，这些信息都会被发布在服务注册表中，用于服务之间的调用。<br>自定义元数据：可以使用eureka.instance.metadata-map配置，这些元数据可以在远程客户端中访问，但是一般不改变客户端行为，除非客户端知道该元数据的含义。</p>
+<p>可以在配置文件中对当前服务设置自定义元数据，可后期用户个性化使用，元数据可以配置在eureka服务器和eureka的客户端上。</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">eureka.instance.metadata-map.dalao</span>=<span class="string">kuro</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="自我保护机制"><a href="#自我保护机制" class="headerlink" title="自我保护机制"></a>自我保护机制</h3><p>Eureka在CAP理论当中是属于AP ， 也就说当产生网络分区时，Eureka保证系统的可用性，但不保证系统里面数据的一致性</p>
+<p>默认开启，服务器端容错的一种方式，即短时间心跳不到达仍不剔除服务列表里的节点</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EMERGENCY! EUREKA MAY BE INCORRECTLY CLAIMING INSTANCES ARE UP WHEN THEY&#39;RE NOT. RENEWALS ARE LESSER THAN THRESHOLD AND HENCE THE INSTANCES ARE NOT BEING EXPIRED JUST TO BE SAFE.</span><br></pre></td></tr></table></figure>
+
+<p>默认情况下，Eureka Server在一定时间内，没有接收到某个微服务心跳，会将某个微服务注销（90S）。但是当网络故障时，微服务与Server之间无法正常通信，上述行为就非常危险，因为微服务正常，不应该注销。</p>
+<p>Eureka Server通过自我保护模式来解决整个问题，当Server在短时间内丢失过多客户端时，那么Server会进入自我保护模式，会保护注册表中的微服务不被注销掉。当网络故障恢复后，退出自我保护模式。</p>
+<p><strong>思想：宁可保留健康的和不健康的，也不盲目注销任何健康的服务。</strong></p>
+<p><strong>客户端每分钟续约数量小于客户端总数的85%时会触发保护机制</strong></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#服务端，关闭自我保护机制</span></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">server:</span> </span><br><span class="line">  	<span class="comment">#关闭自我保护</span></span><br><span class="line">    <span class="attr">enable-self-preservation:</span> <span class="literal">false</span></span><br><span class="line">    <span class="comment">#清理服务间隔时间，毫秒</span></span><br><span class="line">    <span class="attr">eviction-interval-timer-in-ms:</span> <span class="number">5000</span></span><br></pre></td></tr></table></figure>
+
+<p>关闭后<code>Eureka</code>注册页面中会提示</p>
+<p><img src="/images/springcloud-eureka/eureka-03.png" alt="eureka"></p>
+<h3 id="多网卡选择"><a href="#多网卡选择" class="headerlink" title="多网卡选择"></a>多网卡选择</h3><ol>
+<li>ip注册</li>
+</ol>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">eureka</span>:<span class="string"></span></span><br><span class="line">  <span class="attr">instance</span>:<span class="string"></span></span><br><span class="line">    <span class="meta">prefer-ip-address</span>: <span class="string">true</span></span><br><span class="line"><span class="comment">#表示将自己的ip注册到EurekaServer上。不配置或false，表示将操作系统的hostname注册到server</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>服务器有多个网卡，eh0，eh1，eh2，只有eh0可以让外部其他服务访问进来，而Eureka client将eh1和eh2注册到Eureka server上，这样其他服务就无法访问该微服务了。</p>
+</li>
+<li><p>指定Ip</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">eureka</span>:<span class="string"></span></span><br><span class="line">  <span class="attr">instance</span>:<span class="string"></span></span><br><span class="line">    <span class="meta">prefer-ip-address</span>: <span class="string">true</span></span><br><span class="line">    <span class="meta">ip-address</span>: <span class="string">实际能访问到的Ip</span></span><br></pre></td></tr></table></figure>
+
+<p>如果设置了此时的ip-address，在元数据查看到就是此ip，其他服务也通过此ip来调用。或者使用<strong>spring.cloud.inetutils</strong>配置网卡选择</p>
+</li>
+</ol>
+<h2 id="EurekaClient"><a href="#EurekaClient" class="headerlink" title="EurekaClient"></a>EurekaClient</h2><p>EurekaClient 可以在客户端获取eureka服务器上的注册者信息</p>
+<p><strong>org.springframework.cloud.client.discovery与com.netflix.discovery.DiscoveryClient</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line">DiscoveryClient discoveryClient;</span><br><span class="line"></span><br><span class="line"><span class="comment">//DiscoveryClient的API</span></span><br><span class="line"><span class="function">String <span class="title">description</span><span class="params">()</span></span>;<span class="comment">//获取实现类的描述。</span></span><br><span class="line"><span class="function">List&lt;String&gt; <span class="title">getServices</span><span class="params">()</span></span>;<span class="comment">//获取所有服务实例id。</span></span><br><span class="line"><span class="function">List&lt;ServiceInstance&gt; <span class="title">getInstances</span><span class="params">(String serviceId)</span></span>;<span class="comment">//通过服务id查询服务实例信息列表。</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Eureka-健康检查"><a href="#Eureka-健康检查" class="headerlink" title="Eureka 健康检查"></a>Eureka 健康检查</h2><p>由于server和client通过心跳保持 服务状态，而只有状态为UP的服务才能被访问。看eureka界面中的status。</p>
+<p>比如心跳一直正常，服务一直UP，但是此服务DB连不上了，无法正常提供服务。</p>
+<p>此时，我们需要将 微服务的健康状态也同步到server。只需要启动eureka的健康检查就行。这样微服务就会将自己的健康状态同步到eureka。配置如下即可。</p>
+<h3 id="开启手动控制"><a href="#开启手动控制" class="headerlink" title="开启手动控制"></a>开启手动控制</h3><p>在client端配置：将自己真正的健康状态传播到server。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">eureka:</span> </span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">healthcheck:</span></span><br><span class="line">      <span class="comment">#开启健康检查，需要引入actuator</span></span><br><span class="line">      <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">instance:</span> </span><br><span class="line">    <span class="comment">#发送心跳给server的频率，每隔这个时间会主动心跳一次</span></span><br><span class="line">    <span class="attr">lease-renewal-interval-in-seconds:</span> <span class="number">1</span>      </span><br><span class="line">    <span class="comment">#Server从收到client后，下一次收到心跳的间隔时间。超过这个时间没有接收到心跳EurekaServer就会将这个实例剔除</span></span><br><span class="line">    <span class="attr">lease-expiration-duration-in-seconds:</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Client端配置Actuator"><a href="#Client端配置Actuator" class="headerlink" title="Client端配置Actuator"></a>Client端配置Actuator</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-actuator<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="改变健康状态的Service"><a href="#改变健康状态的Service" class="headerlink" title="改变健康状态的Service"></a>改变健康状态的Service</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HealthStatusService</span> <span class="keyword">implements</span> <span class="title">HealthIndicator</span></span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> Boolean status = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setStatus</span><span class="params">(Boolean status)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.status  = status;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> Health <span class="title">health</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">    <span class="keyword">if</span>(status)</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Health.Builder().up().build();</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Health.Builder().down().build();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">getStatus</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.status.toString();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试用的Controller"><a href="#测试用的Controller" class="headerlink" title="测试用的Controller"></a>测试用的Controller</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping</span>(<span class="string">"/health"</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">health</span><span class="params">(@RequestParam(<span class="string">"status"</span>)</span> Boolean status) </span>&#123;</span><br><span class="line">  </span><br><span class="line">  healthStatusSrv.setStatus(status);</span><br><span class="line">  <span class="keyword">return</span> healthStatusSrv.getStatus();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="安全配置"><a href="#安全配置" class="headerlink" title="安全配置"></a>安全配置</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-security<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">spring.security.user.name</span>=<span class="string">kuro</span></span><br><span class="line"><span class="meta">spring.security.user.password</span>=<span class="string">123</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/springcloud-eureka/eureka-04.png" alt="eureka"></p>
+<p>如果服务注册报错以下错误，是默认开启了防止跨域攻击，在服务端增加配置类</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Root name &#39;timestamp&#39; does not match expected (&#39;instance&#39;) for type [simple</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">        http.csrf().disable();</span><br><span class="line">        <span class="keyword">super</span>.configure(http);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="其他配置"><a href="#其他配置" class="headerlink" title="其他配置"></a>其他配置</h2><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">"homePageUrl"</span>: <span class="string">"http://127.0.0.1:8084/",</span></span><br><span class="line"><span class="meta">"statusPageUrl"</span>: <span class="string">"http://127.0.0.1:8084/actuator/info",</span></span><br><span class="line"><span class="meta">"healthCheckUrl"</span>: <span class="string">"http://127.0.0.1:8084/actuator/health",</span></span><br><span class="line"></span><br><span class="line"><span class="attr">如果设置了</span></span><br><span class="line"></span><br><span class="line"><span class="attr">server</span>:<span class="string"></span></span><br><span class="line">    <span class="attr">servlet</span>:<span class="string"></span></span><br><span class="line">        <span class="attr">path</span>: <span class="string">/path</span></span><br><span class="line"></span><br><span class="line"><span class="attr">需要：</span></span><br><span class="line"></span><br><span class="line"><span class="attr">eureka</span>:<span class="string"></span></span><br><span class="line">    <span class="attr">instance</span>:<span class="string"></span></span><br><span class="line">        <span class="attr">statusPageUrlPath</span>: <span class="string">$&#123;server.servlet.path&#125;/actuator/info</span></span><br><span class="line">        <span class="attr">healthCheckUrlPath</span>: <span class="string">$&#123;server.servlet.path&#125;/actuator/health</span></span><br></pre></td></tr></table></figure>
+
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年11月12日 13:48</p>
+        <p>原始链接： <a class="post-url" href="/2020/06/27/springcloud-eureka/" title="&#39;Spring Cloud Eureka &#39;">https://midkuro.gitee.io/2020/06/27/springcloud-eureka/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/06/27/springcloud-eureka/&title=《'Spring Cloud Eureka '》 — Kuro's Blog&pic=images/springcloud.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/06/27/springcloud-eureka/&title=《'Spring Cloud Eureka '》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/06/27/springcloud-eureka/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Spring Cloud Eureka '》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/06/27/springcloud-eureka/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/06/27/springcloud-eureka/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/06/27/springcloud-eureka/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/SpringCloud/" class="color2">SpringCloud</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Spring-Cloud-Eureka"><span class="post-toc-text">Spring Cloud Eureka</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#服务注册与发现"><span class="post-toc-text">服务注册与发现</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Eureka-单节点搭建"><span class="post-toc-text">Eureka 单节点搭建</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Eureka高可用"><span class="post-toc-text">Eureka高可用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#开启监控"><span class="post-toc-text">开启监控</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#服务注册"><span class="post-toc-text">服务注册</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Eureka原理"><span class="post-toc-text">Eureka原理</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#客户端配置选项"><span class="post-toc-text">客户端配置选项</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#服务器端配置选项"><span class="post-toc-text">服务器端配置选项</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#元数据"><span class="post-toc-text">元数据</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自我保护机制"><span class="post-toc-text">自我保护机制</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#多网卡选择"><span class="post-toc-text">多网卡选择</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#EurekaClient"><span class="post-toc-text">EurekaClient</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Eureka-健康检查"><span class="post-toc-text">Eureka 健康检查</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#开启手动控制"><span class="post-toc-text">开启手动控制</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Client端配置Actuator"><span class="post-toc-text">Client端配置Actuator</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#改变健康状态的Service"><span class="post-toc-text">改变健康状态的Service</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#测试用的Controller"><span class="post-toc-text">测试用的Controller</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安全配置"><span class="post-toc-text">安全配置</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#其他配置"><span class="post-toc-text">其他配置</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/06/27/springcloud-feign/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Spring Cloud Feign&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/06/15/cryptography-asymmetric/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Java 密码学 非对称加密&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="springcloud-eureka" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Algorithm/">Algorithm</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.5px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12.5px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.75px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13.75px;">Docker</a> <a href="/tags/HashMap/" style="font-size: 11.25px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13.75px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11.25px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/MySql/" style="font-size: 11.25px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12.5px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13.75px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11.25px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.5px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 13.75px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 16.25px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13.75px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17.5px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12.5px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.75px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13.75px;">Docker</a> <a href="/tags/HashMap/" style="font-size: 11.25px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13.75px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11.25px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/MySql/" style="font-size: 11.25px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12.5px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13.75px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11.25px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.5px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 13.75px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 16.25px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13.75px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
