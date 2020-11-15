@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Spring Boot Security&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="Spring Boot Security浏览器策略同源浏览器的同源策略是一种安全功能，同源策略限制了从同一个源加载的文档或脚本如何与来自另一个源的资源进行交互。这是一个用于隔离潜在恶意文件的重要安全机制。 所谓同源是指：域名、协议、端口均相同。当出现域名、协议、端口中任意一个不同时，则不是同源的。 所以就产生了在www.abc.com网站中的Ajax请求到www.bcd.com网站的跨域问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Spring Boot Security&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/06/05/springboot-security/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Spring Boot Security浏览器策略同源浏览器的同源策略是一种安全功能，同源策略限制了从同一个源加载的文档或脚本如何与来自另一个源的资源进行交互。这是一个用于隔离潜在恶意文件的重要安全机制。 所谓同源是指：域名、协议、端口均相同。当出现域名、协议、端口中任意一个不同时，则不是同源的。 所以就产生了在www.abc.com网站中的Ajax请求到www.bcd.com网站的跨域问题。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/springboot-security/security-01.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/springboot-security/security-02.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/springboot-security/security-03.png">
+<meta property="article:published_time" content="2020-06-05T04:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-15T03:15:27.811Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="SpringBoot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/springboot-security/security-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-springboot-security" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Spring Boot Security&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Security/">Security</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-06-05
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Spring-Boot-Security"><a href="#Spring-Boot-Security" class="headerlink" title="Spring Boot Security"></a>Spring Boot Security</h1><h2 id="浏览器策略"><a href="#浏览器策略" class="headerlink" title="浏览器策略"></a>浏览器策略</h2><h3 id="同源"><a href="#同源" class="headerlink" title="同源"></a>同源</h3><p>浏览器的同源策略是一种安全功能，同源策略限制了从同一个源加载的文档或脚本如何与来自另一个源的资源进行交互。这是一个用于隔离潜在恶意文件的重要安全机制。</p>
+<p><strong>所谓同源是指：域名、协议、端口均相同。当出现域名、协议、端口中任意一个不同时，则不是同源的。</strong></p>
+<p>所以就产生了在<em><a href="http://www.abc.com" target="_blank" rel="noopener">www.abc.com</a></em>网站中的<code>Ajax</code>请求到<code>www.bcd.com</code>网站的跨域问题。</p>
+<p><img src="/images/springboot-security/security-01.png" alt="security"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1.浏览器发送HTTP请求到服务器</span><br><span class="line">2.服务器发送给网关进行登录验证</span><br><span class="line">3.网关登录验证，创建Session会话，返回会话标识SessionID&#x2F;Token&#x2F;令牌等标记信息</span><br><span class="line">4.浏览器接受到SessionID&#x2F;Token后，将其存储在Cookies中</span><br><span class="line">5.下次发送HTTP请求时携带Cookies中的SessionID&#x2F;Token到服务器中</span><br><span class="line">6.定位同一个会话并访问</span><br></pre></td></tr></table></figure>
+
+<p>页面中常用的<strong>记住账号、自动登录</strong>等功能，最简单的实现就是在服务器中创建一个永不过期的会话，然后Cookies存储相关信息即可。</p>
+<h3 id="跨域"><a href="#跨域" class="headerlink" title="跨域"></a>跨域</h3><p>当访问一个服务器的网页时，它的<code>Ajax</code>请求到了另外一个非同源的连接时，则将触发跨域请求，<code>Cookies</code>一般情况下是无法跨域的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">jsonp解决跨域：</span><br><span class="line">只能发起GET请求，通过jsonp发送的请求，会随带 cookie 一起发送。</span><br><span class="line">Cors解决跨域：</span><br><span class="line">在浏览器中指定Origin来源，如果在服务器接受范围，请求则成功</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/springboot-security/security-02.png" alt="security"></p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Cors解决跨域原理：</span><br><span class="line">1.www.bcd.com服务器需要开启允许跨域<span class="emphasis">*Access-Control-Allow-Origin: http://www.abc.com*</span>标识允许这个域名对它进行跨域请求</span><br><span class="line">1.www.abc.com页面中的Ajax跨域请求www.bcd.com</span><br><span class="line">2.Ajax在请求的过程中需要携带自身请求的Cookies信息和Origin来源：www.abc.com到www.bcd.com中</span><br><span class="line">3.www.bcd.com服务器校验请求的Origin来源是否处于可允许的列表中</span><br><span class="line">4.www.bcd.com响应请求</span><br></pre></td></tr></table></figure>
+
+<h3 id="XSS"><a href="#XSS" class="headerlink" title="XSS"></a>XSS</h3><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">XSS攻击通常指的是通过利用网页开发时留下的漏洞，通过巧妙的方法注入恶意指令代码到网页，当用户打开网页时，服务器自动加载并执行攻击者恶意制造的网页程序。</span><br><span class="line">嵌入的脚本一般通过JS实现，如<span class="emphasis">*&lt;script src = "www.baidu.com"/&gt;*</span>，XSS嵌入的JS脚本攻击的只能发送get请求。</span><br><span class="line"></span><br><span class="line">APP基本没有XSS跨站点攻击。</span><br><span class="line"></span><br><span class="line">WEB解决办法：</span><br><span class="line">1.防止非法JS嵌入到网页中</span><br><span class="line">2.URL ENCODE特殊符号（%、;、&amp;等等）</span><br><span class="line">3.定期扫描静态资源是否匹配关键字（script、src）</span><br><span class="line">4.敏感资源人机交互（图形验证码、手机验证码）</span><br><span class="line">5.所有接口改成Post请求</span><br><span class="line"></span><br><span class="line">APP的Token丢了解决办法：</span><br><span class="line">1.代码混淆（编译后的文件加密，无法反编译）</span><br><span class="line">2.Token绑定IP地址，切换IP地址则Token失效</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="CSRF"><a href="#CSRF" class="headerlink" title="CSRF"></a>CSRF</h3><p>CSRF（Cross-site request forgery），中文名称：跨站请求伪造。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CSRF攻击原理：</span><br><span class="line">1.用户登录受信任网站A，并且在本地生成Cookie</span><br><span class="line">2.用户访问受信任网站A，浏览器自动携带Cookie，不需要再做任何验证</span><br><span class="line">3.用户在未登出信任网站A时，访问了危险网站B</span><br><span class="line">4.危险网站B通过浏览器同源，发送了一个请求到信任网站A中，以你的名义发送恶意请求</span><br></pre></td></tr></table></figure>
+
+<p>可以通过增加人为验证机制，或者每个请求动态生成Hash值解决。</p>
+<p><strong>Hash值放在Cookies中容易被CSRF利用进行二次请求，因为他能从Cookies中获取到Hash值，而把Hash值放在每次请求的页面中，即使用户没有退出受信任网站A，危险网站B也无法从信任网站A的页面中中获取Hash值。</strong></p>
+<h3 id="单点登录"><a href="#单点登录" class="headerlink" title="单点登录"></a>单点登录</h3><p>跨域是不同的系统内部互相通信时的浏览器不同源问题，而单点登录是指一个浏览器在系统A登录后，当浏览器访问系统B时，不需要再次登录。</p>
+<p><img src="/images/springboot-security/security-03.png" alt="security"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">单点登录过程：</span><br><span class="line">1.浏览器向www.abc.com发起登录HTTP请求</span><br><span class="line">2.不通的域名系统最终汇集到同一个网关上做鉴权操作</span><br><span class="line">3.通过网关上的OAuth或者第三方的CAS鉴权，产生Session会话</span><br><span class="line">4.持久化Session会话到Redis中，多个域名共享</span><br><span class="line">5.返回SessionID&#x2F;Token到浏览器中，缓存到Cookies中</span><br><span class="line">6.请求www.bcd.com时，发送cookies中的SessonID&#x2F;Token进行免登录。</span><br></pre></td></tr></table></figure>
+
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-security<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">spring.security.user.name</span>=<span class="string">111</span></span><br><span class="line"><span class="meta">spring.security.user.password</span>=<span class="string">111</span></span><br></pre></td></tr></table></figure>
+
+<p>在没配置其账号密码时，默认的账号是<strong>user</strong>，密码会在控制台中输出随机密码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Using generated security password: 6e86c6e9-d661-41ae-aabc-bea8817c4f7b</span><br></pre></td></tr></table></figure>
+
+<h3 id="自定义登录页面"><a href="#自定义登录页面" class="headerlink" title="自定义登录页面"></a>自定义登录页面</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SecuritySecureConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//基于Http的请求配置</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        http.authorizeRequests()</span><br><span class="line">            <span class="comment">//所有请求都需要验证</span></span><br><span class="line">            .anyRequest().authenticated()</span><br><span class="line">            .and()</span><br><span class="line">            <span class="comment">//自定义登录页面</span></span><br><span class="line">            <span class="comment">//permitAll 给没登录的 用户可以访问这个地址的权限</span></span><br><span class="line">            .formLogin().loginPage(<span class="string">"/login.html"</span>).permitAll()</span><br><span class="line">            <span class="comment">//自定义表单的key值，默认是username和password</span></span><br><span class="line">            .usernameParameter(<span class="string">"user"</span>)</span><br><span class="line">            .passwordParameter(<span class="string">"pwd"</span>)</span><br><span class="line"></span><br><span class="line">            <span class="comment">//发送请求登录的页面</span></span><br><span class="line">            .loginProcessingUrl(<span class="string">"/login"</span>)</span><br><span class="line">            <span class="comment">//登录失败后的跳转页面</span></span><br><span class="line">            .failureUrl(<span class="string">"/login.html?error"</span>)</span><br><span class="line">            <span class="comment">//默认登录后打开的地址</span></span><br><span class="line">            .defaultSuccessUrl(<span class="string">"/"</span>).permitAll()</span><br><span class="line"></span><br><span class="line">            <span class="comment">//自定义请求页会默认打开CSRF校验，需要配置生成token【_csrf.token】，并且登录时提交到表单中</span></span><br><span class="line">            .and()</span><br><span class="line">            .csrf().csrfTokenRepository(<span class="keyword">new</span> HttpSessionCsrfTokenRepository());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//开启CSRF跨域攻击的token验证，每次请求都发新的Token给页面中</span></span><br><span class="line">http.csrf().csrfTokenRepository(<span class="keyword">new</span> HttpSessionCsrfTokenRepository());</span><br><span class="line"></span><br><span class="line"><span class="comment">//页面配合</span></span><br><span class="line">&lt;input  th:name=<span class="string">"$&#123;_csrf.parameterName&#125;"</span> th:value=<span class="string">"$&#123;_csrf.token&#125;"</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="自定义账号密码"><a href="#自定义账号密码" class="headerlink" title="自定义账号密码"></a>自定义账号密码</h3><h4 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//配置自定义的账号密码及角色</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(AuthenticationManagerBuilder auth)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="comment">//inMemoryAuthentication从内存中获取账号密码</span></span><br><span class="line">    auth.inMemoryAuthentication()</span><br><span class="line">        .withUser(<span class="string">"admin"</span>)</span><br><span class="line">        <span class="comment">//需要使用制定的加密策略进行加密后传递</span></span><br><span class="line">        .password(<span class="keyword">new</span> SCryptPasswordEncoder().encode(<span class="string">"admin"</span>))</span><br><span class="line">        .roles(<span class="string">"admin"</span>)</span><br><span class="line">        .and()</span><br><span class="line">        .withUser(<span class="string">"test"</span>)</span><br><span class="line">        .password(<span class="string">"test"</span>)</span><br><span class="line">        .roles(<span class="string">"test"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//配置自定义密码时需要定义密码的加密方式</span></span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> PasswordEncoder <span class="title">passwordEncoder</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//采用MD5 Hash(密码 + 随机salt) * 10</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SCryptPasswordEncoder();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 不使用加密策略</span></span><br><span class="line"><span class="comment">//@Bean</span></span><br><span class="line"><span class="comment">//PasswordEncoder passwordEncoder() &#123;</span></span><br><span class="line"><span class="comment">//	return NoOpPasswordEncoder.getInstance();</span></span><br><span class="line"><span class="comment">//&#125;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>或者可以通过添加注解类实现</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> UserDetailsService <span class="title">userDetailsService</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    InMemoryUserDetailsManager manager = <span class="keyword">new</span> InMemoryUserDetailsManager();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取当前用户</span></span><br><span class="line">    <span class="comment">// Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();</span></span><br><span class="line">    <span class="comment">// 根据用户名查找用户对象</span></span><br><span class="line">    <span class="comment">// UserDetails userDetails = manager.loadUserByUsername(currentUser.getName());</span></span><br><span class="line">    <span class="comment">// 修改用户密码</span></span><br><span class="line">    <span class="comment">// manager.changePassword(oldPassword, newPassword);</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建两个用户并添加到manager中</span></span><br><span class="line">    User user = <span class="keyword">new</span> User(<span class="string">"a"</span>, <span class="keyword">new</span> BCryptPasswordEncoder().encode(<span class="string">"1"</span>), <span class="keyword">true</span>, <span class="keyword">true</span>, <span class="keyword">true</span>, <span class="keyword">true</span>, Collections.singletonList(<span class="keyword">new</span> SimpleGrantedAuthority(<span class="string">"xx"</span>)));</span><br><span class="line">    manager.createUser(user);</span><br><span class="line"></span><br><span class="line">    manager.createUser(User.withUsername(<span class="string">"yiming"</span>).password(<span class="keyword">new</span> BCryptPasswordEncoder().encode(<span class="string">"xx"</span>)).roles(<span class="string">"xxz"</span>).build());</span><br><span class="line">    <span class="keyword">return</span> manager;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-jdbc<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>mysql<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mysql-connector-java<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">spring.datasource.username</span>=<span class="string">root</span></span><br><span class="line"><span class="meta">spring.datasource.password</span>=<span class="string">123456</span></span><br><span class="line"><span class="meta">spring.datasource.url</span>=<span class="string">jdbc:mysql://127.0.0.1:3306/kuro?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Spring Security默认情况下需要两张表，用户表和权限表</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">create table users(username varchar(50) not null primary key,password varchar(500) not null,enabled boolean not null);</span><br><span class="line"></span><br><span class="line">create table authorities (username varchar(50) not null,authority varchar(50) not null,constraint fk_authorities_users foreign key(username) references users(username));</span><br><span class="line"></span><br><span class="line">create unique index ix_auth_username on authorities (username,authority);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(AuthenticationManagerBuilder auth)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//创建数据源管理类，传参dataSource</span></span><br><span class="line">    JdbcUserDetailsManager manager = auth.</span><br><span class="line">        jdbcAuthentication()</span><br><span class="line">        .dataSource(dataSource).getUserDetailsService();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//创建用户</span></span><br><span class="line">    manager.createUser(User.withUsername(<span class="string">"1112"</span>)</span><br><span class="line">                       .password(<span class="keyword">new</span> BCryptPasswordEncoder().encode(<span class="string">"123"</span>))</span><br><span class="line">                       .roles(<span class="string">"admin"</span>)</span><br><span class="line">                       .build());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>或者可以通过添加注解类实现</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> UserDetailsService <span class="title">userDetailsService</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    JdbcUserDetailsManager manager = <span class="keyword">new</span> JdbcUserDetailsManager();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//各种操作</span></span><br><span class="line">    <span class="keyword">return</span> manager;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="自定义用户登录查询"><a href="#自定义用户登录查询" class="headerlink" title="自定义用户登录查询"></a>自定义用户登录查询</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.security.core.userdetails.User;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserService</span> <span class="keyword">implements</span> <span class="title">UserDetailsService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    UserDaoImpl userDao;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> UserDetails <span class="title">loadUserByUsername</span><span class="params">(String username)</span> <span class="keyword">throws</span> UsernameNotFoundException </span>&#123;</span><br><span class="line">        List&lt;UserDto&gt; list = userDao.queryUser(username);</span><br><span class="line">        <span class="keyword">if</span>(list.isEmpty()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UsernameNotFoundException(<span class="string">"找不到用户"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        UserDto userdto = list.get(<span class="number">0</span>);</span><br><span class="line">        org.springframework.security.core.userdetails.User us = <span class="keyword">new</span> org.springframework.security.core.userdetails.User(user.getUsername(),<span class="keyword">new</span> BCryptPasswordEncoder().encode(user.getPassword()), <span class="keyword">new</span> ArrayList&lt;&gt;());</span><br><span class="line">        <span class="keyword">return</span> us;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line">UserService userSrv;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(AuthenticationManagerBuilder auth)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="comment">//将Bean实例添加到配置中</span></span><br><span class="line">    auth.userDetailsService(userSrv);</span><br><span class="line">    <span class="comment">//不注入Bean实例，也可以通过以下方式实现，默认单例只会创建一次</span></span><br><span class="line">    <span class="comment">//auth.userDetailsService(new UserService());</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="自定义鉴权"><a href="#自定义鉴权" class="headerlink" title="自定义鉴权"></a>自定义鉴权</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyAuthprovider</span> <span class="keyword">implements</span> <span class="title">AuthenticationProvider</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    UserService userSrv;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Authentication <span class="title">authenticate</span><span class="params">(Authentication authentication)</span> <span class="keyword">throws</span> AuthenticationException </span>&#123;</span><br><span class="line">        <span class="comment">// 密码校验</span></span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">"开始自定义验证~~~~"</span>);</span><br><span class="line"></span><br><span class="line">        String username = authentication.getName();</span><br><span class="line">        <span class="comment">//明文密码</span></span><br><span class="line">        String password = authentication.getCredentials().toString();</span><br><span class="line">        <span class="comment">//查询用户名</span></span><br><span class="line">        UserDetails userDetails = userSrv.loadUserByUsername(authentication.);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">new</span> BCryptPasswordEncoder().matches(password, userDetails.getPassword())) &#123;</span><br><span class="line">            UsernamePasswordAuthenticationToken authenticationToken = <span class="keyword">new</span> UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());</span><br><span class="line">            <span class="keyword">return</span> authenticationToken;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"校验失败"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">supports</span><span class="params">(Class&lt;?&gt; authentication)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">        <span class="comment">//是否支持自定义</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="忽略静态请求"><a href="#忽略静态请求" class="headerlink" title="忽略静态请求"></a>忽略静态请求</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//忽略静态请求</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(WebSecurity web)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    web.ignoring().antMatchers(<span class="string">"/img/**"</span>,<span class="string">"/js/**"</span>);</span><br><span class="line">    <span class="comment">//	super.configure(web);</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="记住我"><a href="#记住我" class="headerlink" title="记住我"></a>记住我</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    http.</span><br><span class="line">        <span class="comment">// 哪些 地址需要登录</span></span><br><span class="line">        authorizeRequests()</span><br><span class="line">        <span class="comment">//所有请求都需要验证</span></span><br><span class="line">        .anyRequest().authenticated()</span><br><span class="line">        .and()</span><br><span class="line">        .formLogin()</span><br><span class="line">        .and()</span><br><span class="line">        .rememberMe()</span><br><span class="line">        .and()</span><br><span class="line">        .csrf().disable();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="踢掉其他已登录的用户"><a href="#踢掉其他已登录的用户" class="headerlink" title="踢掉其他已登录的用户"></a>踢掉其他已登录的用户</h3><p>最简单的原理是保存用户ID和Session的映射关系。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    http.</span><br><span class="line">        <span class="comment">// 哪些 地址需要登录</span></span><br><span class="line">        authorizeRequests()</span><br><span class="line">        <span class="comment">//所有请求都需要验证</span></span><br><span class="line">        .anyRequest().authenticated()</span><br><span class="line">        .and()</span><br><span class="line">        .formLogin()</span><br><span class="line">        .and()</span><br><span class="line">        .csrf().disable()</span><br><span class="line">        .sessionManagement()</span><br><span class="line">        .maximumSessions(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="禁止其他终端登录"><a href="#禁止其他终端登录" class="headerlink" title="禁止其他终端登录"></a>禁止其他终端登录</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    http.</span><br><span class="line">        <span class="comment">// 哪些 地址需要登录</span></span><br><span class="line">        authorizeRequests()</span><br><span class="line">        <span class="comment">//所有请求都需要验证</span></span><br><span class="line">        .anyRequest().authenticated()</span><br><span class="line">        .and()</span><br><span class="line">        .formLogin()</span><br><span class="line">        .and()</span><br><span class="line">        .csrf().disable()</span><br><span class="line">        .sessionManagement()</span><br><span class="line">        .maximumSessions(<span class="number">1</span>)</span><br><span class="line">        .maxSessionsPreventsLogin(<span class="keyword">true</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="清理过期Session"><a href="#清理过期Session" class="headerlink" title="清理过期Session"></a>清理过期Session</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function">HttpSessionEventPublisher <span class="title">httpSessionEventPublisher</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> HttpSessionEventPublisher();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="退出登录"><a href="#退出登录" class="headerlink" title="退出登录"></a>退出登录</h3><p>开启SCRF之后需要使用Post请求退出登录</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"/logout"</span>&gt;</span>GET logout<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">br</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">action</span>=<span class="string">"/logout"</span> <span class="attr">method</span>=<span class="string">"post"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"hidden"</span> <span class="attr">th:name</span>=<span class="string">"$&#123;_csrf.parameterName&#125;"</span> <span class="attr">th:value</span>=<span class="string">"$&#123;_csrf.token&#125;"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">value</span>=<span class="string">"POST Logout"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>否则直接get请求<code>/logout</code>即可</p>
+<h3 id="自定义退出URL"><a href="#自定义退出URL" class="headerlink" title="自定义退出URL"></a>自定义退出URL</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.and()</span><br><span class="line">    .logout()</span><br><span class="line">    .logoutUrl(<span class="string">"/out"</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="增加退出处理器"><a href="#增加退出处理器" class="headerlink" title="增加退出处理器"></a>增加退出处理器</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">.addLogoutHandler(<span class="keyword">new</span> LogoutHandler() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">logout</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Authentication authentication)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">        System.out.println(<span class="string">"退出1"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    .addLogoutHandler(<span class="keyword">new</span> LogoutHandler() &#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">logout</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Authentication authentication)</span> </span>&#123;</span><br><span class="line">            <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">            System.out.println(<span class="string">"退出2"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+
+<h3 id="登录成功处理器"><a href="#登录成功处理器" class="headerlink" title="登录成功处理器"></a>登录成功处理器</h3><p>不同角色 跳转到不同页面</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">.successHandler(<span class="keyword">new</span> AuthenticationSuccessHandler() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAuthenticationSuccess</span><span class="params">(HttpServletRequest request, HttpServletResponse response,</span></span></span><br><span class="line"><span class="function"><span class="params">                                        Authentication authentication)</span> <span class="keyword">throws</span> IOException, ServletException </span>&#123;</span><br><span class="line">        <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">"登录成功1"</span>);</span><br><span class="line">        <span class="comment">// 根据权限不同，跳转到不同页面</span></span><br><span class="line">        request.getSession().getAttribute(name)</span><br><span class="line">            request.getRequestDispatcher(<span class="string">""</span>).forward(request, response);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h3 id="登录失败处理器"><a href="#登录失败处理器" class="headerlink" title="登录失败处理器"></a>登录失败处理器</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//增加了Handler之后，则默认failureUrl配置不生效</span></span><br><span class="line">.failureHandler(<span class="keyword">new</span> AuthenticationFailureHandler() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAuthenticationFailure</span><span class="params">(HttpServletRequest request, HttpServletResponse response,</span></span></span><br><span class="line"><span class="function"><span class="params">                                        AuthenticationException exception)</span> <span class="keyword">throws</span> IOException, ServletException </span>&#123;</span><br><span class="line">        <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">        exception.printStackTrace();</span><br><span class="line">        request.getRequestDispatcher(request.getRequestURL().toString()).forward(request, response);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h3 id="常见登录失败异常"><a href="#常见登录失败异常" class="headerlink" title="常见登录失败异常"></a>常见登录失败异常</h3><p><strong>LockedException</strong> 账户被锁定</p>
+<p><strong>CredentialsExpiredException</strong> 密码过期</p>
+<p><strong>AccountExpiredException</strong> 账户过期</p>
+<p><strong>DisabledException</strong> 账户被禁用</p>
+<p><strong>BadCredentialsException</strong> 密码错误</p>
+<p><strong>UsernameNotFoundException</strong> 用户名错误</p>
+<h2 id="权限"><a href="#权限" class="headerlink" title="权限"></a>权限</h2><h3 id="访问权限"><a href="#访问权限" class="headerlink" title="访问权限"></a>访问权限</h3><p>访问权限可以配置URL匹配用户角色或权限，这是一种粗粒度的权限配置，权限匹配有顺序，比如不能把<code>.anyRequest().authenticated()</code>写在其他规则前面。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http.authorizeRequests()</span><br><span class="line">    .antMatchers(<span class="string">"/admin/**"</span>).hasRole(<span class="string">"admin"</span>)</span><br><span class="line">    .antMatchers(<span class="string">"/user/**"</span>).hasRole(<span class="string">"user"</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">最长匹配原则(has more characters)说明：</span><br><span class="line"></span><br><span class="line">URL请求&#x2F;app&#x2F;dir&#x2F;file.jsp，现在存在两个路径匹配模式&#x2F;**&#x2F;*.jsp和&#x2F;app&#x2F;dir&#x2F;*.jsp，那么会根据模式&#x2F;app&#x2F;dir&#x2F;*.jsp来匹配</span><br></pre></td></tr></table></figure>
+
+<h3 id="权限继承"><a href="#权限继承" class="headerlink" title="权限继承"></a>权限继承</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function">RoleHierarchy <span class="title">roleHierarchy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">//admin拥有user的权限</span></span><br><span class="line">    RoleHierarchyImpl impl = <span class="keyword">new</span> RoleHierarchyImpl();</span><br><span class="line">    impl.setHierarchy(<span class="string">"ROLE_admin &gt; ROLE_user"</span>);</span><br><span class="line">    <span class="keyword">return</span> impl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="细粒度权限配置"><a href="#细粒度权限配置" class="headerlink" title="细粒度权限配置"></a>细粒度权限配置</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="comment">//开启全局注解并设置注解 @Secured、@PreAuthorize生效</span></span><br><span class="line"><span class="meta">@EnableGlobalMethodSecurity</span>(prePostEnabled = <span class="keyword">true</span>,securedEnabled = <span class="keyword">true</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SecuritySecureConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//必须要有admin或者user的角色，‘ROLE_’前缀是Security规定的</span></span><br><span class="line"><span class="meta">@Secured</span>(&#123;<span class="string">"ROLE_admin"</span>,<span class="string">"ROLE_user"</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//@PreAuthorize支持更复杂的配置</span></span><br><span class="line"><span class="comment">//需包含user或admin角色</span></span><br><span class="line"><span class="meta">@PreAuthorize</span>(<span class="string">"haAnyRole('ROLE_admin','ROLE_user')"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//同时需包含user和admin角色</span></span><br><span class="line"><span class="meta">@PreAuthorize</span>(<span class="string">"hasRole('ROLE_admin') AND hasRole('ROLE_user')"</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//根据方法返回值判断是否有权限,适用于访问子系统验证是否有权限使用</span></span><br><span class="line"><span class="meta">@PostAuthorize</span>(<span class="string">"returnObject==1"</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="方法拦截"><a href="#方法拦截" class="headerlink" title="方法拦截"></a>方法拦截</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping</span>(<span class="string">"/hi"</span>)</span><br><span class="line"><span class="meta">@PreAuthorize</span>(<span class="string">"hasRole('ROLE_admin')"</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">hi</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">"hi"</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@PreAuthorize</span>(<span class="string">"hasRole('ROLE_user')"</span>)</span><br><span class="line"><span class="meta">@GetMapping</span>(<span class="string">"/hiUser"</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">hiuser</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">"hi"</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="图形验证码"><a href="#图形验证码" class="headerlink" title="图形验证码"></a>图形验证码</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.github.penggle<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>kaptcha<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.3.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line">Producer captchaProducer;</span><br><span class="line"></span><br><span class="line"><span class="comment">//添加获取验证码图片的controller</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@GetMapping</span>(<span class="string">"/kaptcha"</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getKaptchaImage</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    HttpSession session = request.getSession();</span><br><span class="line">    response.setDateHeader(<span class="string">"Expires"</span>, <span class="number">0</span>);</span><br><span class="line">    response.setHeader(<span class="string">"Cache-Control"</span>, <span class="string">"no-store, no-cache, must-revalidate"</span>);</span><br><span class="line">    response.addHeader(<span class="string">"Cache-Control"</span>, <span class="string">"post-check=0, pre-check=0"</span>);</span><br><span class="line">    response.setHeader(<span class="string">"Pragma"</span>, <span class="string">"no-cache"</span>);</span><br><span class="line">    response.setContentType(<span class="string">"image/jpeg"</span>);</span><br><span class="line">    <span class="comment">//创建图片验证码</span></span><br><span class="line">    String capText = captchaProducer.createText();</span><br><span class="line"> </span><br><span class="line"> 	<span class="comment">//每次请求时将最新的图片验证码存放到session会话的作用域中</span></span><br><span class="line">    session.setAttribute(Constants.KAPTCHA_SESSION_KEY, capText);</span><br><span class="line">    BufferedImage bi = captchaProducer.createImage(capText);</span><br><span class="line">    ServletOutputStream out = response.getOutputStream();</span><br><span class="line">    ImageIO.write(bi, <span class="string">"jpg"</span>, out);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        out.flush();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        out.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//生成图片验证码的配置类</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Kaconfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DefaultKaptcha <span class="title">getDefaultKaptcha</span><span class="params">()</span></span>&#123;</span><br><span class="line">        DefaultKaptcha captchaProducer = <span class="keyword">new</span> DefaultKaptcha();</span><br><span class="line">        Properties properties = <span class="keyword">new</span> Properties();</span><br><span class="line">        properties.setProperty(<span class="string">"kaptcha.border"</span>, <span class="string">"yes"</span>);</span><br><span class="line">        properties.setProperty(<span class="string">"kaptcha.border.color"</span>, <span class="string">"105,179,90"</span>);</span><br><span class="line">        properties.setProperty(<span class="string">"kaptcha.textproducer.font.color"</span>, <span class="string">"blue"</span>);</span><br><span class="line">        properties.setProperty(<span class="string">"kaptcha.image.width"</span>, <span class="string">"310"</span>);</span><br><span class="line">        properties.setProperty(<span class="string">"kaptcha.image.height"</span>, <span class="string">"240"</span>);</span><br><span class="line">        properties.setProperty(<span class="string">"kaptcha.textproducer.font.size"</span>, <span class="string">"30"</span>);</span><br><span class="line">        properties.setProperty(<span class="string">"kaptcha.session.key"</span>, <span class="string">"code"</span>);</span><br><span class="line">        properties.setProperty(<span class="string">"kaptcha.textproducer.char.length"</span>, <span class="string">"4"</span>);</span><br><span class="line">        <span class="comment">//    properties.setProperty("kaptcha.textproducer.char.string", "678");</span></span><br><span class="line">        properties.setProperty(<span class="string">"kaptcha.obscurificator.impl"</span>, <span class="string">"com.google.code.kaptcha.impl.ShadowGimpy"</span>);</span><br><span class="line">        properties.setProperty(<span class="string">"kaptcha.textproducer.font.names"</span>, <span class="string">"宋体,楷体,微软雅黑"</span>);</span><br><span class="line">        Config config = <span class="keyword">new</span> Config(properties);</span><br><span class="line">        captchaProducer.setConfig(config);</span><br><span class="line">        <span class="keyword">return</span> captchaProducer;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//编写校验图片验证码的Filter过滤器</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CodeFilter</span> <span class="keyword">implements</span> <span class="title">Filter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doFilter</span><span class="params">(ServletRequest request, ServletResponse response, FilterChain chain)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> IOException, ServletException </span>&#123;</span><br><span class="line"></span><br><span class="line">        HttpServletRequest req = (HttpServletRequest)request;</span><br><span class="line">        HttpServletResponse resp = (HttpServletResponse)response;</span><br><span class="line"></span><br><span class="line">        String uri = req.getServletPath();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(uri.equals(<span class="string">"/login"</span>) &amp;&amp; req.getMethod().equalsIgnoreCase(<span class="string">"post"</span>)) &#123;</span><br><span class="line">            <span class="comment">//从Session会话作用域中获取图片验证码</span></span><br><span class="line">            String sessionCode = req.getSession().getAttribute(Constants.KAPTCHA_SESSION_KEY).toString();</span><br><span class="line">            <span class="comment">//获取表单中提交的图片验证码</span></span><br><span class="line">            String formCode = req.getParameter(<span class="string">"code"</span>).trim();</span><br><span class="line"></span><br><span class="line">            <span class="comment">//比对验证码是否正确</span></span><br><span class="line">            <span class="keyword">if</span>(StringUtils.isEmpty(formCode)) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"验证码不能为空"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span>(sessionCode.equalsIgnoreCase(formCode)) &#123;</span><br><span class="line">                System.out.println(<span class="string">"验证通过"</span>);</span><br><span class="line">            &#125;		</span><br><span class="line">            System.out.println(req.getSession().getAttribute(Constants.KAPTCHA_SESSION_KEY));</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> AuthenticationServiceException(<span class="string">"xx"</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//若通过则调用Filter链</span></span><br><span class="line">        chain.doFilter(request, response);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>校验图片验证码，最好在最外层的Filter中进行，不要让请求流转到校验账号密码的Filter中</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SecuritySecureConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//基于Http的请求配置</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        http.addFilterBefore(<span class="keyword">new</span> CodeFilter, UsernamePasswordAuthenticationFilter<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年11月15日 11:15</p>
+        <p>原始链接： <a class="post-url" href="/2020/06/05/springboot-security/" title="&#39;Spring Boot Security&#39;">https://midkuro.gitee.io/2020/06/05/springboot-security/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/06/05/springboot-security/&title=《'Spring Boot Security'》 — Kuro's Blog&pic=images/springboot.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/06/05/springboot-security/&title=《'Spring Boot Security'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/06/05/springboot-security/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Spring Boot Security'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/06/05/springboot-security/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/06/05/springboot-security/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/06/05/springboot-security/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/SpringBoot/" class="color1">SpringBoot</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Spring-Boot-Security"><span class="post-toc-text">Spring Boot Security</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#浏览器策略"><span class="post-toc-text">浏览器策略</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#同源"><span class="post-toc-text">同源</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#跨域"><span class="post-toc-text">跨域</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#XSS"><span class="post-toc-text">XSS</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#CSRF"><span class="post-toc-text">CSRF</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#单点登录"><span class="post-toc-text">单点登录</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#基本使用"><span class="post-toc-text">基本使用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自定义登录页面"><span class="post-toc-text">自定义登录页面</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自定义账号密码"><span class="post-toc-text">自定义账号密码</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#内存"><span class="post-toc-text">内存</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#数据库"><span class="post-toc-text">数据库</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自定义用户登录查询"><span class="post-toc-text">自定义用户登录查询</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自定义鉴权"><span class="post-toc-text">自定义鉴权</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#忽略静态请求"><span class="post-toc-text">忽略静态请求</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#记住我"><span class="post-toc-text">记住我</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#踢掉其他已登录的用户"><span class="post-toc-text">踢掉其他已登录的用户</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#禁止其他终端登录"><span class="post-toc-text">禁止其他终端登录</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#清理过期Session"><span class="post-toc-text">清理过期Session</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#退出登录"><span class="post-toc-text">退出登录</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自定义退出URL"><span class="post-toc-text">自定义退出URL</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#增加退出处理器"><span class="post-toc-text">增加退出处理器</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#登录成功处理器"><span class="post-toc-text">登录成功处理器</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#登录失败处理器"><span class="post-toc-text">登录失败处理器</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#常见登录失败异常"><span class="post-toc-text">常见登录失败异常</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#权限"><span class="post-toc-text">权限</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#访问权限"><span class="post-toc-text">访问权限</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#权限继承"><span class="post-toc-text">权限继承</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#细粒度权限配置"><span class="post-toc-text">细粒度权限配置</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#方法拦截"><span class="post-toc-text">方法拦截</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#图形验证码"><span class="post-toc-text">图形验证码</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/06/05/springcloud-sso/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Spring Cloud SSO&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/06/04/springboot-cache/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Spring Boot Cache 缓存&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="springboot-security" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Algorithm/">Algorithm</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16.25px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12.5px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.75px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13.75px;">Docker</a> <a href="/tags/HashMap/" style="font-size: 11.25px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13.75px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11.25px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/MySql/" style="font-size: 12.5px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12.5px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13.75px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11.25px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.5px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 15px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 17.5px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13.75px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16.25px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12.5px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 18.75px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13.75px;">Docker</a> <a href="/tags/HashMap/" style="font-size: 11.25px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13.75px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11.25px;">Kubernetes</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/MySql/" style="font-size: 12.5px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12.5px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13.75px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11.25px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12.5px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 15px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 17.5px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13.75px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
