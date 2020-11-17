@@ -130,7 +130,7 @@ body {
   position: relative;
 }
 .outer {
-  max-width: 920px;
+  max-width: calc(80% - 200px);
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -1452,7 +1452,7 @@ body {
 .post-toc-pos {
   z-index: 999;
   bottom: 77%;
-  left: calc(50% - 660px);
+  left: calc(25px);
   position: fixed;
 }
 .post-toc-pos .post-article {
@@ -2252,7 +2252,7 @@ pre .javascript .function {
   z-index: 999;
   position: fixed;
   bottom: 300px;
-  right: calc(50% - 525px);
+  right: calc(10%);
 }
 .sidebar div {
   display: block;
