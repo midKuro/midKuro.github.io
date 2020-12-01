@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Redis（四） Redis 常用命令&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="RedisRedis是一个单线程 + Epoll + 计算向数据移动的内存型数据库。 常用命令常见命令文档、Redis命令参考手册完整版 redis-cli -h host -p port -a password    命令 描述    SELECT  切换数据库   Dbsize 查看当前数据库的key的数量   Flushdb 清空当前库   Flushall 通杀全部库   12345678">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Redis（四） Redis 常用命令&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/05/24/redis-command/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="RedisRedis是一个单线程 + Epoll + 计算向数据移动的内存型数据库。 常用命令常见命令文档、Redis命令参考手册完整版 redis-cli -h host -p port -a password    命令 描述    SELECT  切换数据库   Dbsize 查看当前数据库的key的数量   Flushdb 清空当前库   Flushall 通杀全部库   12345678">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/redis-command/redis-01.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/redis-command/redis-02.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/redis-command/redis-03.png">
+<meta property="article:published_time" content="2020-05-24T02:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-27T06:17:38.701Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/redis-command/redis-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-redis-command" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Redis（四） Redis 常用命令&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Redis/">Redis</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-05-24
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h1><p>Redis是一个<strong>单线程 + Epoll + 计算向数据移动</strong>的内存型数据库。</p>
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><p><a href="http://redisdoc.com/" target="_blank" rel="noopener">常见命令文档</a>、<a href="/images/nosql-redis/redis-68.pdf">Redis命令参考手册完整版</a></p>
+<p><code>redis-cli -h host -p port -a password</code></p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SELECT <dbid></td>
+<td>切换数据库</td>
+</tr>
+<tr>
+<td>Dbsize</td>
+<td>查看当前数据库的key的数量</td>
+</tr>
+<tr>
+<td>Flushdb</td>
+<td>清空当前库</td>
+</tr>
+<tr>
+<td>Flushall</td>
+<td>通杀全部库</td>
+</tr>
+</tbody></table>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">127.0.0.1</span>:<span class="string">6379&gt; help @generic</span></span><br><span class="line"></span><br><span class="line"><span class="attr">DEL</span> <span class="string">key [key ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Delete a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">DUMP</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Return a serialized version of the value stored at the specified key.</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.6.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">EXISTS</span> <span class="string">key [key ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Determine if a key exists</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">EXPIRE</span> <span class="string">key seconds</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set a key's time to live in seconds</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">EXPIREAT</span> <span class="string">key timestamp</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set the expiration for a key as a UNIX timestamp</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">KEYS</span> <span class="string">pattern</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Find all keys matching the given pattern</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">MIGRATE</span> <span class="string">host port key| destination-db timeout [COPY] [REPLACE] [KEYS key]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Atomically transfer a key from a Redis instance to another one.</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.6.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">MOVE</span> <span class="string">key db</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Move a key to another database</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">OBJECT</span> <span class="string">subcommand [arguments [arguments ...]]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Inspect the internals of Redis objects</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.2.3</span></span><br><span class="line"></span><br><span class="line"><span class="attr">PERSIST</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove the expiration from a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">PEXPIRE</span> <span class="string">key milliseconds</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set a key's time to live in milliseconds</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.6.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">PEXPIREAT</span> <span class="string">key milliseconds-timestamp</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set the expiration for a key as a UNIX timestamp specified in milliseconds</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.6.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">PTTL</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get the time to live for a key in milliseconds</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.6.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">RANDOMKEY</span> <span class="string">-</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Return a random key from the keyspace</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">RENAME</span> <span class="string">key newkey</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Rename a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">RENAMENX</span> <span class="string">key newkey</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Rename a key, only if the new key does not exist</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">RESTORE</span> <span class="string">key ttl serialized-value [REPLACE]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Create a key using the provided serialized value, previously obtained using DUMP.</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.6.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SCAN</span> <span class="string">cursor [MATCH pattern] [COUNT count]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Incrementally iterate the keys space</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.8.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SORT</span> <span class="string">key [BY pattern] [LIMIT offset count] [GET pattern [GET pattern ...]] [ASC|DESC] [ALPHA] [STORE destination]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Sort the elements in a list, set or sorted set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">TOUCH</span> <span class="string">key [key ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Alters the last access time of a key(s). Returns the number of existing keys specified.</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">3.2.1</span></span><br><span class="line"></span><br><span class="line"><span class="attr">TTL</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get the time to live for a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">TYPE</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Determine the type stored at key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">UNLINK</span> <span class="string">key [key ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Delete a key asynchronously in another thread. Otherwise it is just as DEL, but non blocking.</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">4.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">WAIT</span> <span class="string">numreplicas timeout</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Wait for the synchronous replication of all the write commands sent in the context of the current connection</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">3.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">POST</span> <span class="string">...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SUBSTR</span> <span class="string">key arg arg </span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="meta">RESTORE-ASKING</span> <span class="string">key arg arg ...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HOST</span>: <span class="string">...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="attr">PFDEBUG</span> <span class="string">arg arg ...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="attr">MODULE</span> <span class="string">arg ...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="attr">GEORADIUSBYMEMBER_RO</span> <span class="string">key arg arg arg ...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="attr">XSETID</span> <span class="string">key arg </span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="attr">GEORADIUS_RO</span> <span class="string">key arg arg arg arg ...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ASKING</span> <span class="string"></span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="attr">PSYNC</span> <span class="string">arg arg </span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="attr">REPLCONF</span> <span class="string">...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LATENCY</span> <span class="string">arg ...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="attr">PFSELFTEST</span> <span class="string"></span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LOLWUT</span> <span class="string">...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="String"><a href="#String" class="headerlink" title="String"></a>String</h3><p>字符串有正向索引和反向索引，正向开头<code>index=0</code>开始，反向末尾<code>index=-1</code>开始。</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">127.0.0.1</span>:<span class="string">6379&gt; help @String</span></span><br><span class="line"></span><br><span class="line"><span class="attr">APPEND</span> <span class="string">key value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Append a value to a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">DECR</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Decrement the integer value of a key by one</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">DECRBY</span> <span class="string">key decrement</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Decrement the integer value of a key by the given number</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">GET</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get the value of a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">GETRANGE</span> <span class="string">key start end</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get a substring of the string stored at a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.4.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">GETSET</span> <span class="string">key value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set the string value of a key and return its old value</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">INCR</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Increment the integer value of a key by one</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">INCRBY</span> <span class="string">key increment</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Increment the integer value of a key by the given amount</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">INCRBYFLOAT</span> <span class="string">key increment</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Increment the float value of a key by the given amount</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.6.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">MGET</span> <span class="string">key [key ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get the values of all the given keys</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">MSET</span> <span class="string">key value [key value ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set multiple keys to multiple values</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.1</span></span><br><span class="line"></span><br><span class="line"><span class="attr">MSETNX</span> <span class="string">key value [key value ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set multiple keys to multiple values, only if none of the keys exist</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.1</span></span><br><span class="line"></span><br><span class="line"><span class="attr">PSETEX</span> <span class="string">key milliseconds value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set the value and expiration in milliseconds of a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.6.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SET</span> <span class="string">key value [expiration EX seconds|PX milliseconds] [NX|XX]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set the string value of a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SETEX</span> <span class="string">key seconds value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set the value and expiration of a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SETNX</span> <span class="string">key value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set the value of a key, only if the key does not exist</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SETRANGE</span> <span class="string">key offset value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Overwrite part of a string at key starting at the specified offset</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">STRLEN</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get the length of the value stored in a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.2.0</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Incr等数值命令适用场景：</span><br><span class="line">抢购，秒杀，详情页，点赞，评论</span><br><span class="line">规避并发下，对数据库的事务操作，完全由redis内存操作代替</span><br></pre></td></tr></table></figure>
+
+<h3 id="BitMap"><a href="#BitMap" class="headerlink" title="BitMap"></a>BitMap</h3><p>对二进制的Index位数进行设置值</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">BITCOUNT</span> <span class="string">key [start end]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Count set bits in a string</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.6.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">BITFIELD</span> <span class="string">key [GET type offset] [SET type offset value] [INCRBY type offset increment] [OVERFLOW WRAP|SAT|FAIL]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Perform arbitrary bitfield integer operations on strings</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">3.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">BITOP</span> <span class="string">operation destkey key [key ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Perform bitwise operations between strings</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.6.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">BITPOS</span> <span class="string">key bit [start] [end]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Find first bit set or clear in a string</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.8.7</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SETBIT</span> <span class="string">key offset value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Sets or clears the bit at offset in the string value stored at key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">GETBIT</span> <span class="string">key offset</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Returns the bit value at offset in the string value stored at key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.2.0</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">案例：</span><br><span class="line">setbit k1 1 1               0100 0000&#x3D;@</span><br><span class="line">setbit k1 7 1				0100 0001&#x3D;A</span><br><span class="line">setbit k1 9 1				0100 0001 0100 0000&#x3D;A@</span><br><span class="line"></span><br><span class="line">默认会转换成字符集  ascii 输出</span><br><span class="line">其他一般叫做扩展字符集</span><br><span class="line">扩展：  其他字符集不在对ascii重编码</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">redis的位操作适用场景：</span><br><span class="line">1.有用户系统，统计用户登录天数，且窗口随机,每个用户有366位数据，一天一个，用BITCOUNT算出多少天</span><br><span class="line">setbit sean 1 1</span><br><span class="line">setbit sean 7 1</span><br><span class="line">setbit sean 364 1</span><br><span class="line">STRLEN sean</span><br><span class="line">BITCOUNT sean -2 -1</span><br><span class="line"></span><br><span class="line">2.活跃用户统计！随即窗口,多少用户多少个bit，一天一个key，数据与运算后使用BITCOUNT</span><br><span class="line">setbit 20190101   1  1</span><br><span class="line">setbit 20190102   1  1</span><br><span class="line">setbit 20190102   7  1</span><br><span class="line">bitop  or   destkey 20190101  20190102</span><br><span class="line">BITCOUNT  destkey  0 -1</span><br></pre></td></tr></table></figure>
+
+<h3 id="Hash"><a href="#Hash" class="headerlink" title="Hash"></a>Hash</h3><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">127.0.0.1</span>:<span class="string">6379&gt; help @hash</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HDEL</span> <span class="string">key field [field ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Delete one or more hash fields</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HEXISTS</span> <span class="string">key field</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Determine if a hash field exists</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HGET</span> <span class="string">key field</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get the value of a hash field</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HGETALL</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get all the fields and values in a hash</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HINCRBY</span> <span class="string">key field increment</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Increment the integer value of a hash field by the given number</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HINCRBYFLOAT</span> <span class="string">key field increment</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Increment the float value of a hash field by the given amount</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.6.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HKEYS</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get all the fields in a hash</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HLEN</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get the number of fields in a hash</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HMGET</span> <span class="string">key field [field ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get the values of all the given hash fields</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HMSET</span> <span class="string">key field value [field value ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set multiple hash fields to multiple values</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HSCAN</span> <span class="string">key cursor [MATCH pattern] [COUNT count]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Incrementally iterate hash fields and associated values</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.8.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HSET</span> <span class="string">key field value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set the string value of a hash field</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HSETNX</span> <span class="string">key field value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set the value of a hash field, only if the field does not exist</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HSTRLEN</span> <span class="string">key field</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get the length of the value of a hash field</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">3.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">HVALS</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get all the values in a hash</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="List"><a href="#List" class="headerlink" title="List"></a>List</h3><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">127.0.0.1</span>:<span class="string">6379&gt; help @list</span></span><br><span class="line"></span><br><span class="line"><span class="attr">BLPOP</span> <span class="string">key [key ...] timeout</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove and get the first element in a list, or block until one is available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">BRPOP</span> <span class="string">key [key ...] timeout</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove and get the last element in a list, or block until one is available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">BRPOPLPUSH</span> <span class="string">source destination timeout</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Pop a value from a list, push it to another list and return it; or block until one is available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LINDEX</span> <span class="string">key index</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get an element from a list by its index</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LINSERT</span> <span class="string">key BEFORE|AFTER pivot value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Insert an element before or after another element in a list</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LLEN</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get the length of a list</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LPOP</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove and get the first element in a list</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LPUSH</span> <span class="string">key value [value ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Prepend one or multiple values to a list</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LPUSHX</span> <span class="string">key value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Prepend a value to a list, only if the list exists</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LRANGE</span> <span class="string">key start stop</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get a range of elements from a list</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LREM</span> <span class="string">key count value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove elements from a list</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LSET</span> <span class="string">key index value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Set the value of an element in a list by its index</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LTRIM</span> <span class="string">key start stop</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Trim a list to the specified range</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">RPOP</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove and get the last element in a list</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">RPOPLPUSH</span> <span class="string">source destination</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove the last element in a list, prepend it to another list and return it</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">RPUSH</span> <span class="string">key value [value ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Append one or multiple values to a list</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">RPUSHX</span> <span class="string">key value</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Append a value to a list, only if the list exists</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.2.0</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Set"><a href="#Set" class="headerlink" title="Set"></a>Set</h3><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">127.0.0.1</span>:<span class="string">6379&gt; help @set</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SADD</span> <span class="string">key member [member ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Add one or more members to a set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SCARD</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get the number of members in a set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SDIFF</span> <span class="string">key [key ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Subtract multiple sets</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SDIFFSTORE</span> <span class="string">destination key [key ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Subtract multiple sets and store the resulting set in a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SINTER</span> <span class="string">key [key ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Intersect multiple sets</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SINTERSTORE</span> <span class="string">destination key [key ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Intersect multiple sets and store the resulting set in a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SISMEMBER</span> <span class="string">key member</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Determine if a given value is a member of a set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SMEMBERS</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get all the members in a set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SMOVE</span> <span class="string">source destination member</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Move a member from one set to another</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SPOP</span> <span class="string">key [count]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove and return one or multiple random members from a set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SRANDMEMBER</span> <span class="string">key [count]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get one or multiple random members from a set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SREM</span> <span class="string">key member [member ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove one or more members from a set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SSCAN</span> <span class="string">key cursor [MATCH pattern] [COUNT count]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Incrementally iterate Set elements</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.8.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SUNION</span> <span class="string">key [key ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Add multiple sets</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">SUNIONSTORE</span> <span class="string">destination key [key ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Add multiple sets and store the resulting set in a key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.0</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">特性：</span><br><span class="line">【无序】&amp;&amp;【随机性】&amp;&amp;【去重】</span><br><span class="line">放入的多少不同，元素存储的顺序不同。</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Sorted-set"><a href="#Sorted-set" class="headerlink" title="Sorted_set"></a>Sorted_set</h3><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">127.0.0.1</span>:<span class="string">6379&gt; help @sorted_set</span></span><br><span class="line"></span><br><span class="line"><span class="attr">BZPOPMAX</span> <span class="string">key [key ...] timeout</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove and return the member with the highest score from one or more sorted sets, or block until one is available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">5.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">BZPOPMIN</span> <span class="string">key [key ...] timeout</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove and return the member with the lowest score from one or more sorted sets, or block until one is available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">5.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZADD</span> <span class="string">key [NX|XX] [CH] [INCR] score member [score member ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Add one or more members to a sorted set, or update its score if it already exists</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZCARD</span> <span class="string">key</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get the number of members in a sorted set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZCOUNT</span> <span class="string">key min max</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Count the members in a sorted set with scores within the given values</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZINCRBY</span> <span class="string">key increment member</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Increment the score of a member in a sorted set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZINTERSTORE</span> <span class="string">destination numkeys key [key ...] [WEIGHTS weight] [AGGREGATE SUM|MIN|MAX]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Intersect multiple sorted sets and store the resulting sorted set in a new key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZLEXCOUNT</span> <span class="string">key min max</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Count the number of members in a sorted set between a given lexicographical range</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.8.9</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZPOPMAX</span> <span class="string">key [count]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove and return members with the highest scores in a sorted set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">5.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZPOPMIN</span> <span class="string">key [count]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove and return members with the lowest scores in a sorted set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">5.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZRANGE</span> <span class="string">key start stop [WITHSCORES]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Return a range of members in a sorted set, by index</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZRANGEBYLEX</span> <span class="string">key min max [LIMIT offset count]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Return a range of members in a sorted set, by lexicographical range</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.8.9</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZRANGEBYSCORE</span> <span class="string">key min max [WITHSCORES] [LIMIT offset count]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Return a range of members in a sorted set, by score</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.0.5</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZRANK</span> <span class="string">key member</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Determine the index of a member in a sorted set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZREM</span> <span class="string">key member [member ...]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove one or more members from a sorted set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZREMRANGEBYLEX</span> <span class="string">key min max</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove all members in a sorted set between the given lexicographical range</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.8.9</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZREMRANGEBYRANK</span> <span class="string">key start stop</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove all members in a sorted set within the given indexes</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZREMRANGEBYSCORE</span> <span class="string">key min max</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Remove all members in a sorted set within the given scores</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZREVRANGE</span> <span class="string">key start stop [WITHSCORES]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Return a range of members in a sorted set, by index, with scores ordered from high to low</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZREVRANGEBYLEX</span> <span class="string">key max min [LIMIT offset count]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Return a range of members in a sorted set, by lexicographical range, ordered from higher to lower strings.</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.8.9</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZREVRANGEBYSCORE</span> <span class="string">key max min [WITHSCORES] [LIMIT offset count]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Return a range of members in a sorted set, by score, with scores ordered from high to low</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZREVRANK</span> <span class="string">key member</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Determine the index of a member in a sorted set, with scores ordered from high to low</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZSCAN</span> <span class="string">key cursor [MATCH pattern] [COUNT count]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Incrementally iterate sorted sets elements and associated scores</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.8.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZSCORE</span> <span class="string">key member</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Get the score associated with the given member in a sorted set</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">1.2.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ZUNIONSTORE</span> <span class="string">destination numkeys key [key ...] [WEIGHTS weight] [AGGREGATE SUM|MIN|MAX]</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Add multiple sorted sets and store the resulting sorted set in a new key</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">2.0.0</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Bloom"><a href="#Bloom" class="headerlink" title="Bloom"></a>Bloom</h3><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">BF.ADD</span> <span class="string">key ...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="meta">BF.EXISTS</span> <span class="string">key ...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="meta">BF.INSERT</span> <span class="string">key ...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="meta">BF.DEBUG</span> <span class="string">key ...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="meta">BF.MEXISTS</span> <span class="string">key ...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="meta">BF.INFO</span> <span class="string">key ...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br><span class="line"></span><br><span class="line"><span class="meta">BF.MADD</span> <span class="string">key ...options...</span></span><br><span class="line"><span class="attr">summary</span>: <span class="string">Help not available</span></span><br><span class="line"><span class="attr">since</span>: <span class="string">not known</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-server --loadmodule  &#x2F;opt&#x2F;redis&#x2F;redisbloom.so</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/redis-command/redis-01.png" alt="redis"></p>
+<h2 id="持久化"><a href="#持久化" class="headerlink" title="持久化"></a>持久化</h2><h3 id="RDB"><a href="#RDB" class="headerlink" title="RDB"></a>RDB</h3><p><img src="/images/redis-command/redis-02.png" alt="redis"></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#主动触发阻塞的RDB操作（如关机，明确调用）</span></span><br><span class="line"><span class="meta">127.0.0.1</span>:<span class="string">6379&gt; save</span></span><br><span class="line"><span class="comment">#主动触发异步的RDB操作（Fork进程）</span></span><br><span class="line"><span class="meta">127.0.0.1</span>:<span class="string">6379&gt; bgsage</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="AOF"><a href="#AOF" class="headerlink" title="AOF"></a>AOF</h3><p><img src="/images/redis-command/redis-03.png" alt="redis"></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#主动触发重写AOP操作</span></span><br><span class="line"><span class="meta">127.0.0.1</span>:<span class="string">6379&gt; BGREWRITEAOF</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><blockquote>
+<p>Redis如何保证Sorted_set的排序和插入效率？</p>
+</blockquote>
+<p>底层使用跳表Skip List实现的，<a href="https://www.cnblogs.com/hunternet/p/11248192.html" target="_blank" rel="noopener">详细链接</a></p>
+<hr>
+<blockquote>
+<p>Redis如何淘汰过期的keys?</p>
+</blockquote>
+<p>Redis keys过期有两种方式：被动和主动方式。</p>
+<p>当一些客户端尝试访问它时，key会被发现并主动的过期。</p>
+<p>当然，这样是不够的，因为有些过期的keys，永远不会访问他们。 无论如何，这些keys应该过期，所以定时随机测试设置keys的过期时间。所有这些过期的keys将会从密钥空间删除。</p>
+<p>具体就是Redis每秒10次做的事情：</p>
+<ol>
+<li>测试随机的20个keys进行相关过期检测。</li>
+<li>删除所有已经过期的keys。</li>
+<li>如果有多于25%的keys过期，重复步奏1.</li>
+</ol>
+<p>这是一个平凡的概率算法，基本上的假设是，我们的样本是这个密钥控件，并且我们不断重复过期检测，直到过期的keys的百分百低于25%,这意味着，在任何给定的时刻，最多会清除1/4的过期keys。</p>
+<hr>
+<blockquote>
+<p>Redis如何解决缓存穿透？</p>
+</blockquote>
+<p>布隆过滤器，采用多种映射函数将一个元素映射到bitmap的多个位中，当判断元素是否存在时，需要这些位的都是1，若有一个不为1，则不存在。</p>
+<p><strong>概率解决问题</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.穿透了，不存在</span><br><span class="line">2.client，增加redis中的key，value标记</span><br><span class="line">3.数据库增加了元素</span><br><span class="line">4.完成元素对bloom的添加</span><br></pre></td></tr></table></figure>
+
+
+
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年11月27日 14:17</p>
+        <p>原始链接： <a class="post-url" href="/2020/05/24/redis-command/" title="&#39;Redis（四） Redis 常用命令&#39;">https://midkuro.gitee.io/2020/05/24/redis-command/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/05/24/redis-command/&title=《'Redis（四） Redis 常用命令'》 — Kuro's Blog&pic=images/redis.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/05/24/redis-command/&title=《'Redis（四） Redis 常用命令'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/05/24/redis-command/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Redis（四） Redis 常用命令'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/05/24/redis-command/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/05/24/redis-command/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/05/24/redis-command/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Redis/" class="color1">Redis</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Redis"><span class="post-toc-text">Redis</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#常用命令"><span class="post-toc-text">常用命令</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#String"><span class="post-toc-text">String</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#BitMap"><span class="post-toc-text">BitMap</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Hash"><span class="post-toc-text">Hash</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#List"><span class="post-toc-text">List</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Set"><span class="post-toc-text">Set</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Sorted-set"><span class="post-toc-text">Sorted_set</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Bloom"><span class="post-toc-text">Bloom</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#持久化"><span class="post-toc-text">持久化</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#RDB"><span class="post-toc-text">RDB</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#AOF"><span class="post-toc-text">AOF</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#常见问题"><span class="post-toc-text">常见问题</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/05/26/redis-hash/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Redis（二） Hash算法&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/05/24/zookeeper-base/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Zookeeper 详解&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="redis-command" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Algorithm/">Algorithm</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/MYSQL/">MYSQL</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

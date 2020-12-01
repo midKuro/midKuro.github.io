@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;响应式web&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="响应式web长轮训短轮询去服务端查询的时候，不管库存量有没有变化，服务器就立即返回结果了。 长轮询则不是，在长轮询中，服务器如果检测到库存量没有变化的话，将会把当前请求挂起一段时间（这个时间也叫作超时时间，一般是90秒）。在这个时间里，服务器会去检测库存量有没有变化，检测到变化就立即返回，否则就一直等到超时为止。 而对于客户端来说，不管是长轮询还是短轮询，客户端的动作都是一样的，就是不停的去请求，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;响应式web&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/10/21/reactor-webflux/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="响应式web长轮训短轮询去服务端查询的时候，不管库存量有没有变化，服务器就立即返回结果了。 长轮询则不是，在长轮询中，服务器如果检测到库存量没有变化的话，将会把当前请求挂起一段时间（这个时间也叫作超时时间，一般是90秒）。在这个时间里，服务器会去检测库存量有没有变化，检测到变化就立即返回，否则就一直等到超时为止。 而对于客户端来说，不管是长轮询还是短轮询，客户端的动作都是一样的，就是不停的去请求，">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-10-21T14:30:00.000Z">
+<meta property="article:modified_time" content="2020-11-30T13:50:05.023Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Spring">
+<meta name="twitter:card" content="summary">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-reactor-webflux" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;响应式web&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Spring/">Spring</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-10-21
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="响应式web"><a href="#响应式web" class="headerlink" title="响应式web"></a>响应式web</h1><h2 id="长轮训"><a href="#长轮训" class="headerlink" title="长轮训"></a>长轮训</h2><p>短轮询去服务端查询的时候，不管库存量有没有变化，服务器就立即返回结果了。</p>
+<p>长轮询则不是，在长轮询中，服务器如果检测到库存量没有变化的话，将会把当前请求挂起一段时间（这个时间也叫作超时时间，一般是90秒）。在这个时间里，服务器会去检测库存量有没有变化，检测到变化就立即返回，否则就一直等到超时为止。</p>
+<p>而对于客户端来说，不管是长轮询还是短轮询，客户端的动作都是一样的，就是不停的去请求，不同的是服务端，短轮询情况下服务端每次请求不管有没有变化都会立即返回结果，而长轮询情况下，如果有变化才会立即返回结果，而没有变化的话，则不会再立即给客户端返回结果，直到超时为止。</p>
+<h2 id="背压-Backpressure"><a href="#背压-Backpressure" class="headerlink" title="背压 Backpressure"></a>背压 Backpressure</h2><p>在数据流从上游生产者向下游消费者传输的过程中，上游生产速度大于下游消费速度，导致下游的 Buffer 溢出，这种现象就叫做 Backpressure 出现。</p>
+<h2 id="SSE"><a href="#SSE" class="headerlink" title="SSE"></a>SSE</h2><p>所谓的SSE(Sever-Sent Event),就是浏览器向服务器发送了一个HTTP请求，保持长连接，服务器不断单向地向浏览器推送“信息”，这么做是为了节省网络资源，不用一直发请求，建立新连接。</p>
+<p><strong>它是基于HTTP协议通信的。JS基于EventSource实现，后台基于text/event-stream;charset=utf-8。</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping</span>(path = <span class="string">"/sse"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SseRest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Map&lt;String, SseEmitter&gt; sseCache = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping</span>(path = <span class="string">"/subscribe"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> SseEmitter <span class="title">subscribe</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 超时时间设置为1小时</span></span><br><span class="line">        SseEmitter sseEmitter = <span class="keyword">new</span> SseEmitter(<span class="number">3600000L</span>);</span><br><span class="line">        sseCache.put(id, sseEmitter);</span><br><span class="line">        <span class="comment">// 超时回调 触发</span></span><br><span class="line">        sseEmitter.onTimeout(() -&gt; sseCache.remove(id));</span><br><span class="line">        <span class="comment">// 结束之后的回调触发</span></span><br><span class="line">        sseEmitter.onCompletion(() -&gt; System.out.println(<span class="string">"完成！！！"</span>));</span><br><span class="line">        <span class="keyword">return</span> sseEmitter;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping</span>(path = <span class="string">"/push"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">push</span><span class="params">(String id, String content)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        SseEmitter sseEmitter = sseCache.get(id);</span><br><span class="line">        <span class="keyword">if</span> (sseEmitter != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 发送消息</span></span><br><span class="line">            sseEmitter.send(content);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"over"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping</span>(path = <span class="string">"over"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">over</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">        SseEmitter sseEmitter = sseCache.get(id);</span><br><span class="line">        <span class="keyword">if</span> (sseEmitter != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 执行完毕，断开连接</span></span><br><span class="line">            sseEmitter.complete();</span><br><span class="line">            sseCache.remove(id);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"over"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping</span>(path = <span class="string">"/push-all"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">pushAll</span><span class="params">(String content)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (String s : sseCache.keySet()) &#123;</span><br><span class="line">            SseEmitter sseEmitter = sseCache.get(s);</span><br><span class="line">            <span class="keyword">if</span> (sseEmitter != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="comment">// 发送消息</span></span><br><span class="line">                sseEmitter.send(content);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"over"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- user1.html--&gt;</span></span><br><span class="line"><span class="meta">&lt;!doctype <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">"en"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span>&gt;</span> <span class="comment">&lt;!-- for HTML5 --&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"Content-Type"</span> <span class="attr">content</span>=<span class="string">"text/html; charset=utf-8"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Sse测试文档<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span>sse 测试<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"result"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="actionscript">    <span class="keyword">var</span> source = <span class="keyword">new</span> EventSource(<span class="string">'http://localhost/sse/subscribe?id=user1'</span>);</span></span><br><span class="line"><span class="actionscript">    source.onmessage = <span class="function"><span class="keyword">function</span> <span class="params">(event)</span> </span>&#123;</span></span><br><span class="line"><span class="javascript">        text = <span class="built_in">document</span>.getElementById(<span class="string">'result'</span>).innerText;</span></span><br><span class="line"><span class="actionscript">        text += <span class="string">'\n'</span> + event.data;</span></span><br><span class="line"><span class="javascript">        <span class="built_in">document</span>.getElementById(<span class="string">'result'</span>).innerText = text;</span></span><br><span class="line">    &#125;;</span><br><span class="line"><span class="handlebars"><span class="xml">    <span class="comment">&lt;!-- 添加一个开启回调 --&gt;</span></span></span></span><br><span class="line"><span class="actionscript">    source.onopen = <span class="function"><span class="keyword">function</span> <span class="params">(event)</span> </span>&#123;</span></span><br><span class="line"><span class="javascript">        text = <span class="built_in">document</span>.getElementById(<span class="string">'result'</span>).innerText;</span></span><br><span class="line"><span class="actionscript">        text += <span class="string">'\n 开启: '</span>;</span></span><br><span class="line"><span class="javascript">        <span class="built_in">console</span>.log(event);</span></span><br><span class="line"><span class="javascript">        <span class="built_in">document</span>.getElementById(<span class="string">'result'</span>).innerText = text;</span></span><br><span class="line">    &#125;;</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- user2.html--&gt;</span></span><br><span class="line"><span class="meta">&lt;!doctype <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">"en"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span>&gt;</span> <span class="comment">&lt;!-- for HTML5 --&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"Content-Type"</span> <span class="attr">content</span>=<span class="string">"text/html; charset=utf-8"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Sse测试文档<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span>sse 测试<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"result"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="handlebars"><span class="xml"><span class="comment">&lt;!-- H5 里的对象 --&gt;</span></span></span></span><br><span class="line"></span><br><span class="line"><span class="actionscript">    <span class="keyword">var</span> source = <span class="keyword">new</span> EventSource(<span class="string">'http://localhost/sse/subscribe?id=user2'</span>);</span></span><br><span class="line"><span class="actionscript">    source.onmessage = <span class="function"><span class="keyword">function</span> <span class="params">(event)</span> </span>&#123;</span></span><br><span class="line"><span class="javascript">        text = <span class="built_in">document</span>.getElementById(<span class="string">'result'</span>).innerText;</span></span><br><span class="line"><span class="actionscript">        text += <span class="string">'\n'</span> + event.data;</span></span><br><span class="line"><span class="javascript">        <span class="built_in">document</span>.getElementById(<span class="string">'result'</span>).innerText = text;</span></span><br><span class="line">    &#125;;</span><br><span class="line"><span class="handlebars"><span class="xml">    <span class="comment">&lt;!-- 添加一个开启回调 --&gt;</span></span></span></span><br><span class="line"><span class="actionscript">    source.onopen = <span class="function"><span class="keyword">function</span> <span class="params">(event)</span> </span>&#123;</span></span><br><span class="line"><span class="javascript">        text = <span class="built_in">document</span>.getElementById(<span class="string">'result'</span>).innerText;</span></span><br><span class="line"><span class="actionscript">        text += <span class="string">'\n 开启: '</span>;</span></span><br><span class="line"><span class="javascript">        <span class="built_in">console</span>.log(event);</span></span><br><span class="line"><span class="javascript">        <span class="built_in">document</span>.getElementById(<span class="string">'result'</span>).innerText = text;</span></span><br><span class="line">    &#125;;</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="RXJava2"><a href="#RXJava2" class="headerlink" title="RXJava2"></a>RXJava2</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.reactivex.rxjava2<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>rxjava<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RXJavaTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 同步</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Observable 被观察者</span></span><br><span class="line"></span><br><span class="line">        Observable&lt;String&gt; girl = Observable.create(<span class="keyword">new</span> ObservableOnSubscribe&lt;String&gt;() &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            <span class="comment">// emitter 发射器，发射体</span></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">subscribe</span><span class="params">(ObservableEmitter&lt;String&gt; emitter)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// onNext可以 无限次调用</span></span><br><span class="line">                System.out.println(Thread.currentThread().getName());</span><br><span class="line">                emitter.onNext(<span class="string">"1"</span>);</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                System.out.println(Thread.currentThread().getName());</span><br><span class="line">                emitter.onNext(<span class="string">"2"</span>);</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                System.out.println(Thread.currentThread().getName());</span><br><span class="line">                emitter.onNext(<span class="string">"3"</span>);</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                emitter.onNext(<span class="string">"4"</span>);</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                emitter.onNext(<span class="string">"5"</span>);</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                emitter.onComplete();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Observer 观察者</span></span><br><span class="line">        Observer&lt;String&gt; man = <span class="keyword">new</span> Observer&lt;String&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSubscribe</span><span class="params">(Disposable d)</span> </span>&#123;</span><br><span class="line">                <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">                System.out.println(<span class="string">"onSubscribe"</span> + d);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(String t)</span> </span>&#123;</span><br><span class="line">                <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">                System.out.println(Thread.currentThread().getName());</span><br><span class="line">                System.out.println(<span class="string">"onNext "</span> + t);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">(Throwable e)</span> </span>&#123;</span><br><span class="line">                <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">                System.out.println(<span class="string">"onError "</span> + e.getMessage());</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onComplete</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">                System.out.println(<span class="string">"onComplete"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        girl.subscribe(man);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Schedulers.computation()</td>
+<td>适用于计算密集型任务</td>
+</tr>
+<tr>
+<td>Schedulers.io()</td>
+<td>适用于 IO 密集型任务</td>
+</tr>
+<tr>
+<td>Schedulers.trampoline()</td>
+<td>在某个调用 schedule 的线程执行</td>
+</tr>
+<tr>
+<td>Schedulers.newThread()</td>
+<td>每个 Worker 对应一个新线程</td>
+</tr>
+<tr>
+<td>Schedulers.single()</td>
+<td>所有 Worker 使用同一个线程执行任务</td>
+</tr>
+<tr>
+<td>Schedulers.from(Executor)</td>
+<td>使用 Executor 作为任务执行的线程</td>
+</tr>
+</tbody></table>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RXJavaTest2</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 异步</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 被观察者</span></span><br><span class="line">        Observable.create(<span class="keyword">new</span> ObservableOnSubscribe&lt;String&gt;() &#123;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">subscribe</span><span class="params">(ObservableEmitter&lt;String&gt; emitter)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                emitter.onNext(<span class="string">"1"</span>);</span><br><span class="line">                emitter.onNext(<span class="string">"2"</span>);</span><br><span class="line">                emitter.onNext(<span class="string">"3"</span>);</span><br><span class="line">                emitter.onNext(<span class="string">"4"</span>);</span><br><span class="line">                emitter.onNext(<span class="string">"5"</span>);</span><br><span class="line">                emitter.onComplete();				</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">            <span class="comment">// 哪个线程是观察者</span></span><br><span class="line">            .observeOn(</span><br><span class="line">            Schedulers.computation()</span><br><span class="line">        )</span><br><span class="line">            .subscribeOn( Schedulers.computation())</span><br><span class="line">            .subscribe(<span class="keyword">new</span> Observer&lt;String&gt;() &#123;</span><br><span class="line"></span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSubscribe</span><span class="params">(Disposable d)</span> </span>&#123;</span><br><span class="line">                    System.out.println(<span class="string">"onSubscribe..."</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(String t)</span> </span>&#123;</span><br><span class="line">                    System.out.println(<span class="string">"onNext"</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">(Throwable e)</span> </span>&#123;</span><br><span class="line">                    System.out.println(<span class="string">"onError"</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onComplete</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    System.out.println(<span class="string">"onComplete"</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            &#125;)</span><br><span class="line">            ;</span><br><span class="line"></span><br><span class="line">        Thread.sleep(<span class="number">10000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Reactor"><a href="#Reactor" class="headerlink" title="Reactor"></a>Reactor</h2><blockquote>
+<p>响应式编程能够防止雪崩</p>
+</blockquote>
+<h3 id="Flux"><a href="#Flux" class="headerlink" title="Flux"></a>Flux</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-webflux<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 静态方法生成Flux</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">String[] s = <span class="keyword">new</span> String[] &#123;<span class="string">"xx"</span>,<span class="string">"oo"</span>&#125;;</span><br><span class="line"><span class="comment">// just 已知元素数量和内容 使用</span></span><br><span class="line"><span class="comment">// </span></span><br><span class="line">Flux&lt;String&gt; flux1 = Flux.just(s);</span><br><span class="line"><span class="comment">//	flux1.subscribe(System.out::println);</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Flux&lt;String&gt; flux2 = Flux.just(<span class="string">"xx"</span>,<span class="string">"xxx"</span>);</span><br><span class="line"><span class="comment">//	flux2.subscribe(System.out::println);</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//fromArray方法</span></span><br><span class="line">List&lt;String&gt; list = Arrays.asList(<span class="string">"hello"</span>, <span class="string">"world"</span>);</span><br><span class="line">Flux&lt;String&gt; flux3 = Flux.fromIterable(list);</span><br><span class="line"><span class="comment">//  flux3.subscribe(System.out::println);</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//fromStream方法</span></span><br><span class="line">Stream&lt;String&gt; stream = Stream.of(<span class="string">"hi"</span>, <span class="string">"hello"</span>);</span><br><span class="line">Flux&lt;String&gt; flux4 = Flux.fromStream(stream);</span><br><span class="line"><span class="comment">//   flux4.subscribe(System.out::println);</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//range方法</span></span><br><span class="line">Flux&lt;Integer&gt; range = Flux.range(<span class="number">0</span>, <span class="number">5</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//   range.subscribe(System.out::println);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//interval方法, take方法限制个数为5个</span></span><br><span class="line">Flux&lt;Long&gt; longFlux = Flux.interval(Duration.ofSeconds(<span class="number">1</span>)).take(<span class="number">5</span>);</span><br><span class="line">longFlux.subscribe(System.out::println);</span><br><span class="line"></span><br><span class="line"><span class="comment">//链式</span></span><br><span class="line">Flux.range(<span class="number">1</span>, <span class="number">5</span>).subscribe(System.out::println);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 合并</span></span><br><span class="line">Flux&lt;String&gt; mergeWith = flux3.mergeWith(flux4);</span><br><span class="line">mergeWith.subscribe(System.out::println);</span><br><span class="line">System.out.println(<span class="string">"---"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 结合为元祖</span></span><br><span class="line">Flux&lt;String&gt; source1 = Flux.just(<span class="string">"111"</span>, <span class="string">"world"</span>,<span class="string">"333"</span>);</span><br><span class="line">Flux&lt;String&gt; source2 = Flux.just(<span class="string">"2111"</span>, <span class="string">"xxx"</span>);</span><br><span class="line"></span><br><span class="line">Flux&lt;Tuple2&lt;String, String&gt;&gt; zip = source1.zipWith(source2);</span><br><span class="line">zip.subscribe(tuple -&gt; &#123;</span><br><span class="line">    System.out.println(tuple.getT1() + <span class="string">" -&gt; "</span> + tuple.getT2());</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 同步动态创建，next 只能被调用一次</span></span><br><span class="line">Flux.generate(sink -&gt; &#123;</span><br><span class="line"></span><br><span class="line">    sink.next(<span class="string">"xx"</span>);</span><br><span class="line">    sink.complete();</span><br><span class="line"></span><br><span class="line">&#125;).subscribe(System.out::print);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//异步动态创建</span></span><br><span class="line">Flux.create(sink -&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">        sink.next(<span class="string">"xxoo:"</span> + i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    sink.complete();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;).subscribe(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<h3 id="Mono"><a href="#Mono" class="headerlink" title="Mono"></a>Mono</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PersonService</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> ConcurrentHashMap&lt;Integer, Person&gt; map = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line"></span><br><span class="line">            Person person = <span class="keyword">new</span> Person();</span><br><span class="line"></span><br><span class="line">            person.setId(i);</span><br><span class="line">            person.setName(<span class="string">"yangchaoyue"</span> + i);</span><br><span class="line"></span><br><span class="line">            map.put(i, person);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping</span>(<span class="string">"/person"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PersonController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    PersonService personSrv;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping</span>(<span class="string">""</span>)</span><br><span class="line">    <span class="function">Mono&lt;Object&gt; <span class="title">get</span><span class="params">(String name)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">"线程 get"</span> + Thread.currentThread().getName());</span><br><span class="line">        System.out.println(<span class="string">"---1"</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 异步</span></span><br><span class="line">        Mono&lt;Object&gt; mono = Mono.create(sink -&gt; &#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 组装数据序列</span></span><br><span class="line">            System.out.println(<span class="string">"线程 create"</span> + Thread.currentThread().getName());</span><br><span class="line">            sink.success(personSrv.getPerson());</span><br><span class="line">        &#125;)</span><br><span class="line">            .doOnSubscribe(sub -&gt; &#123;</span><br><span class="line">                <span class="comment">// 1 订阅	</span></span><br><span class="line">                System.out.println(<span class="string">"xxx"</span>);</span><br><span class="line">            &#125;)</span><br><span class="line">            .doOnNext(data -&gt; &#123;</span><br><span class="line">                <span class="comment">// 得到数据</span></span><br><span class="line">                System.out.println(<span class="string">"data:"</span> + data);</span><br><span class="line">            &#125;)</span><br><span class="line"></span><br><span class="line">            .doOnSuccess(onSuccess -&gt; &#123;</span><br><span class="line">                <span class="comment">// 整体完成</span></span><br><span class="line">                System.out.println(<span class="string">"onSuccess"</span>);</span><br><span class="line">            &#125;);</span><br><span class="line">        System.out.println(<span class="string">"---2"</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// SpringMvc  值 在这个环节准备好</span></span><br><span class="line">        <span class="comment">// 得到一个包装 数据序列 -&gt; 包含特征  -&gt; 容器 拿到这个序列 -&gt; 执行序列里的方法</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// Ajax   a()  -&gt; b(c()) -&gt;</span></span><br><span class="line">        <span class="comment">// 1,  写回调接口 ， 让b调</span></span><br><span class="line">        <span class="comment">// 2,  直接传方法过去</span></span><br><span class="line">        <span class="comment">// 看起来 像是异步，实质上，阻塞的过程 在容器内部</span></span><br><span class="line">        <span class="keyword">return</span> mono;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">输出（同一个线程运行）：</span><br><span class="line">线程 getreactor-http-nio-<span class="number">3</span></span><br><span class="line">---<span class="number">1</span></span><br><span class="line">---<span class="number">2</span></span><br><span class="line">xxx</span><br><span class="line">线程 createreactor-http-nio-<span class="number">3</span></span><br><span class="line">线程 getPersonreactor-http-nio-<span class="number">3</span></span><br><span class="line">data:com.mashibing.admin.pojo.Person@<span class="number">577e0635</span></span><br><span class="line">onSuccess</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping</span>(<span class="string">"xxoo"</span>)</span><br><span class="line"><span class="comment">// ServerHttpRequest webFlux 中特有</span></span><br><span class="line"><span class="comment">// 拓展思维，SpringCloud Gateway</span></span><br><span class="line"><span class="comment">//没有HttpServlet，request里也没有sesion</span></span><br><span class="line"><span class="function">Mono&lt;Object&gt; <span class="title">get2</span><span class="params">(ServerHttpRequest request,String name,WebSession session)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(StringUtils.isEmpty(session.getAttribute(<span class="string">"code"</span>))) &#123;</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">"需要这样设置session值"</span>);</span><br><span class="line">        session.getAttributes().put(<span class="string">"code"</span>, <span class="number">250</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//需要这样设置属性</span></span><br><span class="line">    request.getQueryParams().add(<span class="string">"key"</span>,<span class="string">"value"</span>);</span><br><span class="line"></span><br><span class="line">    System.out.println(<span class="string">"code = "</span> + session.getAttribute(<span class="string">"code"</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> Mono.just(<span class="string">"么么哒"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//基于webFlux和netty的响应式编程SSE</span></span><br><span class="line"><span class="meta">@GetMapping</span>(value = <span class="string">"/sse"</span>, produces = MediaType.TEXT_EVENT_STREAM_VALUE)</span><br><span class="line"><span class="function"><span class="keyword">public</span> Flux&lt;String&gt; <span class="title">sse</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 1. 封装对象</span></span><br><span class="line">    Flux&lt;String&gt; flux = Flux.fromStream(IntStream.range(<span class="number">1</span>, <span class="number">10</span>).mapToObj(i -&gt; &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="keyword">new</span> Random().nextInt(<span class="number">3000</span>));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"xxoo"</span> + i;</span><br><span class="line">    &#125;))</span><br><span class="line"></span><br><span class="line">        .doOnSubscribe(sub -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"sub 了"</span>);</span><br><span class="line">        &#125;)	</span><br><span class="line">        .doOnComplete(() -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"doOnComplete"</span>);</span><br><span class="line">        &#125;)</span><br><span class="line">        .doOnNext(data -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"有data了~"</span> + data);</span><br><span class="line">        &#125;)</span><br><span class="line">        ;</span><br><span class="line">    <span class="comment">// 2. 对象 连带里面的方法 给了容器</span></span><br><span class="line">    <span class="keyword">return</span> flux;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="WebFlux"><a href="#WebFlux" class="headerlink" title="WebFlux"></a>WebFlux</h3>
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年11月30日 21:50</p>
+        <p>原始链接： <a class="post-url" href="/2020/10/21/reactor-webflux/" title="&#39;响应式web&#39;">https://midkuro.gitee.io/2020/10/21/reactor-webflux/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/10/21/reactor-webflux/&title=《'响应式web'》 — Kuro's Blog&pic=images/spring.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/10/21/reactor-webflux/&title=《'响应式web'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/10/21/reactor-webflux/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'响应式web'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/10/21/reactor-webflux/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/10/21/reactor-webflux/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/10/21/reactor-webflux/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Java/" class="color5">Java</a>
+      
+    <a href="/tags/Spring/" class="color2">Spring</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#响应式web"><span class="post-toc-text">响应式web</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#长轮训"><span class="post-toc-text">长轮训</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#背压-Backpressure"><span class="post-toc-text">背压 Backpressure</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#SSE"><span class="post-toc-text">SSE</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#RXJava2"><span class="post-toc-text">RXJava2</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Reactor"><span class="post-toc-text">Reactor</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Flux"><span class="post-toc-text">Flux</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Mono"><span class="post-toc-text">Mono</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#WebFlux"><span class="post-toc-text">WebFlux</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/10/22/spring-initialization/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Spring的IOC容器创建过程&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/10/21/spring-extends/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Spring的扩展原理&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="reactor-webflux" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Algorithm/">Algorithm</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/MYSQL/">MYSQL</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

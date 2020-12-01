@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Linux 虚拟服务器 LVS&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="Linux 虚拟服务器网络协议原理 12345cd &#x2F;proc&#x2F;$$&#x2F;fdexec 8&lt;&gt; &#x2F;dev&#x2F;tcp&#x2F;www.baidu.com&#x2F;80echo -e &#39;GET &#x2F; HTTP&#x2F;1.0\n&#39; &gt;&amp; 8cat &lt;&amp; 8exec 8&lt;&amp;-     123[root@localhost &#x2F;]# ping www.baidu.comPING www">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Linux 虚拟服务器 LVS&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/11/23/lvs-keepalived/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Linux 虚拟服务器网络协议原理 12345cd &#x2F;proc&#x2F;$$&#x2F;fdexec 8&lt;&gt; &#x2F;dev&#x2F;tcp&#x2F;www.baidu.com&#x2F;80echo -e &#39;GET &#x2F; HTTP&#x2F;1.0\n&#39; &gt;&amp; 8cat &lt;&amp; 8exec 8&lt;&amp;-     123[root@localhost &#x2F;]# ping www.baidu.comPING www">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-01.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-02.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-03.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-04.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-12.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-05.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-08.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-06.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-07.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-09.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-10.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-11.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-13.png">
+<meta property="article:published_time" content="2020-11-23T03:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-24T13:42:32.220Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="LVS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/lvs-keepalived/lvs-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-lvs-keepalived" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Linux 虚拟服务器 LVS&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/LVS/">LVS</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-11-23
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Linux-虚拟服务器"><a href="#Linux-虚拟服务器" class="headerlink" title="Linux 虚拟服务器"></a>Linux 虚拟服务器</h1><h2 id="网络协议原理"><a href="#网络协议原理" class="headerlink" title="网络协议原理"></a>网络协议原理</h2><p><img src="/images/lvs-keepalived/lvs-01.png" alt="lvs"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd /proc/$$/fd</span><br><span class="line">exec 8&lt;&gt; /dev/tcp/www.baidu.com/80</span><br><span class="line">echo -e 'GET / HTTP/1.0\n' &gt;&amp; 8</span><br><span class="line">cat &lt;&amp; 8</span><br><span class="line">exec 8&lt;&amp;-</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/lvs-keepalived/lvs-02.png" alt="lvs"></p>
+<p><img src="/images/lvs-keepalived/lvs-03.png" alt="lvs"></p>
+<p><img src="/images/lvs-keepalived/lvs-04.png" alt="lvs"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost /]# ping www.baidu.com</span><br><span class="line">PING www.a.shifen.com (14.215.177.39) 56(84) bytes of data.</span><br><span class="line">64 bytes from 14.215.177.39 (14.215.177.39): icmp_seq=1 ttl=54 time=6.07 ms</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>通过PING百度的网络，能够看到百度的IP地址：<code>14.215.177.39</code>，那么我们的路由器是如何找到这个请求该往哪里发呢？</p>
+<p>通过将百度的地址与路由表中的子网掩码（Genmask）进行按位与运算，计算出来的结果如果和目标地址（Destination）匹配，就会找到下一跳的路由地址（Gateway）。</p>
+<p>最后匹配上的条目是 14.215.177.39 &amp; 0.0.0.0 = 0.0.0.0 -&gt; 192.168.8.2</p>
+<p>通过计算得知，数据包想出局域网，最终它将会经过Gateway = 192.168.8.2</p>
+</blockquote>
+<h2 id="LVS"><a href="#LVS" class="headerlink" title="LVS"></a>LVS</h2><p><img src="/images/lvs-keepalived/lvs-12.png" alt="lvs"></p>
+<blockquote>
+<p>如Nginx，他是一个7层的反向代理服务器，它需要在中间层建立三次握手，效率会有损耗，而LVS是一个四层代理服务器，它将请求穿透到后台服务器。</p>
+</blockquote>
+<p><img src="/images/lvs-keepalived/lvs-05.png" alt="lvs"></p>
+<p><img src="/images/lvs-keepalived/lvs-08.png" alt="lvs"></p>
+<h3 id="D-NAT"><a href="#D-NAT" class="headerlink" title="D-NAT"></a>D-NAT</h3><p><img src="/images/lvs-keepalived/lvs-06.png" alt="lvs"></p>
+<h3 id="DR"><a href="#DR" class="headerlink" title="DR"></a>DR</h3><p><img src="/images/lvs-keepalived/lvs-07.png" alt="lvs"></p>
+<h3 id="TUN"><a href="#TUN" class="headerlink" title="TUN"></a>TUN</h3><p><img src="/images/lvs-keepalived/lvs-09.png" alt="lvs"></p>
+<h3 id="隐藏IP"><a href="#隐藏IP" class="headerlink" title="隐藏IP"></a>隐藏IP</h3><p><img src="/images/lvs-keepalived/lvs-10.png" alt="lvs"></p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">隐藏VIP方法：对外隐藏，对内可见 ：</span><br><span class="line"></span><br><span class="line">kernel parameter:</span><br><span class="line">目标mac地址为全F，交换机触发广播</span><br><span class="line">  /proc/sys/net/ipv4/conf/<span class="emphasis">*IF*</span>/</span><br><span class="line">arp_ignore: 定义接收到ARP请求时的响应级别；</span><br><span class="line">  0：只要本地配置的有相应地址，就给予响应；</span><br><span class="line">  <span class="strong">**1：仅在请求的目标(MAC)地址配置请求**</span></span><br><span class="line"><span class="code">        到达的接口上的时候，才给予响应；</span></span><br><span class="line"></span><br><span class="line">arp_announce：定义将自己地址向外通告时的通告级别；</span><br><span class="line">  0：将本地任何接口上的任何地址向外通告；</span><br><span class="line">  1：试图仅向目标网络通告与其网络匹配的地址；</span><br><span class="line">  <span class="strong">**2：仅向与本地接口上地址匹配的网络进行通告；**</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">四种静态：</span> <span class="string"></span></span><br><span class="line"><span class="attr">rr</span>:<span class="string">轮循</span></span><br><span class="line"><span class="attr">wrr</span>:<span class="string"></span></span><br><span class="line"><span class="attr">dh</span>: <span class="string"></span></span><br><span class="line"><span class="attr">sh</span>:<span class="string"></span></span><br><span class="line"></span><br><span class="line"><span class="attr">动态调度方法：</span></span><br><span class="line"><span class="attr">lc</span>: <span class="string">最少连接</span></span><br><span class="line"><span class="attr">wlc</span>: <span class="string">加权最少连接</span></span><br><span class="line"><span class="attr">sed</span>: <span class="string">最短期望延迟</span></span><br><span class="line"><span class="attr">nq</span>: <span class="string">never queue</span></span><br><span class="line"><span class="attr">LBLC</span>: <span class="string">基于本地的最少连接</span></span><br><span class="line"><span class="attr">DH</span>: <span class="string"></span></span><br><span class="line"><span class="attr">LBLCR</span>: <span class="string">基于本地的带复制功能的最少连接</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>LVS怎么知道每一台Server有多少连接呢？</p>
+<p>偷窥策略，每一个Client通过LVS发起TCP的三次握手，LVS最少能收到两次Client发送的ACK确认，这时候认为连接数+1，当TCP四次分手时收到FIN和ACK之后，认为连接数-1。</p>
+</blockquote>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">ipvs内核模块</span></span><br><span class="line"><span class="attr">yum</span> <span class="string">install ipvsadm -y</span></span><br><span class="line"></span><br><span class="line"><span class="attr">管理集群服务</span></span><br><span class="line"><span class="meta">添加：-A</span> <span class="string">-t|u|f service-address [-s scheduler]</span></span><br><span class="line"><span class="meta">-t</span>: <span class="string">TCP协议的集群 </span></span><br><span class="line"><span class="meta">-u</span>: <span class="string">UDP协议的集群</span></span><br><span class="line"><span class="meta">service-address</span>:     <span class="string">IP:PORT</span></span><br><span class="line"><span class="meta">-f</span>: <span class="string">FWM: 防火墙标记 </span></span><br><span class="line"><span class="meta">service-address</span>: <span class="string">Mark Number</span></span><br><span class="line"><span class="attr">修改：-E</span></span><br><span class="line"><span class="meta">删除：-D</span> <span class="string">-t|u|f service-address</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ipvsadm</span> <span class="string">-A -t 192.168.9.100:80 -s rr</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">管理集群服务中的RS</span></span><br><span class="line"><span class="meta">添加：-a</span> <span class="string">-t|u|f service-address -r server-address [-g|i|m] [-w weight]</span></span><br><span class="line">  <span class="meta">-t|u|f</span> <span class="string">service-address：事先定义好的某集群服务</span></span><br><span class="line">  <span class="meta">-r</span> <span class="string">server-address: 某RS的地址，在NAT模型中，可使用IP：PORT实现端口映射；</span></span><br><span class="line">  <span class="meta">[-g|i|m]</span>: <span class="string">LVS类型 </span></span><br><span class="line">  <span class="meta">-g</span>: <span class="string">DR</span></span><br><span class="line">  <span class="meta">-i</span>: <span class="string">TUN</span></span><br><span class="line">  <span class="meta">-m</span>: <span class="string">NAT</span></span><br><span class="line">  <span class="meta">[-w</span> <span class="string">weight]: 定义服务器权重</span></span><br><span class="line"><span class="attr">修改：-e</span></span><br><span class="line"><span class="meta">删除：-d</span> <span class="string">-t|u|f service-address -r server-address</span></span><br><span class="line"><span class="comment"># ipvsadm -a -t 172.16.100.1:80 -r 192.168.10.8 –g</span></span><br><span class="line"><span class="comment"># ipvsadm -a -t 172.16.100.1:80 -r 192.168.10.9 -g</span></span><br><span class="line"><span class="attr">查看</span></span><br><span class="line">  <span class="attr">-L|l</span></span><br><span class="line">  <span class="meta">-n</span>: <span class="string">数字格式显示主机地址和端口</span></span><br><span class="line">  <span class="attr">--stats：统计数据</span></span><br><span class="line">  <span class="meta">--rate</span>: <span class="string">速率</span></span><br><span class="line">  <span class="meta">--timeout</span>: <span class="string">显示tcp、tcpfin和udp的会话超时时长</span></span><br><span class="line">  <span class="meta">-</span>:<span class="string">c 显示当前的ipvs连接状况</span></span><br><span class="line"><span class="attr">删除所有集群服务</span></span><br><span class="line">  <span class="attr">-C：清空ipvs规则</span></span><br><span class="line"><span class="attr">保存规则</span></span><br><span class="line">  <span class="meta">-S</span> <span class="string"></span></span><br><span class="line"><span class="comment"># ipvsadm -S &gt; /path/to/somefile</span></span><br><span class="line"><span class="attr">载入此前的规则：</span></span><br><span class="line">  <span class="attr">-R</span></span><br><span class="line"><span class="comment"># ipvsadm -R &lt; /path/form/somefile</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/lvs-keepalived/lvs-11.png" alt="lvs"></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">LVS：</span></span><br><span class="line"></span><br><span class="line"><span class="attr">node01</span>:<span class="string"></span></span><br><span class="line"><span class="comment">    #创建对外提供的VIP地址 网卡eth0:8</span></span><br><span class="line">  <span class="attr">ifconfig</span>  <span class="string">eth0:8 192.168.150.100/24</span></span><br><span class="line"><span class="meta">node02~node03</span>:<span class="string"></span></span><br><span class="line">  <span class="attr">1)修改内核：</span></span><br><span class="line">    <span class="attr">echo</span> <span class="string">1  &gt;  /proc/sys/net/ipv4/conf/eth0/arp_ignore </span></span><br><span class="line">    <span class="attr">echo</span> <span class="string">1  &gt;  /proc/sys/net/ipv4/conf/all/arp_ignore </span></span><br><span class="line">    <span class="attr">echo</span> <span class="string">2 &gt; /proc/sys/net/ipv4/conf/eth0/arp_announce </span></span><br><span class="line">    <span class="attr">echo</span> <span class="string">2 &gt; /proc/sys/net/ipv4/conf/all/arp_announce </span></span><br><span class="line">  <span class="attr">2）设置隐藏的vip：</span></span><br><span class="line">    <span class="attr">ifconfig</span>  <span class="string">lo:3  192.168.150.100  netmask 255.255.255.255</span></span><br><span class="line">    </span><br><span class="line"><span class="attr">RealServer中的服务：</span></span><br><span class="line"><span class="meta">node02~node03</span>:<span class="string"></span></span><br><span class="line"><span class="comment">    #部署一个简单版本的webServer</span></span><br><span class="line">  <span class="attr">yum</span> <span class="string">install httpd -y</span></span><br><span class="line">  <span class="attr">service</span> <span class="string">httpd start</span></span><br><span class="line">  <span class="attr">vi</span>   <span class="string">/var/www/html/index.html</span></span><br><span class="line">    <span class="attr">from</span> <span class="string">192.168.150.1x</span></span><br><span class="line"></span><br><span class="line"><span class="attr">LVS服务配置</span></span><br><span class="line"><span class="attr">node01</span>:<span class="string"></span></span><br><span class="line">  <span class="attr">yum</span> <span class="string">install ipvsadm </span></span><br><span class="line"><span class="comment">	# —A 设置他的负载均衡模式</span></span><br><span class="line">  <span class="attr">ipvsadm</span> <span class="string">-A  -t  192.168.150.100:80  -s rr</span></span><br><span class="line"><span class="comment">	# -a 设置VIP的下一跳路由规则和权重</span></span><br><span class="line">  <span class="attr">ipvsadm</span> <span class="string">-a  -t 192.168.150.100:80  -r  192.168.150.12 -g -w 1</span></span><br><span class="line">  <span class="attr">ipvsadm</span> <span class="string">-a  -t 192.168.150.100:80  -r  192.168.150.13 -g -w 1</span></span><br><span class="line">  <span class="attr">ipvsadm</span> <span class="string">-ln</span></span><br><span class="line"></span><br><span class="line"><span class="attr">验证：</span></span><br><span class="line">  <span class="meta">浏览器访问</span>  <span class="string">192.168.150.100   看到负载  疯狂F5</span></span><br><span class="line">  <span class="attr">node01：</span></span><br><span class="line">    <span class="attr">netstat</span> <span class="string">-natp   结论看不到socket连接</span></span><br><span class="line">  <span class="meta">node02~node03</span>:<span class="string"></span></span><br><span class="line">    <span class="attr">netstat</span> <span class="string">-natp   结论看到很多的socket连接</span></span><br><span class="line">  <span class="attr">node01</span>:<span class="string"></span></span><br><span class="line">    <span class="attr">ipvsadm</span> <span class="string">-lnc    查看偷窥记录本</span></span><br><span class="line">    <span class="attr">TCP</span> <span class="string">00:57  FIN_WAIT    192.168.150.1:51587 192.168.150.100:80 192.168.150.12:80</span></span><br><span class="line">    <span class="meta">FIN_WAIT：</span> <span class="string">连接过，偷窥了所有的包</span></span><br><span class="line">    <span class="meta">SYN_RECV：</span> <span class="string">基本上lvs都记录了，证明lvs没事，一定是后边网络层出问题</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Keepalived"><a href="#Keepalived" class="headerlink" title="Keepalived"></a>Keepalived</h2><p><img src="/images/lvs-keepalived/lvs-13.png" alt="lvs"></p>
+<p>通过配置主备<code>Keepalived</code>，当主机Master挂了后，<code>Keepalived</code>会通过IP漂移技术，将<code>192.168.150.100</code>漂移到<code>node04</code>结点备机BackUp机器上，确保了LVS的单点故障问题。</p>
+<p>并且在LVS中配置了健康检查，校验<code>Real Server</code>的健康状态，确保故障时LVS能够及时得把他从负载均衡列表中移除。</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">keepalived实验：</span></span><br><span class="line"><span class="meta">主机：</span> <span class="string">node01~node04</span></span><br><span class="line"></span><br><span class="line"><span class="attr">node01</span>:<span class="string"></span></span><br><span class="line">  <span class="attr">ipvsadm</span> <span class="string">-C</span></span><br><span class="line">  <span class="attr">ifconfig</span> <span class="string">eth0:8 down</span></span><br><span class="line"></span><br><span class="line"><span class="attr">----------------------------</span></span><br><span class="line"><span class="meta">node01,node04</span>:<span class="string"></span></span><br><span class="line">  <span class="attr">yum</span> <span class="string">install keepalived ipvsadm -y</span></span><br><span class="line">  <span class="attr">配置：</span></span><br><span class="line">    <span class="attr">cd</span>  <span class="string">/etc/keepalived/</span></span><br><span class="line">    <span class="attr">cp</span> <span class="string">keepalived.conf keepalived.conf.bak</span></span><br><span class="line">    <span class="attr">vi</span> <span class="string">keepalived.conf</span></span><br><span class="line">      <span class="attr">node01</span>:<span class="string"></span></span><br><span class="line">      <span class="attr">vrrp：虚拟路由冗余协议！</span></span><br><span class="line">        <span class="attr">vrrp_instance</span> <span class="string">VI_1 &#123;</span></span><br><span class="line">          <span class="attr">state</span> <span class="string">MASTER         //  node04  BACKUP</span></span><br><span class="line">          <span class="attr">interface</span> <span class="string">eth0</span></span><br><span class="line">          <span class="attr">virtual_router_id</span> <span class="string">51</span></span><br><span class="line">          <span class="attr">priority</span> <span class="string">100		 //	 node04	 50</span></span><br><span class="line">          <span class="attr">advert_int</span> <span class="string">1</span></span><br><span class="line">          <span class="attr">authentication</span> <span class="string">&#123;</span></span><br><span class="line">            <span class="attr">auth_type</span> <span class="string">PASS</span></span><br><span class="line">            <span class="attr">auth_pass</span> <span class="string">1111</span></span><br><span class="line">          <span class="attr">&#125;</span></span><br><span class="line">          <span class="attr">virtual_ipaddress</span> <span class="string">&#123;</span></span><br><span class="line">            <span class="meta">192.168.150.100/24</span> <span class="string">dev eth0 label  eth0:8</span></span><br><span class="line"><span class="comment">						#等同于LVS的：ifconfig  eth0:8 192.168.150.100/24</span></span><br><span class="line">          <span class="attr">&#125;</span></span><br><span class="line">        <span class="attr">&#125;</span></span><br><span class="line">        </span><br><span class="line"><span class="comment">		    #vip配置</span></span><br><span class="line">      <span class="attr">virtual_server</span> <span class="string">192.168.150.100 80 &#123;</span></span><br><span class="line">        <span class="attr">delay_loop</span> <span class="string">6</span></span><br><span class="line"><span class="comment">				#轮训</span></span><br><span class="line">        <span class="attr">lb_algo</span> <span class="string">rr</span></span><br><span class="line"><span class="comment">				#模式</span></span><br><span class="line">        <span class="attr">lb_kind</span> <span class="string">DR</span></span><br><span class="line">        <span class="attr">nat_mask</span> <span class="string">255.255.255.0</span></span><br><span class="line"><span class="comment">				#在多少秒内发送同一台RealServer</span></span><br><span class="line">        <span class="attr">persistence_timeout</span> <span class="string">0</span></span><br><span class="line">        <span class="attr">protocol</span> <span class="string">TCP</span></span><br><span class="line"></span><br><span class="line">        <span class="attr">real_server</span> <span class="string">192.168.150.12 80 &#123;</span></span><br><span class="line">          <span class="attr">weight</span> <span class="string">1</span></span><br><span class="line">          <span class="attr">HTTP_GET</span> <span class="string">&#123;</span></span><br><span class="line">            <span class="attr">url</span> <span class="string">&#123;</span></span><br><span class="line"><span class="comment">						  #健康检查URL</span></span><br><span class="line">              <span class="attr">path</span> <span class="string">/</span></span><br><span class="line">              <span class="attr">status_code</span> <span class="string">200</span></span><br><span class="line">            <span class="attr">&#125;</span></span><br><span class="line">            <span class="attr">connect_timeout</span> <span class="string">3</span></span><br><span class="line">            <span class="attr">nb_get_retry</span> <span class="string">3</span></span><br><span class="line">            <span class="attr">delay_before_retry</span> <span class="string">3</span></span><br><span class="line">          <span class="meta">&#125;</span>   <span class="string"></span></span><br><span class="line">        <span class="meta">&#125;</span>       <span class="string"></span></span><br><span class="line">        <span class="attr">real_server</span> <span class="string">192.168.150.13 80 &#123;</span></span><br><span class="line">          <span class="attr">weight</span> <span class="string">1</span></span><br><span class="line">          <span class="attr">HTTP_GET</span> <span class="string">&#123;</span></span><br><span class="line">            <span class="attr">url</span> <span class="string">&#123;</span></span><br><span class="line">              <span class="attr">path</span> <span class="string">/</span></span><br><span class="line">              <span class="attr">status_code</span> <span class="string">200</span></span><br><span class="line">            <span class="attr">&#125;</span></span><br><span class="line">            <span class="attr">connect_timeout</span> <span class="string">3</span></span><br><span class="line">            <span class="attr">nb_get_retry</span> <span class="string">3</span></span><br><span class="line">            <span class="attr">delay_before_retry</span> <span class="string">3</span></span><br><span class="line">          <span class="attr">&#125;</span></span><br><span class="line">        <span class="attr">&#125;</span></span><br><span class="line">      <span class="attr">scp</span>  <span class="string">./keepalived.conf  root@node04:`pwd`</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#node1、node4 启动keepAlived</span></span><br><span class="line"><span class="attr">service</span> <span class="string">keepalived start</span></span><br><span class="line"></span><br><span class="line"><span class="attr">验证：</span></span><br><span class="line"><span class="comment">  #查看LVS的负载均衡配置</span></span><br><span class="line">  <span class="attr">ipvsadm</span> <span class="string">-ln</span></span><br><span class="line">  </span><br><span class="line"><span class="comment">  #查看主机和备机的偷窥记事本请求情况</span></span><br><span class="line">  <span class="attr">ipvsadm</span> <span class="string">-lnc </span></span><br><span class="line">  </span><br><span class="line"><span class="comment">  #node01 主动挂掉网卡,再查看node4的网卡配置，IP是否漂移，偷窥记事本是否有请求</span></span><br><span class="line">  <span class="attr">ifconfig</span> <span class="string">eth0 down</span></span><br><span class="line"><span class="comment">  #node01 启动网卡，查看IP和请求是否漂移回主机</span></span><br><span class="line">  <span class="attr">ifconfig</span> <span class="string">eth0 up</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如果Nnode01的KeepAlived挂了，就会导致导致Node04的KeepAlived无法接收到Node01的健康通知，就会抢过它的IP，这时候就会导致有两台机器有两个对外暴露的相同IP，会导致客户端发送的数据造成混乱。</p>
+<p>通过ZooKeeper集群进行保证KeepAlived的存活。</p>
+</blockquote>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年11月24日 21:42</p>
+        <p>原始链接： <a class="post-url" href="/2020/11/23/lvs-keepalived/" title="&#39;Linux 虚拟服务器 LVS&#39;">https://midkuro.gitee.io/2020/11/23/lvs-keepalived/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/11/23/lvs-keepalived/&title=《'Linux 虚拟服务器 LVS'》 — Kuro's Blog&pic=images/linux.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/11/23/lvs-keepalived/&title=《'Linux 虚拟服务器 LVS'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/11/23/lvs-keepalived/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Linux 虚拟服务器 LVS'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/11/23/lvs-keepalived/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/11/23/lvs-keepalived/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/11/23/lvs-keepalived/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/LVS/" class="color4">LVS</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Linux-虚拟服务器"><span class="post-toc-text">Linux 虚拟服务器</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#网络协议原理"><span class="post-toc-text">网络协议原理</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#LVS"><span class="post-toc-text">LVS</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#D-NAT"><span class="post-toc-text">D-NAT</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#DR"><span class="post-toc-text">DR</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#TUN"><span class="post-toc-text">TUN</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#隐藏IP"><span class="post-toc-text">隐藏IP</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用"><span class="post-toc-text">使用</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Keepalived"><span class="post-toc-text">Keepalived</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/11/24/https-protocol/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39; HTTPS 原理&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/11/10/ssm-frame/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;SSM 框架整合&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="lvs-keepalived" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Algorithm/">Algorithm</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/MYSQL/">MYSQL</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39; HTTPS 原理&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  <meta name="description" content="HTTPS 原理背景 无加密在无加密的情况下，默认是HTTP协议，浏览器向代理服务器发送了请求后，代理服务器能够拦截浏览器的请求，从而达到伪造请求发送给Server、伪造结果发送给浏览器的目的。 加密算法如果采用加密算法对浏览器发送的明文进行加密，将加密请求发送给Server，在这种情况下，是需要浏览器、Server服务器都拥有加密、解密算法逻辑，那么代理服务器可以通过解析浏览器网站，从中获得算法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39; HTTPS 原理&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/11/24/https-protocol/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="HTTPS 原理背景 无加密在无加密的情况下，默认是HTTP协议，浏览器向代理服务器发送了请求后，代理服务器能够拦截浏览器的请求，从而达到伪造请求发送给Server、伪造结果发送给浏览器的目的。 加密算法如果采用加密算法对浏览器发送的明文进行加密，将加密请求发送给Server，在这种情况下，是需要浏览器、Server服务器都拥有加密、解密算法逻辑，那么代理服务器可以通过解析浏览器网站，从中获得算法">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/https-protocol/https-01.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/https-protocol/https-02.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/https-protocol/https-03.png">
+<meta property="article:published_time" content="2020-11-24T03:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-29T13:20:48.874Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="HTTPS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/https-protocol/https-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+  
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-https-protocol" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39; HTTPS 原理&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/HTTPS/">HTTPS</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-11-24
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="HTTPS-原理"><a href="#HTTPS-原理" class="headerlink" title="HTTPS 原理"></a>HTTPS 原理</h1><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p><img src="/images/https-protocol/https-01.png" alt="https"></p>
+<h3 id="无加密"><a href="#无加密" class="headerlink" title="无加密"></a>无加密</h3><p>在无加密的情况下，默认是HTTP协议，浏览器向代理服务器发送了请求后，<strong>代理服务器能够拦截浏览器的请求，从而达到伪造请求发送给Server、伪造结果发送给浏览器的目的</strong>。</p>
+<h3 id="加密算法"><a href="#加密算法" class="headerlink" title="加密算法"></a>加密算法</h3><p>如果采用加密算法对浏览器发送的明文进行加密，将加密请求发送给Server，在这种情况下，是需要浏览器、Server服务器都拥有加密、解密算法逻辑，那么<strong>代理服务器可以通过解析浏览器网站，从中获得算法的加密、解逻辑，等同于说密文传输对代理服务器来说，依旧是透明的。</strong></p>
+<h3 id="非对称加密算法"><a href="#非对称加密算法" class="headerlink" title="非对称加密算法"></a>非对称加密算法</h3><blockquote>
+<p>公钥加密私钥能解、私钥加密私钥能解、私钥加密公钥能解！<strong>公钥加密公钥不能解！！！</strong></p>
+</blockquote>
+<p>浏览器向Server服务器发起请求公钥的请求，Server返回一个公钥，但是这个公钥被代理服务器拦截了，它伪造一个假的公钥返回给浏览器，浏览器对通过假公钥对请求数据进行加密，代理服务器拦截后，使用假私钥解密数据，然后伪造请求到Server服务器中，依旧是不安全的。</p>
+<p>非对称算法最主要的问题是浏览器无法识别公钥的真假。</p>
+<h3 id="对称加密算法"><a href="#对称加密算法" class="headerlink" title="对称加密算法"></a>对称加密算法</h3><p>浏览器通过对数据进行对称加密，这个密钥如果是由浏览器随机生成的，再经过一种某种渠道传递给Server服务器，代理服务器如果无法获得这个密钥，那么加密的请求和结果代理服务器将无法进行识别。</p>
+<blockquote>
+<p><strong>那么最关键的问题在于如何将随机生成的密钥安全的传送给Server服务器呢？</strong></p>
+</blockquote>
+<p><strong>加密，将随机生成的密钥采用非对称算法加密传送给Server，假设浏览器拥有一个正确的Server返回的公钥，简称Server.公钥，通过非对称加密算法（Server公钥+密钥） 生成密文发送，就算代理服务器拦截到了Server公钥，它也无法解密这串密文，因为公钥无法解密公钥加密的数据。</strong></p>
+<blockquote>
+<p><strong>那么第二个关键问题在于如何让浏览器拥有一个正确的Server返回的公钥呢？换句话问，Server如何正确得将公钥发送给浏览器而不被串改？</strong></p>
+</blockquote>
+<p>先声明一个概念，只要让浏览器得到一个正确的Server.公钥，而不是一个伪造的假公钥，即使代理服务器拦截到Server.公钥也无任何意义，因为无法解密公钥加密的数据。</p>
+<h2 id="证书"><a href="#证书" class="headerlink" title="证书"></a>证书</h2><p><img src="/images/https-protocol/https-02.png" alt="https"></p>
+<p>引入一个第三方CA机构，通过非对称算法，利用Server.私钥生成Server.公钥，再将Server.公钥交付给CA机构进行加密，CA机构通过CA.私钥对Server.公钥加密，最后生成证书，下发到浏览器中。</p>
+<p>合法的CA机构会和操作系统打交道，将CA公钥内置在操作系统中，浏览器获得证书后通过CA.公钥进行解密证书获得Server.公钥，这个步骤代理服务器没有CA.私钥，它没办法伪造一个不合格的证书。</p>
+<p>也就是说，通过CA机构下发的合格证书，就能保证浏览器获得一个正确的Server.公钥。</p>
+<h2 id="HTTPS"><a href="#HTTPS" class="headerlink" title="HTTPS"></a>HTTPS</h2><p><img src="/images/https-protocol/https-03.png" alt="https"></p>
+<h2 id="证书生成以及自签名证书"><a href="#证书生成以及自签名证书" class="headerlink" title="证书生成以及自签名证书"></a>证书生成以及自签名证书</h2><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">相关概念：</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#SSL/TLS：</span></span><br><span class="line"><span class="meta">TLS(Transport</span> <span class="string">Layer Security) 是 SSL(Secure Socket Layer) 的后续版本</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#查看系统已存证书</span></span><br><span class="line"><span class="attr">certmgr.msc</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#CSR</span></span><br><span class="line"><span class="attr">证书签名请求文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#CRT</span></span><br><span class="line"><span class="attr">证书</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#key</span></span><br><span class="line"><span class="attr">私钥</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="OPenSSL-自签名"><a href="#OPenSSL-自签名" class="headerlink" title="OPenSSL 自签名"></a>OPenSSL 自签名</h3><h4 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h4><p><a href="http://slproweb.com/products/Win32OpenSSL.html" target="_blank" rel="noopener">http://slproweb.com/products/Win32OpenSSL.html</a></p>
+<h4 id="证书中的信息"><a href="#证书中的信息" class="headerlink" title="证书中的信息"></a>证书中的信息</h4><ul>
+<li>Country Name (2 letter code) [XX]:CN           #请求签署人的信息</li>
+<li>State or Province Name (full name) []: #请求签署人的省份名字</li>
+<li>Locality Name (eg, city) [Default City]:# 请求签署人的城市名字</li>
+<li>Organization Name (eg, company) [Default Company Ltd]:#请求签署人的公司名字</li>
+<li>Organizational Unit Name (eg, section) []:#请求签署人的部门名字</li>
+<li>Common Name (eg, your name or your server’s hostname) []:#这里一般填写请求人的的服务器域名， </li>
+</ul>
+<h3 id="服务器端证书"><a href="#服务器端证书" class="headerlink" title="服务器端证书"></a>服务器端证书</h3><h4 id="1-生成私钥"><a href="#1-生成私钥" class="headerlink" title="1.生成私钥"></a>1.生成私钥</h4><p>找到OpenSSL安装目录下的/bin目录中的OpenSSL.exe</p>
+<p>执行命令</p>
+<p><code>openssl genrsa -des3 -out c:/dev/server.key</code></p>
+<p>生成私钥，需要提供一个至少4位，最多1023位的密码</p>
+<h4 id="2-由私钥创建待签名证书"><a href="#2-由私钥创建待签名证书" class="headerlink" title="2.由私钥创建待签名证书"></a>2.由私钥创建待签名证书</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl.exe req -new -key c:&#x2F;dev&#x2F;server.key -out c:&#x2F;dev&#x2F;pub.csr</span><br></pre></td></tr></table></figure>
+
+<p>需要依次输入国家，地区，城市，组织，组织单位，Common Name和Email。其中Common Name，可以写自己的名字或者域名，如果要支持https，Common Name应该与域名保持一致，否则会引起浏览器警告。</p>
+<h4 id="3-查看证书中的内容"><a href="#3-查看证书中的内容" class="headerlink" title="3.查看证书中的内容"></a>3.查看证书中的内容</h4><p><code>openssl.exe req -text -in c:/dev/pub.csr -noout</code></p>
+<h3 id="自建CA"><a href="#自建CA" class="headerlink" title="自建CA"></a>自建CA</h3><p>我们用的操作系统（windows, linux, unix ,android, ios等）都预置了很多信任的根证书，比如我的windows中就包含VeriSign的根证书，那么浏览器访问服务器比如支付宝<a href="http://www.alipay.com时，SSL协议握手时服务器就会把它的服务器证书发给用户浏览器，而这本服务器证书又是比如VeriSign颁发的，自然就验证通过了。" target="_blank" rel="noopener">www.alipay.com时，SSL协议握手时服务器就会把它的服务器证书发给用户浏览器，而这本服务器证书又是比如VeriSign颁发的，自然就验证通过了。</a></p>
+<h4 id="1-创建CA私钥"><a href="#1-创建CA私钥" class="headerlink" title="1.创建CA私钥"></a>1.创建CA私钥</h4><p><code>openssl.exe genrsa -out c:/dev/myca.key 2048</code></p>
+<h4 id="2-生成CA待签名证书"><a href="#2-生成CA待签名证书" class="headerlink" title="2.生成CA待签名证书"></a>2.生成CA待签名证书</h4><p><code>openssl.exe req -new -key c:/dev/myca.key -out c:/dev/myca.csr</code></p>
+<h4 id="3-生成CA根证书"><a href="#3-生成CA根证书" class="headerlink" title="3.生成CA根证书"></a>3.生成CA根证书</h4><p><code>openssl.exe x509 -req -in c:/dev/myca.csr -extensions v3_ca -signkey c:/dev/myca.key -out myca.crt</code></p>
+<h4 id="4-对服务器证书签名"><a href="#4-对服务器证书签名" class="headerlink" title="4.对服务器证书签名"></a>4.对服务器证书签名</h4><p><code>openssl x509 -days 365 -req -in c:/dev/pub.csr -extensions v3_req -CAkey c:/dev/myca.key -CA c:/dev/myca.crt -CAcreateserial -out c:/dev/server.crt</code></p>
+<h3 id="Nginx配置"><a href="#Nginx配置" class="headerlink" title="Nginx配置"></a>Nginx配置</h3><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="attribute">listen</span>       <span class="number">443</span> ssl;</span><br><span class="line">    <span class="attribute">server_name</span>  aa.abc.com;</span><br><span class="line"></span><br><span class="line">    <span class="attribute">ssl_certificate</span>      /data/cert/server.crt;</span><br><span class="line">    <span class="attribute">ssl_certificate_key</span>  /data/cert/server.key;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>随后在系统中安装证书，并且申请<a href="https://freessl.cn" target="_blank" rel="noopener">免费签名</a></p>
+<h2 id="SS安装"><a href="#SS安装" class="headerlink" title="SS安装"></a>SS安装</h2><p>服务器端</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget --no-check-certificate https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;teddysun&#x2F;shadowsocks_install&#x2F;master&#x2F;shadowsocksR.sh</span><br><span class="line">chmod +x shadowsocksR.sh</span><br><span class="line">.&#x2F;shadowsocksR.sh 2&gt;&amp;1 | tee shadowsocksR.log</span><br></pre></td></tr></table></figure>
+
+<p>卸载</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;shadowsocksR.sh uninstall</span><br></pre></td></tr></table></figure>
+
+<p>运行状态</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;etc&#x2F;init.d&#x2F;shadowsocks status</span><br></pre></td></tr></table></figure>
+
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年11月29日 21:20</p>
+        <p>原始链接： <a class="post-url" href="/2020/11/24/https-protocol/" title="&#39; HTTPS 原理&#39;">https://midkuro.gitee.io/2020/11/24/https-protocol/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.png" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/11/24/https-protocol/&title=《' HTTPS 原理'》 — Kuro's Blog&pic=images/linux.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/11/24/https-protocol/&title=《' HTTPS 原理'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/11/24/https-protocol/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《' HTTPS 原理'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/11/24/https-protocol/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/11/24/https-protocol/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/11/24/https-protocol/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/HTTPS/" class="color1">HTTPS</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#HTTPS-原理"><span class="post-toc-text">HTTPS 原理</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#背景"><span class="post-toc-text">背景</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#无加密"><span class="post-toc-text">无加密</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#加密算法"><span class="post-toc-text">加密算法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#非对称加密算法"><span class="post-toc-text">非对称加密算法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#对称加密算法"><span class="post-toc-text">对称加密算法</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#证书"><span class="post-toc-text">证书</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#HTTPS"><span class="post-toc-text">HTTPS</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#证书生成以及自签名证书"><span class="post-toc-text">证书生成以及自签名证书</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#OPenSSL-自签名"><span class="post-toc-text">OPenSSL 自签名</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#下载"><span class="post-toc-text">下载</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#证书中的信息"><span class="post-toc-text">证书中的信息</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#服务器端证书"><span class="post-toc-text">服务器端证书</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-生成私钥"><span class="post-toc-text">1.生成私钥</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-由私钥创建待签名证书"><span class="post-toc-text">2.由私钥创建待签名证书</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-查看证书中的内容"><span class="post-toc-text">3.查看证书中的内容</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自建CA"><span class="post-toc-text">自建CA</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-创建CA私钥"><span class="post-toc-text">1.创建CA私钥</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-生成CA待签名证书"><span class="post-toc-text">2.生成CA待签名证书</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-生成CA根证书"><span class="post-toc-text">3.生成CA根证书</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-对服务器证书签名"><span class="post-toc-text">4.对服务器证书签名</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Nginx配置"><span class="post-toc-text">Nginx配置</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#SS安装"><span class="post-toc-text">SS安装</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/11/23/lvs-keepalived/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Linux 虚拟服务器 LVS&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="https-protocol" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Algorithm/">Algorithm</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/MYSQL/">MYSQL</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
