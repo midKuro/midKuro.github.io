@@ -2,6 +2,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://midkuro.gitee.io/2020/05/21/garbage-collector/</loc>
+    
+    <lastmod>2020-12-06</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://midkuro.gitee.io/2020/05/21/garbage-collection/</loc>
+    
+    <lastmod>2020-12-06</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://midkuro.gitee.io/2020/05/21/jvm-memory/</loc>
+    
+    <lastmod>2020-12-06</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://midkuro.gitee.io/2020/10/29/jvm-base/</loc>
+    
+    <lastmod>2020-12-06</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://midkuro.gitee.io/2020/09/22/synchronized-process/</loc>
     
     <lastmod>2020-12-06</lastmod>
@@ -373,13 +401,6 @@
   </url>
   
   <url>
-    <loc>https://midkuro.gitee.io/2020/10/29/jvm-base/</loc>
-    
-    <lastmod>2020-11-12</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://midkuro.gitee.io/2020/11/09/mybatis-plus/</loc>
     
     <lastmod>2020-11-12</lastmod>
@@ -397,20 +418,6 @@
     <loc>https://midkuro.gitee.io/2020/11/09/mybatis-config/</loc>
     
     <lastmod>2020-11-12</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://midkuro.gitee.io/2020/05/21/garbage-collector/</loc>
-    
-    <lastmod>2020-11-06</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://midkuro.gitee.io/2020/05/21/garbage-collection/</loc>
-    
-    <lastmod>2020-11-06</lastmod>
     
   </url>
   
@@ -542,13 +549,6 @@
   
   <url>
     <loc>https://midkuro.gitee.io/2020/05/21/kubernetes-introduction/</loc>
-    
-    <lastmod>2020-05-26</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://midkuro.gitee.io/2020/05/21/jvm-memory/</loc>
     
     <lastmod>2020-05-26</lastmod>
     

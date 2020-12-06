@@ -30,7 +30,7 @@
 <meta property="og:image" content="https://midkuro.gitee.io/images/garbage-collection/collection-6.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/garbage-collection/collection-9.png">
 <meta property="article:published_time" content="2020-05-21T14:30:00.000Z">
-<meta property="article:modified_time" content="2020-11-06T14:15:10.447Z">
+<meta property="article:modified_time" content="2020-12-06T15:49:27.443Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="JVM">
@@ -167,7 +167,7 @@
             <h2 id="垃圾回收机制"><a href="#垃圾回收机制" class="headerlink" title="垃圾回收机制"></a>垃圾回收机制</h2><p><strong>想要了解垃圾收集策略，需要先了解 <a href="/2020/05/21/jvm-memory/">Java内存区域</a></strong></p>
 <p><strong>说起垃圾收集（<code>Garbage Collection，GC</code>），经过半个多世纪的发展，目前的内存的动态分配与内存回收技术已经相当成熟，一切看起来都进入了 “ 自动化 ” 时代，那为什么还要去了解<code>GC</code>和内存分配呢？</strong></p>
 <p><strong>答案很简单：需要排查各种内存溢出、内存泄漏问题时，当垃圾收集称为系统达到更高并发量的瓶颈时，就需要对这些 “ 自动化 ” 的技术实施必要的监控和调节。</strong></p>
-<p><strong>上篇文章介绍了在内存运行时区域的各个部分，其中程序计数器、虚拟机栈、本地方法区随线程而生，随线程而灭，不需要过多考虑回收问题，因为方法结束或者线程结束时，内存自然就回收了，这里主要讨论的是 Java 堆和方法区，本章后续讨论中的 “ 内存 ”分配和回收也仅指着一部分内存。</strong></p>
+<p><strong>上篇文章介绍了在内存运行时区域的各个部分，其中程序计数器、虚拟机栈、本地方法栈随线程而生，随线程而灭，不需要过多考虑回收问题，因为方法结束或者线程结束时，内存自然就回收了，这里主要讨论的是 Java 堆和方法区，本章后续讨论中的 “ 内存 ”分配和回收也仅指着一部分内存。</strong></p>
 <p><code>GC</code>完成需要思考的三件事：</p>
 <ul>
 <li>哪些内存需要回收？</li>
@@ -287,17 +287,21 @@
 <p>但问题是，栈上的本地变量表里面只有一部分数据是 <code>Reference</code> 类型的（它们是 <code>GC</code> 所需要的），那些非 <code>Reference</code> 类型的数据对 <code>GC</code> 而言毫无用处，但 <code>GC</code> 还是不得不对整个栈全部扫描一遍，这是对时间和资源的一种浪费。</p>
 <p>一个很自然的想法是，能不能用空间换时间，在某个时候把栈上代表引用的位置全部记录下来，这样到真正 <code>GC</code> 的时候就可以直接读取，而不用再一点一点的扫描了。事实上，大部分主流的虚拟机也正是这么做的，比如 <code>HotSpot</code> ，它使用一种叫做 <code>OopMap</code> 的数据结构来记录这类信息。</p>
 <p><strong><code>OopMap</code> 记录了栈上本地变量到堆上对象的引用关系。</strong>枚举根节点时，递归遍历每个栈帧的 <code>OopMap</code> ，通过栈中记录的被引用对象的内存地址，即可找到这些对象（ <code>GC Roots</code> ）。</p>
+<h4 id="Card-Table"><a href="#Card-Table" class="headerlink" title="Card Table"></a>Card Table</h4><p><code>Card Table</code> 由于做YGC时，无法确定年轻代的对象是否被老年代的对象引用，所以需要扫描整个OLD区，效率非常低，所以JVM设计了CardTable， 如果一个OLD区CardTable中有对象指向Y区，就将这个OLD区的对象设为Dirty，下次扫描时，只需要扫描Dirty Card上的对象，而不需要扫描整个OLD区。</p>
+<p>在结构上，Card Table用BitMap来实现。</p>
+<h4 id="Collection-Set"><a href="#Collection-Set" class="headerlink" title="Collection Set"></a>Collection Set</h4><p>G1垃圾收集器的概念：一组可被回收的分区<code>Region</code>的集合。</p>
+<p>在CSet中存活的数据会在GC过程中被移动到另一个可用分区，CSet中的分区可以来自Eden空间、survivor空间、或者老年代。CSet会占用不到整个对空间的1%大小。</p>
 <h4 id="RememberedSet"><a href="#RememberedSet" class="headerlink" title="RememberedSet"></a>RememberedSet</h4><p><img src="/images/garbage-collection/collection-9.png" alt="collection-9"></p>
-<p><code>RememberedSet</code> 主要用来处理频繁的<strong>新生代 GC</strong>。</p>
-<p>目的：<strong>执行新生代 GC</strong>而不执行<strong>老年代 GC</strong></p>
+<p><code>RememberedSet</code> 主要用来处理频繁的<strong>新生代 GC</strong>，<strong>执行新生代 GC</strong>而不执行<strong>老年代 GC</strong>。</p>
 <p>背景：<br>一般来说，<code>GC</code> 的过程是先枚举根节点。根节点有可能在新生代中，也有可能在老年代中。这里由于我们只想回收新生代（换句话说，不想回收老年代），所以没有必要对位于老年代的 <code>GC Roots</code> 做全面的可达性分析。</p>
 <p>问题：可能存在位于老年代的某个 <code>GC Root</code>，它引用了新生代的某个对象，这个对象你是不能清除的。那怎么办呢？</p>
-<p>通过空间换时间的办法。事实上，对于位于不同年代对象之间的引用关系，虚拟机会在程序运行过程中给记录下来。对应上面所举的例子，<strong>“ 老年代对象引用新生代对象 ” 这种关系，会在引用关系发生时，在新生代边上专门开辟一块空间记录下来</strong>，这就是 <code>RememberedSet</code> 。</p>
+<p>通过空间换时间的办法。事实上，对于位于不同年代对象之间的引用关系，虚拟机会在程序运行过程中给记录下来。对应上面所举的例子，<strong>“ 老年代对象引用新生代对象 ” 这种关系，会在引用关系发生时，在新生代所属的Region上专门开辟一块空间记录下来</strong>，这就是 <code>RememberedSet</code> 。</p>
+<p><strong>它和Card Table的区别在于Card Table是一张结构表，需要通过扫描对象才能知道对象是否可以清除，而G1可以通过<code>RememberedSet</code>上的信息直接判断当前对象是否可以清除，Rset中的数据来源于Card Table。</strong></p>
+<p><strong>达到了规避了扫描Card Table，直接通过Rset就能判断对象清除状态的作用。</strong></p>
 <p>由于RSet的存在，那么每次给对象赋引用的时候，就得做一些额外的操作，这些额外的操作在GC中被称作写屏障，<strong>这个写屏障不等于内存屏障</strong>。</p>
 <p>所以<strong>新生代的 GC Roots</strong> + <strong>RememberedSet 存储的内容</strong>，才是新生代收集时真正的 <code>GC Roots</code> 。然后就可以以此为据，在新生代上做可达性分析，进行垃圾回收。</p>
+<p><strong>Collection Set和 RemenberedSet 是G1垃圾收集器引入的两个新概念。</strong></p>
 <p><strong>ZGC是基于G1的思想上做了改进，没有了RemenberedSet，而是通过颜色指针，在对象头中存储了三位的信息，作为标识。</strong></p>
-<h4 id="Card-Table"><a href="#Card-Table" class="headerlink" title="Card Table"></a>Card Table</h4><p><code>Card Table</code> 由于做YGC时，需要扫描整个OLD区，效率非常低，所以JVM设计了CardTable， 如果一个OLD区CardTable中有对象指向Y区，就将它设为Dirty，下次扫描时，只需要扫描Dirty Card 在结构上，Card Table用BitMap来实现。</p>
-<h4 id="Collection-Set"><a href="#Collection-Set" class="headerlink" title="Collection Set"></a>Collection Set</h4><p>G1垃圾收集器的概念：一组可被回收的分区的集合，在CSet中存活的数据会在GC过程中被移动到另一个可用分区，CSet中的分区可以来自Eden空间、survivor空间、或者老年代。CSet会占用不到整个对空间的1%大小。</p>
 <h4 id="安全点"><a href="#安全点" class="headerlink" title="安全点"></a>安全点</h4><p>在 <code>OopMap</code> 的协助下，<code>HotSpot</code> 可以快速且准确地完成 <code>GC Roots</code> 枚举，但一个很现实的问题随之而来：可能导致引用关系变化，或者说 <code>OopMap</code> 内容变化的指令非常多，如果为每一条指令都生成对应的 <code>OopMap</code>，那将会需要大量的额外空间，这样 GC 的空间成本将会变得很高。</p>
 <p>实际上，<code>HotSpot</code> 也的确没有为每条指令都生成 <code>OopMap</code>，前面已经提到，只是在 “ 特定的位置 ” 记录了这些信息，这些位置称为<strong>安全点</strong>(<code>SafePoint</code>)，即程序执行时并非在所有地方都能停顿下来开始 <code>GC</code> ，只有在到达安全点时才能暂停。</p>
 <p><code>Safepoint</code> 的选定既不能太少以致于 <code>GC</code> 过少，也不能过于频繁以致于过分增大运行时的负荷。</p>
@@ -321,7 +325,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年11月06日 22:15</p>
+        <p>最后更新： 2020年12月06日 23:49</p>
         <p>原始链接： <a class="post-url" href="/2020/05/21/garbage-collection/" title="&#39;JVM（二） 垃圾回收机制&#39;">https://midkuro.gitee.io/2020/05/21/garbage-collection/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">
@@ -441,7 +445,7 @@
 
     <aside class="post-toc-pos post-toc-top" id="post-toc">
         <nav class="post-toc-wrap">
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#垃圾回收机制"><span class="post-toc-text">垃圾回收机制</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#对象判断机制"><span class="post-toc-text">对象判断机制</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#引用计数法"><span class="post-toc-text">引用计数法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#可达性分析算法"><span class="post-toc-text">可达性分析算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#再谈引用"><span class="post-toc-text">再谈引用</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#生存与死亡"><span class="post-toc-text">生存与死亡</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#回收方法区"><span class="post-toc-text">回收方法区</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#垃圾收集算法"><span class="post-toc-text">垃圾收集算法</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#标记-清除算法"><span class="post-toc-text">标记-清除算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#复制算法"><span class="post-toc-text">复制算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#标记-整理算法"><span class="post-toc-text">标记-整理算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#分代收集策略"><span class="post-toc-text">分代收集策略</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#HotSpot的算法实现"><span class="post-toc-text">HotSpot的算法实现</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#枚举根节点"><span class="post-toc-text">枚举根节点</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#OopMap"><span class="post-toc-text">OopMap</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#RememberedSet"><span class="post-toc-text">RememberedSet</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Card-Table"><span class="post-toc-text">Card Table</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Collection-Set"><span class="post-toc-text">Collection Set</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#安全点"><span class="post-toc-text">安全点</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#安全区域"><span class="post-toc-text">安全区域</span></a></li></ol></li></ol></li></ol>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#垃圾回收机制"><span class="post-toc-text">垃圾回收机制</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#对象判断机制"><span class="post-toc-text">对象判断机制</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#引用计数法"><span class="post-toc-text">引用计数法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#可达性分析算法"><span class="post-toc-text">可达性分析算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#再谈引用"><span class="post-toc-text">再谈引用</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#生存与死亡"><span class="post-toc-text">生存与死亡</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#回收方法区"><span class="post-toc-text">回收方法区</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#垃圾收集算法"><span class="post-toc-text">垃圾收集算法</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#标记-清除算法"><span class="post-toc-text">标记-清除算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#复制算法"><span class="post-toc-text">复制算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#标记-整理算法"><span class="post-toc-text">标记-整理算法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#分代收集策略"><span class="post-toc-text">分代收集策略</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#HotSpot的算法实现"><span class="post-toc-text">HotSpot的算法实现</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#枚举根节点"><span class="post-toc-text">枚举根节点</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#OopMap"><span class="post-toc-text">OopMap</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Card-Table"><span class="post-toc-text">Card Table</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Collection-Set"><span class="post-toc-text">Collection Set</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#RememberedSet"><span class="post-toc-text">RememberedSet</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#安全点"><span class="post-toc-text">安全点</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#安全区域"><span class="post-toc-text">安全区域</span></a></li></ol></li></ol></li></ol>
         </nav>
     </aside>
     
