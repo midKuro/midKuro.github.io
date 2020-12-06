@@ -8,6 +8,11 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
   <meta name="description" content="docker私服仓库docker的私服仓库存储不像maven私服有完整独立的应用，它是通过docker获取私服仓库镜像，并根据镜像创建私服仓库容器 说白了，docker的私服仓库的搭建就是拉取镜像、创建容器、上传镜像的过程 宿主机环境IP：192.168.1.131 私服仓库的搭建1、拉取私服镜像 1docker pull registry:2  2、启动私服 1docker run --name">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;docker（四） 安装私服仓库&#39;">
@@ -43,27 +48,7 @@
   
 
 
-  {% if theme.baidu_site_verification %}
-  <meta name="baidu-site-verification" content="{{ theme.baidu_site_verification }}" />
-  {% endif %}
-
-  {% if theme.baidu_push %}
-  <script>
-  (function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-  })();
-  </script>
-  {% endif %}
-
+  
   <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
   
 <meta name="generator" content="Hexo 4.2.1"></head>

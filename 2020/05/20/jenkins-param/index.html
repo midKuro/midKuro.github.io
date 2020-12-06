@@ -8,6 +8,11 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
   <meta name="description" content="jenkins参数化构建通过输入参数进行构建项目，需要插件build with parameters plugin，正常安装成功的jenkins应该都会自带了的，那么参数可以做什么事呢？如果我想要jenkins构建svn上指定版本号的代码并进行测试，就可以使用参数构建. 首先先了解一下怎么获取svn上指定的版本代码:通过项目路径@版本号进行获取的，版本号为head时，则取最新版本. 打开jenki">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;jenkins（四） 参数化构建&#39;">
@@ -46,27 +51,7 @@
   
 
 
-  {% if theme.baidu_site_verification %}
-  <meta name="baidu-site-verification" content="{{ theme.baidu_site_verification }}" />
-  {% endif %}
-
-  {% if theme.baidu_push %}
-  <script>
-  (function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-  })();
-  </script>
-  {% endif %}
-
+  
   <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
   
 <meta name="generator" content="Hexo 4.2.1"></head>

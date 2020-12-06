@@ -8,6 +8,11 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
   <meta name="description" content="ActiveMQ高级特性异步投递ActiveMQ支持同步、异步两种发送的模式将消息发送到Broker，模式的选择对发送延时有巨大的影响。producer能够达到怎样的产出率（产出率&#x3D;发送数据总量&#x2F;时间）主要受发送延时的影响，使用异步发送可以显著的提高发送的性能。 ActiveMQ默认使用异步发送的模式，除非明确指定使用同步发送的方式或者在未使用事务的前提下发送持久化的消息，这两种情况都是同步发送的">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;ActiveMQ（八） 高级特性&#39;">
@@ -42,27 +47,7 @@
   
 
 
-  {% if theme.baidu_site_verification %}
-  <meta name="baidu-site-verification" content="{{ theme.baidu_site_verification }}" />
-  {% endif %}
-
-  {% if theme.baidu_push %}
-  <script>
-  (function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-  })();
-  </script>
-  {% endif %}
-
+  
   <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
   
 <meta name="generator" content="Hexo 4.2.1"></head>

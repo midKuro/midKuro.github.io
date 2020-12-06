@@ -8,6 +8,11 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
   <meta name="description" content="线程同步容器同步容器类同步容器类包括Vector和Hashtable，二者是早期JDK的一部分，这些同步的封装器类是由Conllections.synchronizedXxx等工厂方法创建的。 这些类实现线程安全的模式是：将他们的状态封装起来，并对每个公有方法进行同步，使得每次只有一个线程能访问容器的状态。 同步容器类的问题同步容器类都是线程安全的，但是在某些情况下可能需要额外的客户端加锁来保护复">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;Thread（二） 线程同步容器&#39;">
@@ -40,27 +45,7 @@
   
 
 
-  {% if theme.baidu_site_verification %}
-  <meta name="baidu-site-verification" content="{{ theme.baidu_site_verification }}" />
-  {% endif %}
-
-  {% if theme.baidu_push %}
-  <script>
-  (function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-  })();
-  </script>
-  {% endif %}
-
+  
   <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
   
 <meta name="generator" content="Hexo 4.2.1"></head>

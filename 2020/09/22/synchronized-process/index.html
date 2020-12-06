@@ -8,6 +8,11 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
   <meta name="description" content="锁升级的过程Cache Line存储器是分层次的，离CPU越近的存储器，速度越快，每字节的成本越高，同时容量也因此越小。寄存器速度最快，离CPU最近，成本最高，所以个数容量有限，其次是高速缓存（缓存也是分级，有L1，L2等缓存），再次是主存（普通内存），再次是本地磁盘。  比如这时候有个应用程序xxx.exe，这时候启动该程序，操作系统的加载步骤如下：  1、程序指令加载到内存当中 2、PC指令寄">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;锁升级的过程&#39;">
@@ -56,27 +61,7 @@
   
 
 
-  {% if theme.baidu_site_verification %}
-  <meta name="baidu-site-verification" content="{{ theme.baidu_site_verification }}" />
-  {% endif %}
-
-  {% if theme.baidu_push %}
-  <script>
-  (function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-  })();
-  </script>
-  {% endif %}
-
+  
   <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
   
 <meta name="generator" content="Hexo 4.2.1"></head>

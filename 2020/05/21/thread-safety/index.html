@@ -8,6 +8,11 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
   <meta name="description" content="线程安全性什么是线程安全性线程是CPU执行的基本单位，进程是CPU分配的基本单位。 多线程访问某个类时，不管运行环境采用何种调度方式或者这些线程将如何交替执行，并且在主调代码中不需要任何额外的同步或者异步，这个类都能表现出正确的行为，那么就称这个类是线程安全的。 示例：一个无状态的Servlet 123456&#x2F;&#x2F;Servlet容器是一个单例多线程的容器对象public class Stateles">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;Thread（一） 线程安全性&#39;">
@@ -38,27 +43,7 @@
   
 
 
-  {% if theme.baidu_site_verification %}
-  <meta name="baidu-site-verification" content="{{ theme.baidu_site_verification }}" />
-  {% endif %}
-
-  {% if theme.baidu_push %}
-  <script>
-  (function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-  })();
-  </script>
-  {% endif %}
-
+  
   <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
   
 <meta name="generator" content="Hexo 4.2.1"></head>

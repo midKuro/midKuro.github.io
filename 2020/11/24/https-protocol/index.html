@@ -8,6 +8,11 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
   <meta name="description" content="HTTPS 原理背景 无加密在无加密的情况下，默认是HTTP协议，浏览器向代理服务器发送了请求后，代理服务器能够拦截浏览器的请求，从而达到伪造请求发送给Server、伪造结果发送给浏览器的目的。 加密算法如果采用加密算法对浏览器发送的明文进行加密，将加密请求发送给Server，在这种情况下，是需要浏览器、Server服务器都拥有加密、解密算法逻辑，那么代理服务器可以通过解析浏览器网站，从中获得算法">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39; HTTPS 原理&#39;">
@@ -41,27 +46,7 @@
   
 
 
-  {% if theme.baidu_site_verification %}
-  <meta name="baidu-site-verification" content="{{ theme.baidu_site_verification }}" />
-  {% endif %}
-
-  {% if theme.baidu_push %}
-  <script>
-  (function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-  })();
-  </script>
-  {% endif %}
-
+  
   <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
   
 <meta name="generator" content="Hexo 4.2.1"></head>

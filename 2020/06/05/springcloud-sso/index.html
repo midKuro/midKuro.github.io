@@ -8,6 +8,11 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
   <meta name="description" content="Spring Cloud SSO单机服务 在单机服务中，同一个浏览器访问系统，系统需要在登录后将用户信息存储在Session会话中，并返回一个SessionID到浏览器中，浏览器下次请求该系统时，携带SessionID到系统中，校验通过则无需再次登录。 单点登录单点登录（Single Sign On），简称为 SSO，其含义在于用户只需要登录一次就可以访问所有相互信任的应用系统。 在多个微服务的场">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;Spring Cloud SSO&#39;">
@@ -49,27 +54,7 @@
   
 
 
-  {% if theme.baidu_site_verification %}
-  <meta name="baidu-site-verification" content="{{ theme.baidu_site_verification }}" />
-  {% endif %}
-
-  {% if theme.baidu_push %}
-  <script>
-  (function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-  })();
-  </script>
-  {% endif %}
-
+  
   <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
   
 <meta name="generator" content="Hexo 4.2.1"></head>

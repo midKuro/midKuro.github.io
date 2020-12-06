@@ -8,6 +8,11 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
   <meta name="description" content="HashMap的源码和分析JDK1.7HashMap 问题：JDK1.7中，HashMap是通过什么原理实现的呢？ 答案：数组+链表 问题：什么叫哈希碰撞（哈希冲突）？ 不同的键值通过哈希函数运算得到相同的哈希值，解决哈希冲突的方式有开放寻址法和链表法，ThreadLocalMap由于其元素个数较少，采用的是开放寻址法，而HashMap采用的是链表法来解决哈希冲突，即所有散列值相同的元素都放在相同">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;JDK1.7 HashMap和ConcurrentHashMap 源码和实现&#39;">
@@ -52,27 +57,7 @@
   
 
 
-  {% if theme.baidu_site_verification %}
-  <meta name="baidu-site-verification" content="{{ theme.baidu_site_verification }}" />
-  {% endif %}
-
-  {% if theme.baidu_push %}
-  <script>
-  (function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-  })();
-  </script>
-  {% endif %}
-
+  
   <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
   
 <meta name="generator" content="Hexo 4.2.1"></head>

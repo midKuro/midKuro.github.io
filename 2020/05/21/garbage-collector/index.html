@@ -8,6 +8,11 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
   <meta name="description" content="垃圾收集器与内存分配策略GC回收的区间  清理Eden区和Survivor区叫Minor GC； 清理Old区叫Major GC； 清理整个堆空间————包括年轻代和老年代叫Full GC；   GC回收的定位保守式 GC在进行 GC 的时候，会从一些已知的位置（也就是GC Roots）开始扫描内存，扫描到一个数字就判断他是不是可能是指向GC堆中的一个指针,然后一直递归的扫描下去，最后完成可达性分">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;JVM（三） 垃圾收集器&#39;">
@@ -55,27 +60,7 @@
   
 
 
-  {% if theme.baidu_site_verification %}
-  <meta name="baidu-site-verification" content="{{ theme.baidu_site_verification }}" />
-  {% endif %}
-
-  {% if theme.baidu_push %}
-  <script>
-  (function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-  })();
-  </script>
-  {% endif %}
-
+  
   <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
   
 <meta name="generator" content="Hexo 4.2.1"></head>

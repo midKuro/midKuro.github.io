@@ -8,6 +8,11 @@
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
   
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
   <meta name="description" content="Spring的循环依赖循环依赖有两种方式：构造函数参数循环依赖，以及属性循环依赖，构造函数参数循环依赖是没有办法解决的，所以我们常说的Spring解决的循环依赖一般指的是属性循环依赖。 Spring的循环依赖是通过建立三级缓存实现的，三级缓存主要是为了解决在AOP情况下，出现循环依赖的问题，当然，其中的一级+二级是为了解决读取不完整的性能问题，如果没了三级缓存，使用二级缓存也能够实现功能，但是会在">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;Spring的循环依赖&#39;">
@@ -40,27 +45,7 @@
   
 
 
-  {% if theme.baidu_site_verification %}
-  <meta name="baidu-site-verification" content="{{ theme.baidu_site_verification }}" />
-  {% endif %}
-
-  {% if theme.baidu_push %}
-  <script>
-  (function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-  })();
-  </script>
-  {% endif %}
-
+  
   <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
   
 <meta name="generator" content="Hexo 4.2.1"></head>
