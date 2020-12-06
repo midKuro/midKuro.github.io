@@ -951,14 +951,14 @@
   </url>
   
   <url>
-    <loc>https://midkuro.gitee.io/categories/Feign/</loc>
+    <loc>https://midkuro.gitee.io/categories/Hystrix/</loc>
     <lastmod>2020-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://midkuro.gitee.io/categories/Hystrix/</loc>
+    <loc>https://midkuro.gitee.io/categories/Feign/</loc>
     <lastmod>2020-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -979,14 +979,14 @@
   </url>
   
   <url>
-    <loc>https://midkuro.gitee.io/categories/Sentinel/</loc>
+    <loc>https://midkuro.gitee.io/categories/SSO/</loc>
     <lastmod>2020-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://midkuro.gitee.io/categories/SSO/</loc>
+    <loc>https://midkuro.gitee.io/categories/Sentinel/</loc>
     <lastmod>2020-12-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
