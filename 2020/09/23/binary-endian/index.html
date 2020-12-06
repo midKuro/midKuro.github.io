@@ -17,7 +17,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://midkuro.gitee.io/images/binary-endian/binary-01.png">
 <meta property="article:published_time" content="2020-09-23T04:20:00.000Z">
-<meta property="article:modified_time" content="2020-11-12T04:09:50.083Z">
+<meta property="article:modified_time" content="2020-12-06T06:18:54.105Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="Linux">
@@ -156,7 +156,7 @@
 <p>1 KB = 1024 Bytes</p>
 <p>1 Byte = 8 bits</p>
 <p>思考个问题，通常描述32位二进制数据，为什么是用8个十六进制数呢？如<strong>0x1A2B3C4D</strong></p>
-<p>4个二进制bit 表示的数值范围是从0000<del>1111，即0</del>15, 刚好等同于 一位 16进制数的数值范围0~F(15)，也就是说，4个二进制位(bit) = 1个十六进制(Hex)，8个二进制位(bit) = 一个字节(Byte) = 2个十六进制(hex)，32个二进制位(bit) = 四个字节(Byte) = 8个十六进制(hex)。</p>
+<p>4个二进制bit 表示的数值范围是从【0000 - 1111】，即【0 - 15】, 刚好等同于 一位 16进制数的数值范围0~F(15)，也就是说，4个二进制位(bit) = 1个十六进制(Hex)，8个二进制位(bit) = 一个字节(Byte) = 2个十六进制(hex)，32个二进制位(bit) = 四个字节(Byte) = 8个十六进制(hex)。</p>
 <p>所以针对一个32位的二进制数值，通常十六进制来表示，如<strong>0x1A2B3C4D</strong>，总共四个字节，两个十六进制数表示一个字节，高位字节为<strong>0x1A</strong>，低位字节为<strong>0x4D</strong>；中间两个字节分别为<strong>0x2B</strong>和<strong>0x3C</strong>；</p>
 <p>数值<strong>0x1A2B3C4D</strong>想要在计算机中正确使用，就必须要考虑在内存中将其对应的四个字节合理存储。<strong>假设内存的地址都是从低到高分配的</strong>，那么对于一个数值多个字节顺序存储就有两种存储方式：</p>
 <p><strong>方式一</strong>：<strong>数值的高位字节</strong>存放在<strong>内存的低地址端</strong>，<strong>低位字节</strong>存放在<strong>内存的高地址端</strong>：</p>
@@ -178,7 +178,7 @@
 <p><strong>Little-Endian 优点：</strong>提取一个，两个，四个或者更长字节数据的汇编指令以与其他所有格式相同的方式进行：首先在偏移地址为0的地方提取最低位的字节，因为地址偏移和字节数是一对一的关系，多重精度的数学函数就相对地容易写了。</p>
 <p>如果你增加数字的值，你可能在左边增加数字（高位非指数函数需要更多的数字）。因此，经常需要增加两位数字并移动存储器里所有Big-endian顺序的数字，把所有数向右移，这会增加计算机的工作量。不过，使用Little- Endian的存储器中不重要的字节可以存在它原来的位置，新的数可以存在它的右边的高位地址里。这就意味着计算机中的某些计算可以变得更加简单和快速。</p>
 <h2 id="网络字节顺序"><a href="#网络字节顺序" class="headerlink" title="网络字节顺序"></a>网络字节顺序</h2><p>1、<strong>字节内的比特位不受这种顺序的影响</strong><br>比如一个字节 1000 0000 （或表示为十六进制 80H)不管是什么顺序其内存中的表示法都是这样。</p>
-<p>2、*<em>大于1个字节的数据类型才有字节顺序问题<br>*</em>比如 Byte A，这个变量只有一个字节的长度，所以根据上一条没有字节顺序问题。所以字节顺序是“字节之间的相对顺序”的意思。</p>
+<p>2、<strong>大于1个字节的数据类型才有字节顺序问题</strong><br>比如 Byte A，这个变量只有一个字节的长度，所以根据上一条没有字节顺序问题。所以字节顺序是“字节之间的相对顺序”的意思。</p>
 <p>3、<strong>大于1个字节的数据类型的字节顺序有两种</strong><br>比如 short B，这是一个两字节的数据类型，这时就有字节之间的相对顺序问题了。<br><strong>网络字节顺序是“所见即所得”的顺序</strong>。而Intel类型的CPU的字节顺序与此相反。<br>比如上面的 short B=0102H(十六进制，每两位表示一个字节的宽度）。所见到的是“0102”，按一般数学常识，数轴从左到右的方向增加，即内存地址从左到右增加的话，在内存中这个 short B的字节顺序是：<br>01 02<br>这就是网络字节顺序。所见到的顺序和在内存中的顺序是一致的！<br><strong>假设通过抓包得到网络数据的两个字节流为：01 02</strong></p>
 <p>*<em>而相反的字节顺序就不同了，其在内存中的顺序为：02 01<br>*</em><br>如果这表示两个 Byte类型的变量，那么自然不需要考虑字节顺序的问题。如果这表示一个 short 变量，那么就需要考虑字节顺序问题。根据网络字节顺序“所见即所得”的规则，这个变量的值就是：0102</p>
 <p>假设本地主机是Intel类型的，那么要表示这个变量，有点麻烦：<br>定义变量 short X，字节流地址为：pt，按顺序读取内存是为x=<em>((short</em>)pt);<br>那么X的<strong>内存顺序</strong>当然是 <strong>01 02按非 “所见即所得” 的规则</strong>，这个内存顺序和看到的一样显然是不对的，所以要把这两个字节的位置调换。调换的方法可以自己定义，但用已经有的API还是更为方便。</p>
@@ -193,7 +193,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年11月12日 12:09</p>
+        <p>最后更新： 2020年12月06日 14:18</p>
         <p>原始链接： <a class="post-url" href="/2020/09/23/binary-endian/" title="&#39;字节顺序&#39;">https://midkuro.gitee.io/2020/09/23/binary-endian/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">
