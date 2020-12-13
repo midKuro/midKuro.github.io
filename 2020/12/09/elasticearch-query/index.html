@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Elasticsearch（六） 搜索&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
+  <meta name="description" content="Elasticsearch 搜索prefix前缀查询：以xx开头的搜索，不计算相关度评分，和filter比，没有bitcache。前缀搜索，尽量把前缀长度设置的更长，性能差，因为它会扫描倒排索引整张表，匹配每个term是否包含xx。 1234567891011121314语法：GET index&#x2F;_search&amp;#123;    &quot;query&quot;: &amp;#123;        &quot;prefix&quot;: &amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Elasticsearch（六） 搜索&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/12/09/elasticearch-query/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Elasticsearch 搜索prefix前缀查询：以xx开头的搜索，不计算相关度评分，和filter比，没有bitcache。前缀搜索，尽量把前缀长度设置的更长，性能差，因为它会扫描倒排索引整张表，匹配每个term是否包含xx。 1234567891011121314语法：GET index&#x2F;_search&amp;#123;    &quot;query&quot;: &amp;#123;        &quot;prefix&quot;: &amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-09T09:00:00.000Z">
+<meta property="article:modified_time" content="2020-12-13T16:00:54.234Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?code-JRipY21QjX";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+  
+
+
+  
+  <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
+  
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.gif" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-elasticearch-query" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Elasticsearch（六） 搜索&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Elasticsearch/">Elasticsearch</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-12-09
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Elasticsearch-搜索"><a href="#Elasticsearch-搜索" class="headerlink" title="Elasticsearch 搜索"></a>Elasticsearch 搜索</h1><h2 id="prefix"><a href="#prefix" class="headerlink" title="prefix"></a>prefix</h2><p>前缀查询：以xx开头的搜索，不计算相关度评分，和filter比，没有bitcache。前缀搜索，尽量把前缀长度设置的更长，<strong>性能差，因为它会扫描倒排索引整张表，匹配每个term是否包含xx。</strong></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">语法：</span><br><span class="line">GET index/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"prefix"</span>: &#123;</span><br><span class="line">            <span class="attr">"title"</span>: &#123;</span><br><span class="line">                <span class="attr">"value"</span>: <span class="string">"text"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">参数：</span><br><span class="line">index_prefixes: 默认   "min_chars" : 2,   "max_chars" : 5</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//类似于SQL的左Like查询</span></span><br><span class="line">GET my_index/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"prefix"</span>: &#123;</span><br><span class="line">            <span class="attr">"text"</span>: &#123;</span><br><span class="line">                <span class="attr">"value"</span>: <span class="string">"myword"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用<code>index_prefixes</code>映射，ES会额外建立一个长度在2和5之间索引，在进行前缀匹配的时候效率会有很大的提高</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//设置默认的 启动索引 加快前缀搜索速度</span></span><br><span class="line">PUT my_index</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"mappings"</span>: &#123;</span><br><span class="line">        <span class="attr">"properties"</span>: &#123;</span><br><span class="line">            <span class="attr">"text"</span>: &#123;</span><br><span class="line">                <span class="attr">"type"</span>: <span class="string">"text"</span>,</span><br><span class="line">                <span class="attr">"index_prefixes"</span>: &#123;</span><br><span class="line">                    <span class="attr">"min_chars"</span>:<span class="number">2</span>,</span><br><span class="line">                    <span class="attr">"max_chars"</span>:<span class="number">4</span></span><br><span class="line">                &#125;    </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="wildcard"><a href="#wildcard" class="headerlink" title="wildcard"></a>wildcard</h2><p>通配符：通配符运算符是匹配一个或多个字符的占位符。例如，*通配符运算符匹配零个或多个字符。可以将通配符运算符与其他字符结合使用以创建通配符模式</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//  "name" : "xiaomi nfc phone"</span></span><br><span class="line"><span class="comment">//通配符匹配</span></span><br><span class="line">GET product/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"wildcard"</span>: &#123;</span><br><span class="line">            <span class="attr">"name"</span>: &#123;     <span class="comment">//匹配倒排索引表中的term词项</span></span><br><span class="line">                <span class="attr">"value"</span>: <span class="string">"xia?mi"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出结果：</span><br><span class="line">能查出  "name" : "xiaomi nfc phone" 的数据</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">GET product/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"wildcard"</span>: &#123;</span><br><span class="line">            <span class="attr">"name.keyword"</span>: &#123;     <span class="comment">//全量匹配内容</span></span><br><span class="line">                <span class="attr">"value"</span>: <span class="string">"xia?mi"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出结果：</span><br><span class="line">不能查出数据</span><br></pre></td></tr></table></figure>
+
+<h2 id="regexp"><a href="#regexp" class="headerlink" title="regexp"></a>regexp</h2><p>正则：regexp查询的性能可以根据提供的正则表达式而有所不同。为了提高性能，应避免使用通配符模式，如.<em>或 .</em>?+未经前缀或后缀</p>
+ <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//"name" : "xiaomi nfc phone"  正则匹配</span></span><br><span class="line">GET product/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"regexp"</span>: &#123;</span><br><span class="line">            <span class="attr">"name"</span>: &#123;</span><br><span class="line">                <span class="attr">"value"</span>: <span class="string">"[\\s\\S]*nfc[\\s\\S]*"</span>,  <span class="comment">//  \\s\\S表示任意字符</span></span><br><span class="line">                <span class="attr">"flags"</span>: <span class="string">"ALL"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//"desc" : "xiaomi nfc 2020-05-20 phone"</span></span><br><span class="line">GET product/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"regexp"</span>: &#123;</span><br><span class="line">            <span class="attr">"desc"</span>: &#123;</span><br><span class="line">                <span class="attr">"value"</span>: <span class="string">".*2020-05-20.*"</span>,</span><br><span class="line">                <span class="attr">"flags"</span>: <span class="string">"ALL"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 无法匹配到上文中的注释数据，原因在于默认使用了<code>standard</code>，会将日期拆成【2020】、【05】、【20】三个词汇，如果想要匹配，需要使用<code>desc.keyword</code>进行全文匹配，但是这样性能十分低下。</p>
+<p>而IK分词器很好的对日期进行了分词词项【2020-05-20】，对该索引指定IK分词器（需重建索引），即可查询到结果。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">PUT product</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"mappings"</span>: &#123;</span><br><span class="line">        <span class="attr">"properties"</span>: &#123;</span><br><span class="line">            <span class="attr">"desc"</span>: &#123;</span><br><span class="line">                <span class="attr">"type"</span>: <span class="string">"text"</span>,</span><br><span class="line">                <span class="attr">"analyzer"</span>: <span class="string">"ik_max_word"</span>,   <span class="comment">//倒排索引分词</span></span><br><span class="line">                <span class="attr">"search_analyzer"</span>: <span class="string">"ik_max_word"</span>  <span class="comment">//搜索分词</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="fuzzy"><a href="#fuzzy" class="headerlink" title="fuzzy"></a>fuzzy</h2><p>混淆字符 (<strong>b</strong>ox → <strong>f</strong>ox)                缺少字符 (<strong>b</strong>lack → lack)</p>
+<p>多出字符 (sic → sic<strong>k</strong>)                颠倒次序 (<strong>ac</strong>t → <strong>ca</strong>t)</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">语法：</span><br><span class="line">GET /_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"fuzzy"</span>: &#123;</span><br><span class="line">            <span class="attr">"desc"</span>: &#123;</span><br><span class="line">                <span class="attr">"value"</span>: <span class="string">"keyword"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">参数：</span><br><span class="line">value：（必需，字符串）</span><br><span class="line">fuzziness：（可选，字符串）最大误差(距离)  并非越大越好, 召回率高 但是结果不准确</span><br></pre></td></tr></table></figure>
+
+<p>距离：两段文本之间的Damerau-Levenshtein距离是指一个字符串需要经过多少次操作之后才能变成另一个字符串。</p>
+<p>距离公式：Levenshtein是lucene的，es改进版：Damerau-Levenshtein，<code>axe=&gt;aex  Levenshtein=2</code> ，而<code>Damerau-Levenshtein=1</code></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//案例 使用fuzzy</span></span><br><span class="line">GET /product/_search </span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"fuzzy"</span>: &#123;</span><br><span class="line">            <span class="attr">"desc"</span>: &#123;</span><br><span class="line">                <span class="attr">"value"</span>: <span class="string">"xioami"</span>,  <span class="comment">//匹配 xiaomi</span></span><br><span class="line">                <span class="attr">"fuzziness"</span>: <span class="number">5</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//案例 使用match</span></span><br><span class="line">GET /product/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"match"</span>: &#123;</span><br><span class="line">            <span class="attr">"desc"</span>: &#123;</span><br><span class="line">                <span class="attr">"query"</span>: <span class="string">"quangengneng nfc"</span>,</span><br><span class="line">                <span class="attr">"fuzziness"</span>: <span class="string">"AUTO"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="match-phrase-prefix"><a href="#match-phrase-prefix" class="headerlink" title="match_phrase_prefix"></a>match_phrase_prefix</h2><p>match_phrase_prefix与match_phrase相同,但是它多了一个特性,就是它允许在文本的最后一个词项(term)上的前缀匹配。</p>
+<p>如果 是一个单词,比如a,它会匹配文档字段所有以a开头的文档,如果是一个短语,比如 “this is ma” ,<strong>他会先在倒排索引中做以ma做前缀搜索,然后在匹配到的doc中做match_phrase查询</strong>。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">语法：</span><br><span class="line">GET /index/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"match_phrase_prefix"</span>: &#123;</span><br><span class="line">            <span class="attr">"fieldName"</span>: &#123;</span><br><span class="line">                <span class="attr">"query"</span>: <span class="string">"text"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">参数</span><br><span class="line">analyzer 指定何种分析器来对该短语进行分词处理</span><br><span class="line">max_expansions 限制匹配到的最大词项，每个分片中匹配的结果达到max_expansions值后停止遍历倒排索引表</span><br><span class="line">boost 用于设置该查询的权重</span><br><span class="line">slop：允许短语间的词项(term)间隔，指为了让查询和文档匹配需要移动term多少(slop)次</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//案例  匹配 "desc" : "zhichi nfc"   注意！无法匹配 "zhichi aaa nfc"</span></span><br><span class="line">GET /product/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"match_phrase_prefix"</span>: &#123;</span><br><span class="line">            <span class="attr">"desc"</span>: &#123;</span><br><span class="line">                <span class="attr">"query"</span>: <span class="string">"zhichi nf"</span>,  <span class="comment">//先进行nf 前缀匹配，再进行match_phrase(zhichi)词项匹配</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//案例 可以匹配到："zhichi aaa nfc"</span></span><br><span class="line">GET /product/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"match_phrase_prefix"</span>: &#123;</span><br><span class="line">            <span class="attr">"desc"</span>: &#123;</span><br><span class="line">                <span class="attr">"query"</span>: <span class="string">"zhichi nf"</span>,</span><br><span class="line">                <span class="attr">"analyzer"</span>: <span class="string">"whitespace"</span>,</span><br><span class="line">                <span class="attr">"max_expansions"</span>: <span class="number">1</span>,</span><br><span class="line">                <span class="attr">"slop"</span>: <span class="number">1</span>,   <span class="comment">//配置slop，允许移动一次term匹配结果</span></span><br><span class="line">                <span class="attr">"boost"</span>: <span class="number">1</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="N-gram：token-filter"><a href="#N-gram：token-filter" class="headerlink" title="N-gram：token filter"></a>N-gram：token filter</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">edge_ngram：是从第一个字符开始,按照步长,进行分词,适合前缀匹配场景,比如:订单号,手机号,邮政编码的检索</span><br><span class="line">ngram：是从每一个字符开始,按照步长,进行分词,适合前缀中缀检索</span><br><span class="line"></span><br><span class="line">参数：</span><br><span class="line">min_gram &#x3D;1 最小步长 默认值 1</span><br><span class="line">max_gram &#x3D;1 最大步长 默认值 1</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">【edge_ngram】 拆词： &quot;reba always loves me&quot;</span><br><span class="line">min_gram &#x3D;1   max_gram &#x3D;1</span><br><span class="line">#r a l m</span><br><span class="line"></span><br><span class="line">min_gram &#x3D;1   max_gram &#x3D;2</span><br><span class="line">#r a l m</span><br><span class="line">#re al lo me</span><br><span class="line"></span><br><span class="line">min_gram &#x3D;2   max_gram &#x3D;3</span><br><span class="line">#re al lo me</span><br><span class="line">#reb alw lov me</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//创建索引，设置分词器和token filter</span></span><br><span class="line">PUT my_index</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"settings"</span>: &#123;</span><br><span class="line">        <span class="attr">"analysis"</span>: &#123;</span><br><span class="line">            <span class="attr">"filter"</span>: &#123;</span><br><span class="line">                <span class="attr">"2_3_edge_ngram"</span>: &#123;</span><br><span class="line">                    <span class="attr">"type"</span>: <span class="string">"edge_ngram"</span>,</span><br><span class="line">                    <span class="attr">"min_gram"</span>: <span class="number">2</span>,</span><br><span class="line">                    <span class="attr">"max_gram"</span>: <span class="number">3</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">"analyzer"</span>: &#123;</span><br><span class="line">                <span class="attr">"my_edge_ngram"</span>: &#123;</span><br><span class="line">                    <span class="attr">"type"</span>:<span class="string">"custom"</span>,</span><br><span class="line">                    <span class="attr">"tokenizer"</span>: <span class="string">"standard"</span>,</span><br><span class="line">                    <span class="attr">"filter"</span>: [ <span class="string">"2_3_edge_ngram"</span> ]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">"mappings"</span>: &#123;</span><br><span class="line">        <span class="attr">"properties"</span>: &#123;</span><br><span class="line">            <span class="attr">"text"</span>: &#123;</span><br><span class="line">                <span class="attr">"type"</span>: <span class="string">"text"</span>,</span><br><span class="line">                <span class="attr">"analyzer"</span>:<span class="string">"my_edge_ngram"</span>,</span><br><span class="line">                <span class="attr">"search_analyzer"</span>: <span class="string">"standard"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">GET /my_index/_analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"analyzer"</span>: <span class="string">"my_edge_ngram"</span></span><br><span class="line">  , <span class="attr">"text"</span>: [<span class="string">"my english"</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出结果：</span><br><span class="line">my、en、eng</span><br><span class="line"></span><br><span class="line">如果分词器把edge_ngram换成ngram，则输出结果如下：</span><br><span class="line">my、en、ng、gl、li、is、sh、eng、ngl、gli、lis、ish</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//匹配 "text": "my english is good"</span></span><br><span class="line">GET /my_index/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"match_phrase"</span>: &#123;</span><br><span class="line">            <span class="attr">"text"</span>: <span class="string">"my eng is goo"</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年12月14日 00:00</p>
+        <p>原始链接： <a class="post-url" href="/2020/12/09/elasticearch-query/" title="&#39;Elasticsearch（六） 搜索&#39;">https://midkuro.gitee.io/2020/12/09/elasticearch-query/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.gif" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/12/09/elasticearch-query/&title=《'Elasticsearch（六） 搜索'》 — Kuro's Blog&pic=images/es.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/12/09/elasticearch-query/&title=《'Elasticsearch（六） 搜索'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/12/09/elasticearch-query/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Elasticsearch（六） 搜索'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/12/09/elasticearch-query/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/12/09/elasticearch-query/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/12/09/elasticearch-query/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Elasticsearch/" class="color4">Elasticsearch</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Elasticsearch-搜索"><span class="post-toc-text">Elasticsearch 搜索</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#prefix"><span class="post-toc-text">prefix</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#wildcard"><span class="post-toc-text">wildcard</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#regexp"><span class="post-toc-text">regexp</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#fuzzy"><span class="post-toc-text">fuzzy</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#match-phrase-prefix"><span class="post-toc-text">match_phrase_prefix</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#N-gram：token-filter"><span class="post-toc-text">N-gram：token filter</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/12/09/elasticearch-analysis/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Elasticsearch（五） 分词器&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="elasticearch-query" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Algorithm/">Algorithm</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Elasticsearch/">Elasticsearch</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/MYSQL/">MYSQL</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 15px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 15px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

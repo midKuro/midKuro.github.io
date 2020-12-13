@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Elasticsearch（五） 分词器&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
+  <meta name="description" content="Elasticsearch 分词器Analysis123456789101112分析器：1.character filter（mapping）：分词之前预处理（过滤无用字符、标签等，转换一些&amp;&#x3D;&gt;and 《es》&#x3D;&gt; es   HTML Strip Character Filter：html_strip  自动过滤html标签   参数：escaped_tags   需要保留的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Elasticsearch（五） 分词器&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/12/09/elasticearch-analysis/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Elasticsearch 分词器Analysis123456789101112分析器：1.character filter（mapping）：分词之前预处理（过滤无用字符、标签等，转换一些&amp;&#x3D;&gt;and 《es》&#x3D;&gt; es   HTML Strip Character Filter：html_strip  自动过滤html标签   参数：escaped_tags   需要保留的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/elasticsearch-analysis/es-01.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/elasticsearch-analysis/es-02.png">
+<meta property="article:published_time" content="2020-12-09T08:00:00.000Z">
+<meta property="article:modified_time" content="2020-12-13T13:08:35.171Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/elasticsearch-analysis/es-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?code-JRipY21QjX";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+  
+
+
+  
+  <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
+  
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.gif" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-elasticearch-analysis" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Elasticsearch（五） 分词器&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Elasticsearch/">Elasticsearch</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-12-09
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Elasticsearch-分词器"><a href="#Elasticsearch-分词器" class="headerlink" title="Elasticsearch 分词器"></a>Elasticsearch 分词器</h1><h2 id="Analysis"><a href="#Analysis" class="headerlink" title="Analysis"></a>Analysis</h2><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">分析器：</span></span><br><span class="line"><span class="meta">1.character</span> <span class="string">filter（mapping）：分词之前预处理（过滤无用字符、标签等，转换一些&amp;=&gt;and 《es》=&gt; es</span></span><br><span class="line">   <span class="attr">HTML</span> <span class="string">Strip Character Filter：html_strip  自动过滤html标签</span></span><br><span class="line">   <span class="meta">参数：escaped_tags</span>   <span class="string">需要保留的html标签</span></span><br><span class="line"></span><br><span class="line">   <span class="attr">Mapping</span> <span class="string">Character Filter：type mapping</span></span><br><span class="line"></span><br><span class="line">   <span class="attr">Pattern</span> <span class="string">Replace Character Filter：type pattern_replace</span></span><br><span class="line"></span><br><span class="line"><span class="attr">4.tokenizer（分词器）：分词</span></span><br><span class="line"></span><br><span class="line"><span class="meta">5.token</span> <span class="string">filter：停用词、时态转换、大小写转换、同义词转换、语气词处理等。如：has=&gt;have  him=&gt;he  apples=&gt;apple</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="normalization"><a href="#normalization" class="headerlink" title="normalization"></a>normalization</h3><p><img src="/images/elasticsearch-analysis/es-01.png" alt="es"></p>
+<p><img src="/images/elasticsearch-analysis/es-02.png" alt="es"></p>
+<h3 id="character-filter"><a href="#character-filter" class="headerlink" title="character filter"></a>character filter</h3><h4 id="HTML-Strip-Character-Filter"><a href="#HTML-Strip-Character-Filter" class="headerlink" title="HTML Strip Character Filter"></a>HTML Strip Character Filter</h4><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//HTML Strip Character Filter</span></span><br><span class="line">PUT my_index</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"settings"</span>: &#123;</span><br><span class="line">        <span class="comment">//分析器</span></span><br><span class="line">        <span class="attr">"analysis"</span>: &#123;</span><br><span class="line">            <span class="attr">"char_filter"</span>: &#123;</span><br><span class="line">                <span class="attr">"my_char_filter"</span>: &#123;         <span class="comment">//设置html字符过滤器，并保留&lt;a&gt;标签</span></span><br><span class="line">                    <span class="attr">"type"</span>: <span class="string">"html_strip"</span>,   </span><br><span class="line">                    <span class="attr">"escaped_tags"</span>: [<span class="string">"a"</span>]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment">//分词器</span></span><br><span class="line">            <span class="attr">"analyzer"</span>: &#123;</span><br><span class="line">                <span class="attr">"my_analyzer"</span>: &#123;</span><br><span class="line">                    <span class="attr">"tokenizer"</span>: <span class="string">"keyword"</span>,</span><br><span class="line">                    <span class="attr">"char_filter"</span>: [<span class="string">"my_char_filter"</span>]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//尝试分词</span></span><br><span class="line">POST my_index/_analyze</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"analyzer"</span>: <span class="string">"my_analyzer"</span>,</span><br><span class="line">    <span class="attr">"text"</span>: <span class="string">"&lt;p&gt;I&amp;apos;m so &lt;a&gt;happy&lt;/a&gt;!&lt;/p&gt;"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出结果：</span><br><span class="line">"token" : """</span><br><span class="line">          I'm so &lt;a&gt;happy&lt;/a&gt;!</span><br><span class="line"><span class="string">""</span><span class="string">"</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Mapping-Character-Filter"><a href="#Mapping-Character-Filter" class="headerlink" title="Mapping Character Filter"></a>Mapping Character Filter</h4><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Mapping Character Filter</span></span><br><span class="line">PUT my_index</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"settings"</span>: &#123;</span><br><span class="line">        <span class="attr">"analysis"</span>: &#123;</span><br><span class="line">            <span class="attr">"analyzer"</span>: &#123;</span><br><span class="line">                <span class="attr">"my_analyzer"</span>: &#123;</span><br><span class="line">                    <span class="attr">"tokenizer"</span>: <span class="string">"keyword"</span>,</span><br><span class="line">                    <span class="attr">"char_filter"</span>: [</span><br><span class="line">                        <span class="string">"my_char_filter"</span></span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">"char_filter"</span>: &#123;</span><br><span class="line">                <span class="attr">"my_char_filter"</span>: &#123;</span><br><span class="line">                    <span class="attr">"type"</span>: <span class="string">"mapping"</span>,   <span class="comment">//为指定的字符制定映射规则</span></span><br><span class="line">                    <span class="attr">"mappings"</span>: [</span><br><span class="line">                        <span class="string">"٠ =&gt; 0"</span>,</span><br><span class="line">                        <span class="string">"١ =&gt; 1"</span>,</span><br><span class="line">                        <span class="string">"٢ =&gt; 2"</span>,</span><br><span class="line">                        <span class="string">"٣ =&gt; 3"</span>,</span><br><span class="line">                        <span class="string">"٤ =&gt; 4"</span>,</span><br><span class="line">                        <span class="string">"٥ =&gt; 5"</span>,</span><br><span class="line">                        <span class="string">"٦ =&gt; 6"</span>,</span><br><span class="line">                        <span class="string">"٧ =&gt; 7"</span>,</span><br><span class="line">                        <span class="string">"٨ =&gt; 8"</span>,</span><br><span class="line">                        <span class="string">"٩ =&gt; 9"</span></span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">POST my_index/_analyze</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"analyzer"</span>: <span class="string">"my_analyzer"</span>,</span><br><span class="line">    <span class="attr">"text"</span>: <span class="string">"My license plate is ٢٥٠١٥"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出结果：</span><br><span class="line">"token" : "My license plate is 25015"</span><br></pre></td></tr></table></figure>
+
+<h4 id="Pattern-Replace-Character-Filter"><a href="#Pattern-Replace-Character-Filter" class="headerlink" title="Pattern Replace Character Filter"></a>Pattern Replace Character Filter</h4><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Pattern Replace Character Filter</span></span><br><span class="line">PUT my_index</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"settings"</span>: &#123;</span><br><span class="line">        <span class="attr">"analysis"</span>: &#123;</span><br><span class="line">            <span class="attr">"analyzer"</span>: &#123;</span><br><span class="line">                <span class="attr">"my_analyzer"</span>: &#123;</span><br><span class="line">                    <span class="attr">"tokenizer"</span>: <span class="string">"standard"</span>,</span><br><span class="line">                    <span class="attr">"char_filter"</span>: [<span class="string">"my_char_filter"</span>]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">"char_filter"</span>: &#123;</span><br><span class="line">                <span class="attr">"my_char_filter"</span>: &#123;</span><br><span class="line">                    <span class="attr">"type"</span>: <span class="string">"pattern_replace"</span>,   <span class="comment">//通过正则匹配，把-替换成_</span></span><br><span class="line">                    <span class="attr">"pattern"</span>: <span class="string">"(\\d+)-(?=\\d)"</span>,</span><br><span class="line">                    <span class="attr">"replacement"</span>: <span class="string">"$1_"</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">POST my_index/_analyze</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"analyzer"</span>: <span class="string">"my_analyzer"</span>,</span><br><span class="line">    <span class="attr">"text"</span>: <span class="string">"My credit card is 123-456-789"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出结果：</span><br><span class="line">"token" : "My credit card is 123_456_789"</span><br></pre></td></tr></table></figure>
+
+<h2 id="token-filter"><a href="#token-filter" class="headerlink" title="token filter"></a>token filter</h2><h3 id="lowercase-token-filter"><a href="#lowercase-token-filter" class="headerlink" title="lowercase token filter"></a>lowercase token filter</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//大小写 lowercase token filter</span></span><br><span class="line">GET _analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"tokenizer"</span> : <span class="string">"standard"</span>,</span><br><span class="line">  <span class="attr">"filter"</span> : [<span class="string">"lowercase"</span>],</span><br><span class="line">  <span class="attr">"text"</span> : <span class="string">"THE Quick FoX JUMPs"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出结果：</span><br><span class="line">the、quick、fox、jumps</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//当分词后的词项长度满足 &lt; 5 时，执行 filter配置</span></span><br><span class="line">GET /_analyze</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"tokenizer"</span>: <span class="string">"standard"</span>,</span><br><span class="line">    <span class="attr">"filter"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"type"</span>: <span class="string">"condition"</span>,</span><br><span class="line">            <span class="attr">"filter"</span>: [ <span class="string">"lowercase"</span> ],</span><br><span class="line">            <span class="attr">"script"</span>: &#123;</span><br><span class="line">                <span class="attr">"source"</span>: <span class="string">"token.getTerm().length() &lt; 5"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">"text"</span>: <span class="string">"THE QUICK BROWN FOX"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出结果：</span><br><span class="line">the、QUICK、BROWN、fox</span><br></pre></td></tr></table></figure>
+
+<h3 id="stopwords-token-filter"><a href="#stopwords-token-filter" class="headerlink" title="stopwords token filter"></a>stopwords token filter</h3><p>在信息检索中，停用词是为节省存储空间和提高搜索效率，处理文本时自动过滤掉某些字或词，这些字或词即被称为Stop Words（停用词）。</p>
+<p>停用词大致分为两类。一类是语言中的功能词，这些词极其普遍而无实际含义，如“the”、“is“、“which“、“on”等。另一类是词汇词，比如’want’等，这些词应用广泛，但搜索引擎无法保证能够给出真正相关的搜索结果，难以缩小搜索范围，还会降低搜索效率。</p>
+<p>实践中，<strong>通过配置<code>stopwords</code>使得这些词汇不添加进倒排索引中</strong>，从而节省索引的存储空间、提高搜索性能。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">PUT /my_index</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"settings"</span>: &#123;</span><br><span class="line">        <span class="attr">"analysis"</span>: &#123;</span><br><span class="line">            <span class="attr">"analyzer"</span>: &#123;</span><br><span class="line">                <span class="attr">"my_analyzer"</span>:&#123;</span><br><span class="line">                    <span class="attr">"type"</span>:<span class="string">"standard"</span>,</span><br><span class="line">                    <span class="attr">"stopwords"</span>:<span class="string">"_english_"</span>  <span class="comment">//启动英语停用词</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">GET my_index/_analyze</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"analyzer"</span>: <span class="string">"my_analyzer"</span>,</span><br><span class="line">    <span class="attr">"text"</span>: <span class="string">"Teacher Ma is in the restroom"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">未启用英语停用词结果：</span><br><span class="line">Teacher、Ma、is、in、the、restroom</span><br><span class="line"></span><br><span class="line">启用英语停用词结果：</span><br><span class="line">Teacher、Ma、restroom</span><br></pre></td></tr></table></figure>
+
+<h2 id="tokenizer"><a href="#tokenizer" class="headerlink" title="tokenizer"></a>tokenizer</h2><p>基于ES 7.6版本，支持的内置分词器有15种。<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.10/analysis-tokenizers.html" target="_blank" rel="noopener">官网介绍</a></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">1.standard</span> <span class="string">analyzer：默认分词器，中文支持的不理想，会逐字拆分。</span></span><br><span class="line">   <span class="attr">max_token_length：最大令牌长度。如果看到令牌超过此长度，则将其max_token_length间隔分割。默认为255。</span></span><br><span class="line">   </span><br><span class="line"><span class="meta">2.Pattern</span> <span class="string">Tokenizer：以正则匹配分隔符，把文本拆分成若干词项。</span></span><br><span class="line"></span><br><span class="line"><span class="meta">3.Simple</span> <span class="string">Pattern Tokenizer：以正则匹配词项，速度比Pattern Tokenizer快。</span></span><br><span class="line"></span><br><span class="line"><span class="meta">4.whitespace</span> <span class="string">analyzer：以空白符分隔	Tim_cookie</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//配置内置分词器</span></span><br><span class="line">PUT /test_analysis/</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"settings"</span>: &#123;</span><br><span class="line">        <span class="attr">"analysis"</span>: &#123;</span><br><span class="line">            <span class="attr">"analyzer"</span>: &#123;</span><br><span class="line">                <span class="attr">"my_analyzer"</span>: &#123;  <span class="comment">//自定义分词器名称</span></span><br><span class="line">                    <span class="attr">"tokenizer"</span>:<span class="string">"whitespace"</span>   <span class="comment">//指定使用的分词器 standard、pattern、simple</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//验证分词器</span></span><br><span class="line">GET /test_analysis/_analyze</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"analyzer"</span>: <span class="string">"my_analyzer"</span>,</span><br><span class="line">    <span class="attr">"text"</span>: <span class="string">"ooo is bbbb!!"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="自定义-analysis"><a href="#自定义-analysis" class="headerlink" title="自定义 analysis"></a>自定义 analysis</h3><p>设置<code>&quot;type&quot;: &quot;custom&quot;</code>告诉Elasticsearch我们正在定义一个定制分析器。将此与配置内置分析器的方式进行比较： type将设置为内置分析器的名称，如 standard或simple</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">PUT /test_analysis</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"settings"</span>: &#123;</span><br><span class="line">        <span class="attr">"analysis"</span>: &#123;</span><br><span class="line">            <span class="attr">"char_filter"</span>: &#123;   <span class="comment">//自定义字符过滤器，设置映射规则</span></span><br><span class="line">                <span class="attr">"test_char_filter"</span>: &#123;</span><br><span class="line">                    <span class="attr">"type"</span>: <span class="string">"mapping"</span>,</span><br><span class="line">                    <span class="attr">"mappings"</span>: [</span><br><span class="line">                        <span class="string">"&amp; =&gt; and"</span>,</span><br><span class="line">                        <span class="string">"| =&gt; or"</span></span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">"filter"</span>: &#123;         <span class="comment">//过滤器，过滤指定字符</span></span><br><span class="line">                <span class="attr">"test_stopwords"</span>: &#123;</span><br><span class="line">                    <span class="attr">"type"</span>: <span class="string">"stop"</span>,</span><br><span class="line">                    <span class="attr">"stopwords"</span>: [<span class="string">"is"</span>,<span class="string">"in"</span>,<span class="string">"at"</span>,<span class="string">"the"</span>,<span class="string">"a"</span>,<span class="string">"for"</span>]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">"tokenizer"</span>: &#123;     <span class="comment">//正则分析器</span></span><br><span class="line">                <span class="attr">"punctuation"</span>: &#123; </span><br><span class="line">                    <span class="attr">"type"</span>: <span class="string">"pattern"</span>,</span><br><span class="line">                    <span class="attr">"pattern"</span>: <span class="string">"[ .,!?]"</span>  <span class="comment">//以正则匹配到的字符做分词</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">"analyzer"</span>: &#123;      <span class="comment">//自定义分词器</span></span><br><span class="line">                <span class="attr">"my_analyzer"</span>: &#123;</span><br><span class="line">                    <span class="attr">"type"</span>: <span class="string">"custom"</span>,    <span class="comment">//告诉ES这是一个自定义分词器</span></span><br><span class="line">                    <span class="attr">"char_filter"</span>: [     <span class="comment">//设置两个字符过滤器</span></span><br><span class="line">                        <span class="string">"html_strip"</span>,</span><br><span class="line">                        <span class="string">"test_char_filter"</span></span><br><span class="line">                    ],</span><br><span class="line">                    <span class="attr">"tokenizer"</span>: <span class="string">"standard"</span>,  <span class="comment">//设置内置分词器</span></span><br><span class="line">                    <span class="attr">"filter"</span>: [<span class="string">"lowercase"</span>,<span class="string">"test_stopwords"</span>]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">GET /test_analysis/_analyze</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"text"</span>: <span class="string">"Teacher ma &amp; zhang also thinks [mother's friends] is good | nice!!!"</span>,</span><br><span class="line">    <span class="attr">"analyzer"</span>: <span class="string">"my_analyzer"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">分词结果：</span><br><span class="line">teacher、ma、and、zhang、also、thinks、mother's、friends、good、or、nice</span><br></pre></td></tr></table></figure>
+
+<h3 id="IK中文分词器"><a href="#IK中文分词器" class="headerlink" title="IK中文分词器"></a>IK中文分词器</h3><p><a href="https://github.com/medcl/elasticsearch-analysis-ik" target="_blank" rel="noopener">IK分词器下载地址</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">IK分词器安装步骤：</span><br><span class="line">1.上Github下载IK分词器</span><br><span class="line">2.解压分词器，使用maven进行package打包</span><br><span class="line">3.从releases中获取打好的zip包，放到es安装目录&#x2F;plugins&#x2F;ik&#x2F; 目录下解压</span><br><span class="line">4.重启ES</span><br></pre></td></tr></table></figure>
+
+<p>如果ES版本比IK分词器版本高，启动ES时可能会出现如下错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Plugin [analysis-ik] was built for Elasticsearch version 7.4.0 but version 7.10.1 is running</span><br></pre></td></tr></table></figure>
+
+<p>需要修改IK分词器的配置文件<code>plugin-descriptor.properties</code>：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#改成自己使用的ES版本号</span></span><br><span class="line"><span class="meta">elasticsearch.version</span>=<span class="string">7.10.1</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">IK分词器提供两种analyzer</span><br><span class="line">  ik_max_word：细粒度</span><br><span class="line">  ik_smart：粗粒度</span><br><span class="line"></span><br><span class="line">2.IK文件描述</span><br><span class="line">  IKAnalyzer.cfg.xml：IK分词配置文件</span><br><span class="line">  主词库：main.dic</span><br><span class="line">  英文停用词：stopword.dic，不会建立在倒排索引中</span><br><span class="line">  特殊词库：</span><br><span class="line">    quantifier.dic：特殊词库：计量单位等</span><br><span class="line">    suffix.dic：特殊词库：后缀名</span><br><span class="line">    surname.dic：特殊词库：百家姓</span><br><span class="line">    preposition：特殊词库：语气词</span><br><span class="line">  </span><br><span class="line">  自定义词库：比如当下流行词：857、emmm...、996</span><br><span class="line">  热更新：</span><br><span class="line">    修改ik分词器源码</span><br><span class="line">    基于ik分词器原生支持的热更新方案，部署web服务器，提供http接口，通过modified和tag两个http响应头，来提供词语的热更新</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">GET _analyze</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"text"</span>: <span class="string">"你的衣服真好看"</span>,</span><br><span class="line">    <span class="attr">"analyzer"</span>: <span class="string">"ik_max_word"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出结果：</span><br><span class="line">你、的、衣服、真好、好看</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">GET _analyze</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"text"</span>: <span class="string">"你的衣服真好看"</span>,</span><br><span class="line">    <span class="attr">"analyzer"</span>: <span class="string">"ik_smart"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">输出结果：</span><br><span class="line">你、的、衣服、真、好看</span><br></pre></td></tr></table></figure>
+
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年12月13日 21:08</p>
+        <p>原始链接： <a class="post-url" href="/2020/12/09/elasticearch-analysis/" title="&#39;Elasticsearch（五） 分词器&#39;">https://midkuro.gitee.io/2020/12/09/elasticearch-analysis/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.gif" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/12/09/elasticearch-analysis/&title=《'Elasticsearch（五） 分词器'》 — Kuro's Blog&pic=images/es.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/12/09/elasticearch-analysis/&title=《'Elasticsearch（五） 分词器'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/12/09/elasticearch-analysis/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Elasticsearch（五） 分词器'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/12/09/elasticearch-analysis/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/12/09/elasticearch-analysis/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/12/09/elasticearch-analysis/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Elasticsearch/" class="color4">Elasticsearch</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Elasticsearch-分词器"><span class="post-toc-text">Elasticsearch 分词器</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Analysis"><span class="post-toc-text">Analysis</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#normalization"><span class="post-toc-text">normalization</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#character-filter"><span class="post-toc-text">character filter</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#HTML-Strip-Character-Filter"><span class="post-toc-text">HTML Strip Character Filter</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Mapping-Character-Filter"><span class="post-toc-text">Mapping Character Filter</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Pattern-Replace-Character-Filter"><span class="post-toc-text">Pattern Replace Character Filter</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#token-filter"><span class="post-toc-text">token filter</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#lowercase-token-filter"><span class="post-toc-text">lowercase token filter</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#stopwords-token-filter"><span class="post-toc-text">stopwords token filter</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#tokenizer"><span class="post-toc-text">tokenizer</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自定义-analysis"><span class="post-toc-text">自定义 analysis</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#IK中文分词器"><span class="post-toc-text">IK中文分词器</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/12/09/elasticearch-query/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Elasticsearch（六） 搜索&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/12/09/elasticearch-painless/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Elasticsearch（四） Painless&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="elasticearch-analysis" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Algorithm/">Algorithm</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Elasticsearch/">Elasticsearch</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/MYSQL/">MYSQL</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 15px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 15px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

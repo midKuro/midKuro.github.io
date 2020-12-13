@@ -1,3 +1,7 @@
+https://midkuro.gitee.io/2020/12/09/elasticearch-query/
+https://midkuro.gitee.io/2020/12/09/elasticearch-analysis/
+https://midkuro.gitee.io/2020/12/09/elasticearch-painless/
+https://midkuro.gitee.io/2020/12/09/elasticearch-index/
 https://midkuro.gitee.io/2020/12/09/elasticearch-dql/
 https://midkuro.gitee.io/2020/12/09/es-elasticsearch/
 https://midkuro.gitee.io/2020/11/24/https-protocol/

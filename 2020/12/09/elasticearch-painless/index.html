@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Elasticsearch（四） Painless&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
+  <meta name="description" content="Elasticsearch 之 PainlessPainlessPainless是一种专门用于Elasticsearch的简单,用于内联和存储脚本，类似于Java,也有注释、关键字、类型、变量、函数等，安全的脚本语言。它是Elasticsearch的默认脚本语言，可以安全地用于内联和存储脚本。 1234567891011121314&#x2F;&#x2F;将price的价格减少1&#x2F;&#x2F;ctx._source 拿取上下文">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Elasticsearch（四） Painless&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/12/09/elasticearch-painless/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Elasticsearch 之 PainlessPainlessPainless是一种专门用于Elasticsearch的简单,用于内联和存储脚本，类似于Java,也有注释、关键字、类型、变量、函数等，安全的脚本语言。它是Elasticsearch的默认脚本语言，可以安全地用于内联和存储脚本。 1234567891011121314&#x2F;&#x2F;将price的价格减少1&#x2F;&#x2F;ctx._source 拿取上下文">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/elasticsearch-painless/es-01.jpg">
+<meta property="article:published_time" content="2020-12-09T07:00:00.000Z">
+<meta property="article:modified_time" content="2020-12-13T12:40:05.460Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/elasticsearch-painless/es-01.jpg">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?code-JRipY21QjX";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+  
+
+
+  
+  <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
+  
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.gif" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-elasticearch-painless" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Elasticsearch（四） Painless&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Elasticsearch/">Elasticsearch</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-12-09
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Elasticsearch-之-Painless"><a href="#Elasticsearch-之-Painless" class="headerlink" title="Elasticsearch 之 Painless"></a>Elasticsearch 之 Painless</h1><h2 id="Painless"><a href="#Painless" class="headerlink" title="Painless"></a>Painless</h2><p>Painless是一种专门用于Elasticsearch的简单,用于内联和存储脚本，类似于Java,也有注释、关键字、类型、变量、函数等，安全的脚本语言。它是Elasticsearch的默认脚本语言，可以安全地用于内联和存储脚本。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//将price的价格减少1</span></span><br><span class="line"><span class="comment">//ctx._source 拿取上下文的source对象，固定写法</span></span><br><span class="line">POST index/_update/id</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"script"</span>: <span class="string">"ctx._source.price -=1"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//省略的写法</span></span><br><span class="line">POST index/_update/id</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"script"</span>: &#123;</span><br><span class="line">        <span class="attr">"source"</span>: <span class="string">"ctx._source.price -=1"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="add"><a href="#add" class="headerlink" title="add"></a>add</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//通过调用方法添加tags里的数据</span></span><br><span class="line">POST product2/_update/3</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"script"</span>: &#123;</span><br><span class="line">        <span class="comment">//标识这是一个painless语言</span></span><br><span class="line">        <span class="attr">"lang"</span>: <span class="string">"painless"</span>,</span><br><span class="line">        <span class="attr">"source"</span>: <span class="string">"ctx._source.tags.add('无线充电')"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//传参调用</span></span><br><span class="line">POST product2/_update/3</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"script"</span>: &#123;</span><br><span class="line">        <span class="attr">"lang"</span>: <span class="string">"painless"</span>,</span><br><span class="line">        <span class="attr">"source"</span>: <span class="string">"ctx._source.tags.add(params.tag_name)"</span>,</span><br><span class="line">        <span class="attr">"params"</span>: &#123;</span><br><span class="line">            <span class="attr">"tag_name"</span>: <span class="string">"无线充电"</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="delete"><a href="#delete" class="headerlink" title="delete"></a>delete</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//delete  id=15的数据</span></span><br><span class="line">POST product2/_update/15</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"script"</span>: &#123;</span><br><span class="line">        <span class="attr">"lang"</span>: <span class="string">"painless"</span>,</span><br><span class="line">        <span class="attr">"source"</span>: <span class="string">"ctx.op='delete'"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="upsert"><a href="#upsert" class="headerlink" title="upsert"></a>upsert</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//如果数据存在,执行script语句进行更新操作,如果数据不存在,那么执行upsert进行插入操作</span></span><br><span class="line">GET /product2/_doc/15</span><br><span class="line">POST product2/_update/15</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"script"</span>: &#123;</span><br><span class="line">        <span class="attr">"source"</span>: <span class="string">"ctx._source.price += params.param1"</span>,</span><br><span class="line">        <span class="attr">"lang"</span>: <span class="string">"painless"</span>,</span><br><span class="line">        <span class="attr">"params"</span>: &#123;</span><br><span class="line">            <span class="attr">"param1"</span>: <span class="number">100</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">"upsert"</span>: &#123;</span><br><span class="line">        <span class="attr">"name"</span>: <span class="string">"小米10"</span>,</span><br><span class="line">        <span class="attr">"price"</span>: <span class="number">1999</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h3><blockquote>
+<p>Elasticsearch首次执行脚本时，将对其进行编译并将编译后的版本存储在缓存中。编译过程比较消耗性能。<br>如果需要将变量传递到脚本中，则应以命名形式传递变量，params而不是将值硬编码到脚本本身中。例如，如果您希望能够将字段值乘以不同的乘数，请不要将乘数硬编码到脚本中</p>
+</blockquote>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//看took消耗</span></span><br><span class="line"><span class="comment">//doc['price'].value 获取doc对象里的price列的值</span></span><br><span class="line">GET product2/_search</span><br><span class="line">&#123;	</span><br><span class="line">    <span class="comment">//由于是查询字段经过了script计算，返回的结果需要定义一个名称，使用script_fields接收结果</span></span><br><span class="line">    <span class="attr">"script_fields"</span>: &#123;</span><br><span class="line">        <span class="attr">"test_field"</span>: &#123;</span><br><span class="line">            <span class="attr">"script"</span>: &#123;</span><br><span class="line">                <span class="attr">"lang"</span>: <span class="string">"painless"</span>,</span><br><span class="line">                <span class="attr">"source"</span>: <span class="string">"doc['price'].value * 9"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//更换num的值 对比took消耗   </span></span><br><span class="line">GET product2/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"script_fields"</span>: &#123;</span><br><span class="line">        <span class="attr">"test_field"</span>: &#123;</span><br><span class="line">            <span class="attr">"script"</span>: &#123;</span><br><span class="line">                <span class="attr">"lang"</span>: <span class="string">"expression"</span>,</span><br><span class="line">                <span class="attr">"source"</span>: <span class="string">"doc['price'].value * num"</span>,</span><br><span class="line">                <span class="attr">"params"</span>: &#123;</span><br><span class="line">                    <span class="attr">"num"</span>: <span class="number">9</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>doc[&#39;price&#39;] * num</code>只编译一次，而<code>doc[&#39;price&#39;] * 9</code> 会随着数字改变而一直编译，效率没有传参的方式高效。ES默认每分钟支持15次编译。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 支持查原数据 + 计算数据 ，如原始价格 和 多个打折价格</span></span><br><span class="line">GET product2/_search</span><br><span class="line">&#123;	</span><br><span class="line">    <span class="attr">"script_fields"</span>: &#123;</span><br><span class="line">        <span class="attr">"price"</span>: &#123;</span><br><span class="line">            <span class="attr">"script"</span>: &#123;</span><br><span class="line">                <span class="attr">"lang"</span>: <span class="string">"painless"</span>,</span><br><span class="line">                <span class="attr">"source"</span>: <span class="string">"doc['price'].value"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">"discount_price"</span>: &#123;</span><br><span class="line">            <span class="attr">"script"</span>: &#123;</span><br><span class="line">                <span class="attr">"lang"</span>: <span class="string">"painless"</span>,</span><br><span class="line">                <span class="comment">//这里要使用数据，因为有多个参数</span></span><br><span class="line">                <span class="attr">"source"</span>: <span class="string">"[doc['price'].value * params.p1,doc['price'].value * params.p2]"</span>,</span><br><span class="line">                <span class="attr">"params"</span>: &#123;</span><br><span class="line">                    <span class="attr">"p1"</span>: <span class="number">0.8</span>,</span><br><span class="line">                    <span class="attr">"p2"</span>: <span class="number">0.7</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Stored-scripts"><a href="#Stored-scripts" class="headerlink" title="Stored scripts"></a>Stored scripts</h3><p><strong>Stored scripts</strong> :可以理解为script模板  缓存在集群的cache中，默认缓存大小是100MB  没有过期时间 可以手工设置过期时间script.cache.expire 通过script.cache.max_size设置缓存大小 脚本最大64MB 通过<code>script.max_size_in_bytes</code>配置 只有发生变更时重新编译。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 语法：/_scripts/&#123;id&#125;  类似存储过程  计算折扣 作用域为整个集群 &#123;id&#125;是scripts的名称</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//新增</span></span><br><span class="line">POST _scripts/calculate-discount</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"script"</span>: &#123;</span><br><span class="line">        <span class="attr">"lang"</span>: <span class="string">"painless"</span>,</span><br><span class="line">        <span class="attr">"source"</span>: <span class="string">"doc['price'].value * params.discount"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//查看</span></span><br><span class="line">GET _scripts/calculate-discount</span><br><span class="line"></span><br><span class="line"><span class="comment">//删除</span></span><br><span class="line">DELETE _scripts/calculate-discount</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//调用</span></span><br><span class="line">GET product2/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"script_fields"</span>: &#123;</span><br><span class="line">        <span class="attr">"discount_price"</span>: &#123;</span><br><span class="line">            <span class="attr">"script"</span>: &#123;</span><br><span class="line">                <span class="comment">//调用名称为calculate-discount的srcipt</span></span><br><span class="line">                <span class="attr">"id"</span>:<span class="string">"calculate-discount"</span>,</span><br><span class="line">                <span class="attr">"params"</span>: &#123;</span><br><span class="line">                    <span class="attr">"discount"</span>: <span class="number">0.8</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Dates"><a href="#Dates" class="headerlink" title="Dates"></a>Dates</h3><p><strong>Dates</strong>：ZonedDateTime类型，因此它们支持诸如之类的方法getYear，getDayOfWeek 或例如从历元开始到毫秒getMillis。要在脚本中使用它们，请省略get前缀并继续使用小写的方法名其余部分。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//getYear()</span></span><br><span class="line"><span class="comment">//getMonth()</span></span><br><span class="line"><span class="comment">//getDayOfMonth()</span></span><br><span class="line"><span class="comment">//getDayOfWeek()</span></span><br><span class="line"><span class="comment">//getDayOfYear()</span></span><br><span class="line"><span class="comment">//getHour()</span></span><br><span class="line"><span class="comment">//getMinute()</span></span><br><span class="line"><span class="comment">//getSecond()</span></span><br><span class="line"><span class="comment">//getNano()</span></span><br><span class="line">GET product2/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"script_fields"</span>: &#123;</span><br><span class="line">        <span class="attr">"test_year"</span>: &#123;</span><br><span class="line">            <span class="attr">"script"</span>: &#123;</span><br><span class="line">                <span class="attr">"source"</span>: <span class="string">"doc.createtime.value.year"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Groovy"><a href="#Groovy" class="headerlink" title="Groovy"></a>Groovy</h3><p>通过两个<code>&quot;&quot;&quot;</code>括起来，在里面能够把它当做java代码进行编写，每个语句分隔使用<code>;</code>，支持使用条件语句。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">POST product2/_update/1</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"script"</span>: &#123;</span><br><span class="line">        <span class="attr">"lang"</span>: <span class="string">"painless"</span>,</span><br><span class="line">        <span class="attr">"source"</span>: <span class="string">""</span><span class="string">"</span></span><br><span class="line"><span class="string">            ctx._source.name += params.name;</span></span><br><span class="line"><span class="string">            ctx._source.price -= 1</span></span><br><span class="line"><span class="string">        "</span><span class="string">""</span>,</span><br><span class="line">        <span class="attr">"params"</span>: &#123;</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"无线充电"</span>,</span><br><span class="line">            <span class="attr">"price"</span>: <span class="string">"1"</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//正则部分匹配phone</span></span><br><span class="line">POST product2/_update/1</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"script"</span>: &#123;</span><br><span class="line">        <span class="attr">"lang"</span>: <span class="string">"painless"</span>,</span><br><span class="line">        <span class="attr">"source"</span>: <span class="string">""</span><span class="string">"</span></span><br><span class="line"><span class="string">            // =~ 部分匹配 name中包含phone   [\s\S]表示任意符号 </span></span><br><span class="line"><span class="string">            if (ctx._source.name =~ /[\s\S]*phone[\s\S]*/) &#123;</span></span><br><span class="line"><span class="string">                ctx._source.name += "</span>***|<span class="string">";</span></span><br><span class="line"><span class="string">            &#125; else &#123;</span></span><br><span class="line"><span class="string">                //什么都不做</span></span><br><span class="line"><span class="string">                ctx.op = "</span>noop<span class="string">";</span></span><br><span class="line"><span class="string">            &#125;</span></span><br><span class="line"><span class="string">        "</span><span class="string">""</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//正则匹配日期 yyyy-MM-dd</span></span><br><span class="line">POST product2/_update/1</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"script"</span>: &#123;</span><br><span class="line">        <span class="attr">"lang"</span>: <span class="string">"painless"</span>,</span><br><span class="line">        <span class="attr">"source"</span>: <span class="string">""</span><span class="string">"</span></span><br><span class="line"><span class="string">            // ==~ 全匹配 日期</span></span><br><span class="line"><span class="string">            if (ctx._source.createtime ==~ /[0-9]&#123;4&#125;-[0-9]&#123;2&#125;-[0-9]&#123;2&#125;/) &#123;</span></span><br><span class="line"><span class="string">                ctx._source.name += "</span>|***<span class="string">";</span></span><br><span class="line"><span class="string">            &#125; else &#123;</span></span><br><span class="line"><span class="string">                ctx.op = "</span>noop<span class="string">";</span></span><br><span class="line"><span class="string">            &#125;</span></span><br><span class="line"><span class="string">        "</span><span class="string">""</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>正则表达式默认情况下处于禁用状态，因为他们绕过了<code>Painless</code>的针对长时间运行和占用内存的脚本保护措施，而且有深度堆栈行为，若想要开启，则需要在<code>elasticsearch.yml</code>增加配置：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">script.painless.regex.enabled</span>: <span class="string">true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="聚合操作"><a href="#聚合操作" class="headerlink" title="聚合操作"></a>聚合操作</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//计算价格小于1000的tags数量</span></span><br><span class="line">GET /product/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"bool"</span>: &#123;</span><br><span class="line">            <span class="attr">"filter"</span>: [</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="attr">"range"</span>: &#123;</span><br><span class="line">                        <span class="attr">"price"</span>: &#123;</span><br><span class="line">                            <span class="attr">"lt"</span>: <span class="number">1000</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">"aggs"</span>: &#123;</span><br><span class="line">        <span class="attr">"tag_agg_group"</span>: &#123;</span><br><span class="line">            <span class="attr">"sum"</span>: &#123;</span><br><span class="line">                <span class="attr">"script"</span>: &#123;</span><br><span class="line">                    <span class="attr">"lang"</span>: <span class="string">"painless"</span>,</span><br><span class="line">                    <span class="attr">"source"</span>: <span class="string">""</span><span class="string">"</span></span><br><span class="line"><span class="string">                        int total = 0;</span></span><br><span class="line"><span class="string">                    for (int i = 0; i &lt; doc['tags.keyword'].length; i++)</span></span><br><span class="line"><span class="string">                    &#123;</span></span><br><span class="line"><span class="string">                        total++</span></span><br><span class="line"><span class="string">                    &#125;</span></span><br><span class="line"><span class="string">                    return total;</span></span><br><span class="line"><span class="string">                    "</span><span class="string">""</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">"size"</span>: <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>doc[‘field’].value和params[‘_source’] [‘field’] 的区别：</p>
+</blockquote>
+<p>理解之间的区别是很重要的，首先，使用doc关键字，将导致该字段的条件被加载到内存（缓存），这将导致更快的执行，但更多的内存消耗。</p>
+<p>此外，<strong>doc[…]符号只允许简单类型</strong>（不能返回一个复杂类型(JSON对象或者nested类型)），只有在非分析或单个词条的基础上有意义。</p>
+<p>但是，doc如果可能，使用仍然是从文档访问值的推荐方式，因为_source每次使用时都必须加载并解析。使用_source非常缓慢。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//查询一批数据中，字段people：[&#123;"SF":男&#125;,&#123;"SF":女&#125;]，有多少个男性</span></span><br><span class="line">GET /test_index/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">"aggs"</span>: &#123;</span><br><span class="line">        <span class="string">"sum_person"</span>: &#123;</span><br><span class="line">            <span class="string">"sum"</span>: &#123;</span><br><span class="line">                <span class="string">"script"</span>: &#123;</span><br><span class="line">                    <span class="string">"lang"</span>: <span class="string">"painless"</span>,</span><br><span class="line">                    <span class="string">"source"</span>: <span class="string">""</span><span class="string">"</span></span><br><span class="line"><span class="string">                        int total = 0;</span></span><br><span class="line"><span class="string">                    for (int i = 0; i &lt; params['_source']['people'].length; i++)</span></span><br><span class="line"><span class="string">                    &#123;</span></span><br><span class="line"><span class="string">                        if (params['_source']['people'][i]['SF'] == '男') &#123;</span></span><br><span class="line"><span class="string">                            total += 1;</span></span><br><span class="line"><span class="string">                        &#125;</span></span><br><span class="line"><span class="string">                    &#125;</span></span><br><span class="line"><span class="string">                    return total;</span></span><br><span class="line"><span class="string">                    "</span><span class="string">""</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"size"</span>: <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="写入原理"><a href="#写入原理" class="headerlink" title="写入原理"></a>写入原理</h2><p><img src="/images/elasticsearch-painless/es-01.jpg" alt="es"></p>
+<p>当有写入请求时，数据会先写到内存的Buffer中（Buffer专门用于写入操作），每间隔1S会创建一个<code>index segment</code>的<code>file</code>，然后<code>segment</code>会同步到<code>OS cache</code>中，<code>OS cache</code>会返回一个<code>status = Open</code>，<strong>这时候的<code>segment</code>就能对外提供搜索操作。</strong></p>
+<p><strong>读写操作进行了异步分离操作，segment对外提供读搜索操作，OS cache后台异步写入数据。</strong></p>
+<blockquote>
+<p>在这种方式下，如果宕机会造成少部分数据的丢失，ES是怎么避免的？</p>
+</blockquote>
+<p>ES在写入索引时，并没有实时落盘到索引文件，而是先双写到内存和translog文件，假如节点挂了，重启节点时就会重放日志，这样相当于把用户的操作模拟了一遍。保证了数据的不丢失。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">当OS cache中的数据达到一定大小之后或者一定时间后，触发Flush：</span><br><span class="line">1.执行 commit操作，把内存中的Buffer、Segment数据同步到OS cache</span><br><span class="line">2.把OS cache的数据fsync到 磁盘中</span><br><span class="line">3.清空translog</span><br></pre></td></tr></table></figure>
+
+<p><code>Commit Point</code>用于存储可用的segment，每当创建一个segment时，都会往<code>Commit point</code>中做登记，<code>segment</code>文件并不是无限制地创建的，当达到一定的操作/大小时，会执行segment合并操作：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.选择一些体积小的segment，然后将其合并成一个更大的segment</span><br><span class="line">2.执行flush操作，讲OS cache的数据落地到磁盘中</span><br><span class="line">3.创建新的commit point，并且登记新的segment，然后将旧的segment标记成删除状态</span><br><span class="line">4.将新的segment搜索状态&#96;status&#x3D;open&#96;打开</span><br><span class="line">5.将删除状态的segment文件删除</span><br></pre></td></tr></table></figure>
+
+<p><code>segment</code>维护了一个<code>.del</code>的文件，当有数据执行删除/更新操作时，它会先将数据在segment中标记成删除的状态，这时候没有物理删除，然后在查询的时候，会将删除状态的数据进行过滤。</p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年12月13日 20:40</p>
+        <p>原始链接： <a class="post-url" href="/2020/12/09/elasticearch-painless/" title="&#39;Elasticsearch（四） Painless&#39;">https://midkuro.gitee.io/2020/12/09/elasticearch-painless/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.gif" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/12/09/elasticearch-painless/&title=《'Elasticsearch（四） Painless'》 — Kuro's Blog&pic=images/es.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/12/09/elasticearch-painless/&title=《'Elasticsearch（四） Painless'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/12/09/elasticearch-painless/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Elasticsearch（四） Painless'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/12/09/elasticearch-painless/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/12/09/elasticearch-painless/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/12/09/elasticearch-painless/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Elasticsearch/" class="color4">Elasticsearch</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Elasticsearch-之-Painless"><span class="post-toc-text">Elasticsearch 之 Painless</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Painless"><span class="post-toc-text">Painless</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#add"><span class="post-toc-text">add</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#delete"><span class="post-toc-text">delete</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#upsert"><span class="post-toc-text">upsert</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#查询"><span class="post-toc-text">查询</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Stored-scripts"><span class="post-toc-text">Stored scripts</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Dates"><span class="post-toc-text">Dates</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Groovy"><span class="post-toc-text">Groovy</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#聚合操作"><span class="post-toc-text">聚合操作</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#写入原理"><span class="post-toc-text">写入原理</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/12/09/elasticearch-analysis/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Elasticsearch（五） 分词器&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/12/09/elasticearch-index/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Elasticsearch（三） 倒排索引&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="elasticearch-painless" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Algorithm/">Algorithm</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Elasticsearch/">Elasticsearch</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/MYSQL/">MYSQL</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 15px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 15px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Elasticsearch（三） 倒排索引&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
+  <meta name="description" content="Elasticsearch 倒排索引底层原理 正排索引（doc values ）VS 倒排索引：  概念：从广义来说，doc values 本质上是一个序列化的 列式存储 。列式存储 适用于聚合、排序、脚本等操作，所有的数字、地理坐标、日期、IP 和不分析（ not_analyzed ）字符类型都会默认开启。 特点：倒排索引的优势 在于查找包含某个项的文档，相反，如果用它确定哪些项是否存在单个文档">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Elasticsearch（三） 倒排索引&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/12/09/elasticearch-index/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Elasticsearch 倒排索引底层原理 正排索引（doc values ）VS 倒排索引：  概念：从广义来说，doc values 本质上是一个序列化的 列式存储 。列式存储 适用于聚合、排序、脚本等操作，所有的数字、地理坐标、日期、IP 和不分析（ not_analyzed ）字符类型都会默认开启。 特点：倒排索引的优势 在于查找包含某个项的文档，相反，如果用它确定哪些项是否存在单个文档">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/elasticsearch-index/es-01.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/elasticsearch-index/es-02.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/elasticsearch-index/es-03.png">
+<meta property="article:published_time" content="2020-12-09T06:00:00.000Z">
+<meta property="article:modified_time" content="2020-12-13T12:39:57.023Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/elasticsearch-index/es-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?code-JRipY21QjX";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+  
+
+
+  
+  <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
+  
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.gif" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-elasticearch-index" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Elasticsearch（三） 倒排索引&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Elasticsearch/">Elasticsearch</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-12-09
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Elasticsearch-倒排索引"><a href="#Elasticsearch-倒排索引" class="headerlink" title="Elasticsearch 倒排索引"></a>Elasticsearch 倒排索引</h1><h2 id="底层原理"><a href="#底层原理" class="headerlink" title="底层原理"></a>底层原理</h2><blockquote>
+<p>正排索引（doc values ）VS 倒排索引：</p>
+</blockquote>
+<p><strong>概念</strong>：从广义来说，doc values 本质上是一个序列化的 列式存储 。列式存储 适用于聚合、排序、脚本等操作，所有的数字、地理坐标、日期、IP 和不分析（ not_analyzed ）字符类型都会默认开启。</p>
+<p><strong>特点</strong>：倒排索引的优势 在于查找包含某个项的文档，相反，如果用它确定哪些项是否存在单个文档里。</p>
+<p><strong>总结：全文搜索需要用倒排索引，而排序和聚合则需要使用 正排索引。</strong></p>
+<blockquote>
+<p>在Mappings中有两个相关配置</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">doc_values：true&#x2F;false </span><br><span class="line">为该字段创建正排索引，默认true，不支持text类型</span><br><span class="line"></span><br><span class="line">index:true&#x2F;false </span><br><span class="line">为该字段创建倒排索引，默认为true</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">PUT /product</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"mappings"</span>: &#123;</span><br><span class="line">        <span class="attr">"properties"</span>: &#123;  </span><br><span class="line">            <span class="attr">"tags"</span>: &#123;</span><br><span class="line">                <span class="attr">"type"</span>: <span class="string">"text"</span>,</span><br><span class="line">                <span class="attr">"index"</span>: <span class="string">"true"</span></span><br><span class="line">                <span class="comment">//"doc_values": "true" text类型不支持</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//当使用es自带的keyword时，它字段值是一个整体的精确匹配，并不会对字段值的内容进行分词</span></span><br><span class="line">GET /product/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"aggs"</span>: &#123;</span><br><span class="line">        <span class="attr">"tags_group"</span>: &#123;</span><br><span class="line">            <span class="attr">"terms"</span>: &#123;</span><br><span class="line">                <span class="attr">"field"</span>: <span class="string">"tags.keyword"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>而<code>doc_values</code>正排索引不支持<code>text</code>字段，那<code>text</code>字段怎么进行聚合操作呢？</p>
+</blockquote>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//当直接使用tags进行聚合操作，想要聚合tags中的分词后的terms词项，会报错</span></span><br><span class="line">GET /product/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"aggs"</span>: &#123;</span><br><span class="line">        <span class="attr">"tags_group"</span>: &#123;</span><br><span class="line">            <span class="attr">"terms"</span>: &#123;</span><br><span class="line">                <span class="attr">"field"</span>: <span class="string">"tags"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Text fields are not optimised for operations that require per-document field data like aggregations and sorting, </span><br><span class="line">so these operations are disabled by default. Please use a keyword field instead. </span><br><span class="line">Alternatively, set fielddata&#x3D;true on [tags] in order to load field data by uninverting the inverted index. </span><br><span class="line">Note that this can use significant memory.</span><br></pre></td></tr></table></figure>
+
+<p>大概的意思是，必须要打开<code>fielddata=true</code>，然后将正排索引数据加载到内存中，才可以对分词的field执行聚合操作，而且会消耗很大的内存。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//修改Mapping结构：开启tags字段 在使用聚合操作时使用 正排索引进行计算</span></span><br><span class="line">PUT /product/_mapping</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"properties"</span>: &#123;</span><br><span class="line">        <span class="attr">"tags"</span>: &#123;</span><br><span class="line">            <span class="attr">"type"</span>: <span class="string">"text"</span>,</span><br><span class="line">            <span class="attr">"fielddata"</span>: <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这时候再次执行上文的tags的聚合操作，就不会报错了，<strong>那么<code>fielddata</code>和<code>doc_values</code>都是开启正排索引，他们之间有什么区别呢？</strong></p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>doc_values</th>
+<th>fielddata</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>创建时间</td>
+<td>index时创建</td>
+<td>使用时动态创建</td>
+</tr>
+<tr>
+<td>创建位置</td>
+<td>磁盘</td>
+<td>内存(jvm heap)</td>
+</tr>
+<tr>
+<td>优点</td>
+<td>不占用内存空间</td>
+<td>不占用磁盘空间</td>
+</tr>
+<tr>
+<td>缺点</td>
+<td>索引速度稍低</td>
+<td>文档很多时，动态创建开销比较大，而且占内存</td>
+</tr>
+<tr>
+<td>默认值</td>
+<td><strong>true</strong></td>
+<td><strong>false</strong></td>
+</tr>
+</tbody></table>
+<p><code>doc_values</code>速度稍低这个是相对于fielddata方案的，其实仔细想想也可以理解。拿排序举例，相对于一个在磁盘排序，一个在内存排序。谁的速度快自然不用多说。</p>
+<p>与 doc values 不同，fielddata 构建和管理 100% 在内存中，常驻于 JVM 内存堆。这意味着它本质上是不可扩展的。</p>
+<p>fielddata可能会消耗大量的堆空间，尤其是在加载高基数（high cardinality）text字段时。一旦fielddata已加载到堆中，它将在该段的生命周期内保留。此外，加载fielddata是一个昂贵的过程，可能会导致用户遇到延迟命中。这就是默认情况下禁用fielddata的原因。</p>
+<p><code>doc_values</code>虽然速度稍慢，但doc_values的优势还是非常明显的。一个很显著的点就是他不会随着文档的增多引起<code>OOM</code>问题。正如前面说的，doc_values在磁盘创建排序和聚合所需的正排索引。这样我们就避免了在生产环境给ES设置一个很大的<code>HEAP_SIZE</code>，也使得JVM的GC更加高效，这个又为其它的操作带来了间接的好处。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.当没有doc value的字段需要聚合时，需要打开fielddata，然后临时在内存中建立正排索引，fielddata的构建和管理发生在JVM heap中。</span><br><span class="line"></span><br><span class="line">2.Fielddata默认是不启用的，因为text字段比较长，一般只做关键字分词和搜索，很少拿来进行全文匹配和聚合还有排序。</span><br><span class="line"></span><br><span class="line">3.ES采用了circuit breaker(熔断)机制避免fielddata一次性超过物理内存大小而导致内存溢出，如果发生熔断，查询会被终止并返回异常。</span><br><span class="line"></span><br><span class="line">4.fielddata使用的是jvm内存，doc value在内存不足时会静静的待在磁盘中，而当内存充足时，会蹦到内存里提升性能。</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/elasticsearch-index/es-01.png" alt="es"></p>
+<p><img src="/images/elasticsearch-index/es-02.png" alt="es"></p>
+<blockquote>
+<p>为什么不可以用倒排索引计算聚合？</p>
+<p>对于聚合部分，我们需要找到匹配的doc里所有唯一的词项（term）。需要遍历每个doc获取所有trem词项，然后再一个个去倒排索引表中进行查找，是一个 n x m 的操作，做这件事情性能很低，很有可能会造成全表遍历。</p>
+<p><strong>因此通过正排索引来解决聚合问题</strong>。</p>
+</blockquote>
+<p><img src="/images/elasticsearch-index/es-03.png" alt="es"></p>
+<h2 id="批量查询"><a href="#批量查询" class="headerlink" title="批量查询"></a>批量查询</h2><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">语法：</span></span><br><span class="line"><span class="attr">GET</span> <span class="string">/_mget</span></span><br><span class="line"><span class="attr">GET</span> <span class="string">/&lt;index&gt;/_mget</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//批量查询 查询id =2 和id = 3 的数据</span></span><br><span class="line">GET /_mget</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"docs"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_index"</span>: <span class="string">"product"</span>,</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">2</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_index"</span>: <span class="string">"product"</span>,</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">3</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//封装,把索引名(product提取出来)</span></span><br><span class="line">GET /product/_mget</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"docs"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">2</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">3</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//再封装</span></span><br><span class="line">GET /product/_mget</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"ids"</span>:[<span class="number">2</span>,<span class="number">3</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//include包含哪些字段  exclude排除哪些字段</span></span><br><span class="line">GET /product/_mget</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"docs"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">2</span>,</span><br><span class="line">            <span class="attr">"_source"</span>: <span class="literal">false</span> <span class="comment">//不显示字段数据</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">3</span>,</span><br><span class="line">            <span class="attr">"_source"</span>: [  <span class="comment">//指定字段数据</span></span><br><span class="line">                <span class="string">"name"</span>,</span><br><span class="line">                <span class="string">"price"</span></span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"_id"</span>: <span class="number">4</span>,</span><br><span class="line">            <span class="attr">"_source"</span>: &#123;</span><br><span class="line">                <span class="attr">"include"</span>: [</span><br><span class="line">                    <span class="string">"name"</span></span><br><span class="line">                ],</span><br><span class="line">                <span class="attr">"exclude"</span>:[</span><br><span class="line">                    <span class="string">"price"</span></span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Operate：</span><br><span class="line">  create：PUT &#x2F;index&#x2F;_create&#x2F;id&#x2F;，强制创建（是否制定id）</span><br><span class="line">  delete：删除（lazy delete原理）</span><br><span class="line">  index：可以是创建，也可以是全量替换</span><br><span class="line">  update：执行partial update（全量替换，部分替换）</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//手动指定id和自动生成</span></span><br><span class="line">PUT /test_index/_doc/1/</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"test"</span>:<span class="string">"123"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//强制执行创建 如果数据存在则报错</span></span><br><span class="line">PUT /test_index/_doc/1/_create</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"test"</span>:<span class="string">"123"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//同上</span></span><br><span class="line">PUT /test_index/_create/1/</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"test"</span>:<span class="string">"123"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//自动生产id(guid)</span></span><br><span class="line">POST /test_index/_doc</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"test"</span>:<span class="string">"123"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当使用PUT进行数据覆盖的时候，Version版本号会上升，旧的Version数据会被删除，不会马上删除，会有一个懒删除的机制。</p>
+<h2 id="批量操作"><a href="#批量操作" class="headerlink" title="批量操作"></a>批量操作</h2><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bulk：批量增删改  no-query</span><br><span class="line">语法格式：</span><br><span class="line">POST /_bulk</span><br><span class="line">POST /&lt;index&gt;/_bulk</span><br><span class="line">&#123;<span class="attr">"action"</span>: &#123;<span class="attr">"metadata"</span>&#125;&#125;   <span class="comment">//操作和索引</span></span><br><span class="line">&#123;<span class="attr">"data"</span>&#125;   <span class="comment">//数据</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">POST /_bulk</span><br><span class="line">&#123; <span class="attr">"delete"</span>: &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"1"</span> &#125;&#125;</span><br><span class="line"></span><br><span class="line">&#123; <span class="attr">"create"</span>: &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"2"</span> &#125;&#125;</span><br><span class="line">&#123; <span class="attr">"name"</span>:    <span class="string">"_bulk create 2"</span> &#125;</span><br><span class="line"></span><br><span class="line">&#123; <span class="attr">"create"</span>: &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"12"</span> &#125;&#125;</span><br><span class="line">&#123; <span class="attr">"name"</span>:    <span class="string">"_bulk create 12"</span> &#125;</span><br><span class="line"></span><br><span class="line">&#123; <span class="attr">"index"</span>:  &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"3"</span> &#125;&#125;</span><br><span class="line">&#123; <span class="attr">"name"</span>:    <span class="string">"index product2 "</span> &#125;</span><br><span class="line"></span><br><span class="line">&#123; <span class="attr">"index"</span>:  &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"13"</span> &#125;&#125;</span><br><span class="line">&#123; <span class="attr">"name"</span>:    <span class="string">"index product2"</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//当出现冲突时尝试三次，三次失败后就放弃</span></span><br><span class="line">&#123; <span class="attr">"update"</span>: &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"4"</span>,<span class="attr">"retry_on_conflict"</span> : <span class="string">"3"</span>&#125; &#125;</span><br><span class="line">&#123; <span class="attr">"doc"</span> : &#123;<span class="attr">"test_field2"</span> : <span class="string">"bulk test1"</span>&#125; &#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>bulk</code>批处理操作要求数据分两行编写，不可以将<code>{}</code>进行换行操作。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//加?filter_path=items.*.error  只显示失败的，返回从操作失败的数据信息</span></span><br><span class="line">POST /_bulk?filter_path=items.*.error</span><br><span class="line">&#123; <span class="attr">"delete"</span>: &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"1"</span> &#125;&#125;</span><br><span class="line">&#123; <span class="attr">"create"</span>: &#123; <span class="attr">"_index"</span>: <span class="string">"product2"</span>,  <span class="attr">"_id"</span>: <span class="string">"2"</span> &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//version=2&amp;&amp;version_type=external 通过版本更新数据，避免并发覆盖---CAS</span></span><br><span class="line">PUT /version_index/_doc/1?version=2&amp;&amp;version_type=external</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"title"</span>: <span class="string">"窈窕淑女,君子好逑"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//新版本使用者两个</span></span><br><span class="line"><span class="comment">//if_seq_no` and `if_primary_term`</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>ES是通过CAS+Version解决并发的问题！！！</strong></p>
+</blockquote>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年12月13日 20:39</p>
+        <p>原始链接： <a class="post-url" href="/2020/12/09/elasticearch-index/" title="&#39;Elasticsearch（三） 倒排索引&#39;">https://midkuro.gitee.io/2020/12/09/elasticearch-index/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.gif" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/12/09/elasticearch-index/&title=《'Elasticsearch（三） 倒排索引'》 — Kuro's Blog&pic=images/es.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/12/09/elasticearch-index/&title=《'Elasticsearch（三） 倒排索引'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/12/09/elasticearch-index/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Elasticsearch（三） 倒排索引'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/12/09/elasticearch-index/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/12/09/elasticearch-index/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/12/09/elasticearch-index/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Elasticsearch/" class="color4">Elasticsearch</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Elasticsearch-倒排索引"><span class="post-toc-text">Elasticsearch 倒排索引</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#底层原理"><span class="post-toc-text">底层原理</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#批量查询"><span class="post-toc-text">批量查询</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#批量操作"><span class="post-toc-text">批量操作</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/12/09/elasticearch-painless/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Elasticsearch（四） Painless&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/12/09/elasticearch-dql/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Elasticsearch（二） 查询语法&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="elasticearch-index" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Algorithm/">Algorithm</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Elasticsearch/">Elasticsearch</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/MYSQL/">MYSQL</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 15px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 15px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

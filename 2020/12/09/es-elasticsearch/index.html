@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   
-  <title>&#39;Elasticsearch 基本概念&#39; | Kuro&#39;s Blog</title>
+  <title>&#39;Elasticsearch（一） 基本概念&#39; | Kuro&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
@@ -15,7 +15,7 @@
 
   <meta name="description" content="Elasticsearch基本概念ES是基于Lucene分布式搜索服务，可以存储整个对象或文档，分布式的实时文件存储，每个字段都被索引并可被搜索，分布式的实时分析搜索引擎，可以扩展到上百台服务器，处理PB级结构化或非结构化数据。 与传统数据库的对比 索引（index）索引是ES的一个逻辑存储，对应关系型数据库中的库，ES可以把索引数据存放到服务器中，也可以sharding(分片)后存储到多台服务器">
 <meta property="og:type" content="article">
-<meta property="og:title" content="&#39;Elasticsearch 基本概念&#39;">
+<meta property="og:title" content="&#39;Elasticsearch（一） 基本概念&#39;">
 <meta property="og:url" content="https://midkuro.gitee.io/2020/12/09/es-elasticsearch/index.html">
 <meta property="og:site_name" content="Kuro&#39;s Blog">
 <meta property="og:description" content="Elasticsearch基本概念ES是基于Lucene分布式搜索服务，可以存储整个对象或文档，分布式的实时文件存储，每个字段都被索引并可被搜索，分布式的实时分析搜索引擎，可以扩展到上百台服务器，处理PB级结构化或非结构化数据。 与传统数据库的对比 索引（index）索引是ES的一个逻辑存储，对应关系型数据库中的库，ES可以把索引数据存放到服务器中，也可以sharding(分片)后存储到多台服务器">
@@ -23,10 +23,12 @@
 <meta property="og:image" content="https://midkuro.gitee.io/images/elastic-search/es-01.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/elastic-search/es-02.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/elastic-search/es-03.png">
-<meta property="og:image" content="https://midkuro.gitee.io/images/elastic-search/es-04.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/elastic-search/es-06.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/elastic-search/es-07.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/elastic-search/es-08.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/elastic-search/es-05.png">
 <meta property="article:published_time" content="2020-12-09T04:00:00.000Z">
-<meta property="article:modified_time" content="2020-12-11T05:52:30.401Z">
+<meta property="article:modified_time" content="2020-12-13T12:39:32.080Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Elasticsearch">
 <meta name="twitter:card" content="summary">
@@ -45,6 +47,16 @@
   
 
   
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?code-JRipY21QjX";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
   
 
 
@@ -130,7 +142,7 @@
         
   
     <h1 class="post-title" itemprop="name">
-      &#39;Elasticsearch 基本概念&#39;
+      &#39;Elasticsearch（一） 基本概念&#39;
     </h1>
     <div class="post-title-bar">
       <ul>
@@ -235,7 +247,9 @@
 <p>（7）高可用性（HA）群集至少需要三个主节点，其中<strong>至少两个不是仅投票</strong>节点。即使其中一个节点发生故障，这样的群集也将能够选举一个主节点。生产环境最好设置3台仅Master候选节点（node.master = true     node.data = true）</p>
 <p> （8）为确保群集仍然可用，集群<strong>不能同时停止投票配置中的一半或更多节点</strong>。只要有一半以上的投票节点可用，群集仍可以正常工作。这意味着，如果存在三个或四个主节点合格的节点，则群集可以容忍其中一个节点不可用。如果有两个或更少的主机资格节点，则它们必须都保持可用</p>
 <h3 id="Master选举"><a href="#Master选举" class="headerlink" title="Master选举"></a>Master选举</h3><p>每个节点都会不定期的在集群做广播，ping所有节点</p>
-<p><img src="/images/elastic-search/es-04.png" alt="es"></p>
+<p><img src="/images/elastic-search/es-06.png" alt="es"></p>
+<p><img src="/images/elastic-search/es-07.png" alt="es"></p>
+<p><img src="/images/elastic-search/es-08.png" alt="es"></p>
 <p><strong>如果是偶数节点，Elasticsearch会将其中一个排除在投票配置之外，确保其大小为奇数。</strong></p>
 <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="elasticsearch"><a href="#elasticsearch" class="headerlink" title="elasticsearch"></a>elasticsearch</h3><p><a href="https://www.elastic.co/cn/downloads/elasticsearch" target="_blank" rel="noopener">下载地址</a> ES的启动需要JDK环境</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">window版本启动：</span><br><span class="line">  elasticsearch.bat</span><br><span class="line"></span><br><span class="line">linux版本启动：</span><br><span class="line">  .&#x2F;elasticsearch -d</span><br><span class="line">  </span><br><span class="line">验证：</span><br><span class="line">  http:&#x2F;&#x2F;localhost:9200&#x2F;</span><br></pre></td></tr></table></figure>
@@ -302,9 +316,9 @@
 
 <figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#删除索引  index是索引名称</span></span><br><span class="line"><span class="attr">DELETE</span> <span class="string">/index?pretty</span></span><br><span class="line"><span class="comment">#案例</span></span><br><span class="line"><span class="attr">DELETE</span> <span class="string">/product?pretty</span></span><br></pre></td></tr></table></figure>
 
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#插入数据 /index/type/id   若无索引会自动创建,   type被弱化，统一使用 "_doc" </span><br><span class="line">PUT /index/type/id</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"key"</span> : <span class="string">"value"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#案例：</span><br><span class="line">PUT /product/_doc/1</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"xiaomi phone"</span>,</span><br><span class="line">    <span class="attr">"desc"</span> :  <span class="string">"shouji zhong de zhandouji"</span>,</span><br><span class="line">    <span class="attr">"price"</span> :  <span class="number">3999</span>,</span><br><span class="line">    <span class="attr">"tags"</span>: [ <span class="string">"xingjiabi"</span>, <span class="string">"fashao"</span>, <span class="string">"buka"</span> ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//插入数据 /index/type/id   若无索引会自动创建,   type被弱化，统一使用 "_doc" </span></span><br><span class="line">PUT /index/type/id</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"key"</span> : <span class="string">"value"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//案例：</span></span><br><span class="line">PUT /product/_doc/1</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"xiaomi phone"</span>,</span><br><span class="line">    <span class="attr">"desc"</span> :  <span class="string">"shouji zhong de zhandouji"</span>,</span><br><span class="line">    <span class="attr">"price"</span> :  <span class="number">3999</span>,</span><br><span class="line">    <span class="attr">"tags"</span>: [ <span class="string">"xingjiabi"</span>, <span class="string">"fashao"</span>, <span class="string">"buka"</span> ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">#更新数据---全量更新---再次执行插入数据即可</span><br><span class="line">PUT /product/_doc/1</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"xiaomi phone"</span>,</span><br><span class="line">    <span class="attr">"desc"</span> :  <span class="string">"shouji zhong de zhandouji"</span>,</span><br><span class="line">    <span class="attr">"price"</span> :  <span class="number">13999</span>,</span><br><span class="line">    <span class="attr">"tags"</span>: [ <span class="string">"xingjiabi"</span>, <span class="string">"fashao"</span>, <span class="string">"buka"</span> ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#更新数据---增量更新</span><br><span class="line">PUT /index/type/id/_update</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"doc"</span>: &#123;</span><br><span class="line">       <span class="attr">"key"</span> : <span class="string">"value"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#增量更新案例</span><br><span class="line">PUT /product/_doc/1/_update</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"doc"</span>: &#123;</span><br><span class="line">      <span class="attr">"price"</span> :  <span class="number">3999</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//更新数据---全量更新---再次执行插入数据即可</span></span><br><span class="line">PUT /product/_doc/1</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"xiaomi phone"</span>,</span><br><span class="line">    <span class="attr">"desc"</span> :  <span class="string">"shouji zhong de zhandouji"</span>,</span><br><span class="line">    <span class="attr">"price"</span> :  <span class="number">13999</span>,</span><br><span class="line">    <span class="attr">"tags"</span>: [ <span class="string">"xingjiabi"</span>, <span class="string">"fashao"</span>, <span class="string">"buka"</span> ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//更新数据---增量更新</span></span><br><span class="line">PUT /index/type/id/_update</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"doc"</span>: &#123;</span><br><span class="line">       <span class="attr">"key"</span> : <span class="string">"value"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//增量更新案例</span></span><br><span class="line">PUT /product/_doc/1/_update</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"doc"</span>: &#123;</span><br><span class="line">      <span class="attr">"price"</span> :  <span class="number">3999</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#删除数据</span></span><br><span class="line"><span class="attr">DELETE</span> <span class="string">/index/type/id</span></span><br><span class="line"><span class="comment">#案例</span></span><br><span class="line"><span class="attr">DELETE</span> <span class="string">/product/_doc/1</span></span><br></pre></td></tr></table></figure>
 
@@ -313,8 +327,8 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年12月11日 13:52</p>
-        <p>原始链接： <a class="post-url" href="/2020/12/09/es-elasticsearch/" title="&#39;Elasticsearch 基本概念&#39;">https://midkuro.gitee.io/2020/12/09/es-elasticsearch/</a></p>
+        <p>最后更新： 2020年12月13日 20:39</p>
+        <p>原始链接： <a class="post-url" href="/2020/12/09/es-elasticsearch/" title="&#39;Elasticsearch（一） 基本概念&#39;">https://midkuro.gitee.io/2020/12/09/es-elasticsearch/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">
                 <img src="/images/logo.gif" alt="Kuro">
@@ -371,7 +385,7 @@
     <div class="post-share-list" id="share-list">
         <ul class="share-icons">
           <li>
-            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/12/09/es-elasticsearch/&title=《'Elasticsearch 基本概念'》 — Kuro's Blog&pic=images/es.jpg" data-title="微博">
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/12/09/es-elasticsearch/&title=《'Elasticsearch（一） 基本概念'》 — Kuro's Blog&pic=images/es.jpg" data-title="微博">
               <i class="fa fa-weibo"></i>
             </a>
           </li>
@@ -381,7 +395,7 @@
             </a>
           </li>
           <li>
-            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/12/09/es-elasticsearch/&title=《'Elasticsearch 基本概念'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/12/09/es-elasticsearch/&title=《'Elasticsearch（一） 基本概念'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
               <i class="fa fa-qq"></i>
             </a>
           </li>
@@ -391,7 +405,7 @@
             </a>
           </li>
           <li>
-            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Elasticsearch 基本概念'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/12/09/es-elasticsearch/&via=https://midkuro.gitee.io" data-title="Twitter">
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Elasticsearch（一） 基本概念'》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/12/09/es-elasticsearch/&via=https://midkuro.gitee.io" data-title="Twitter">
               <i class="fa fa-twitter"></i>
             </a>
           </li>
@@ -443,7 +457,7 @@
       <span class="article-nav-title">
         <i class="fa fa-hand-o-left" aria-hidden="true"></i>
         
-          &#39;Elasticsearch 查询语法&#39;
+          &#39;Elasticsearch（二） 查询语法&#39;
         
       </span>
     </a>
@@ -524,7 +538,7 @@
             <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Algorithm/">Algorithm</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Elasticsearch/">Elasticsearch</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/MYSQL/">MYSQL</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
         </div>
         <div id="sidebar-menu-box-tags">
-            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 11px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 15px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
         </div>
     </div>
     <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
@@ -557,7 +571,7 @@
     <div class="mobile-header-tag-container">
         <span class="title">Tags</span>
         <div id="mobile-header-container-tags">
-            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 11px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 15px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
         </div>
     </div>
 </div>
