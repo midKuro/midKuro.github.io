@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>elk-logstash | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
+  <meta name="description" content="原理 Logstash开源的流数据处理、转换（解析）和发送引擎，可以采集来自不同数据源的数据，并对数据进行处理后输出到多种输出源。Logstash是ELK Stash的重要组成部分。 工作原理Logstash的数据处理过程主要包括：Inputs, Filters, Outputs 三部分，如图：  Inputs：用于从数据源获取数据，常见的插件如beats、file、kafka、rabbitmq、">
+<meta property="og:type" content="article">
+<meta property="og:title" content="elk-logstash">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/12/16/elk-logstash/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="原理 Logstash开源的流数据处理、转换（解析）和发送引擎，可以采集来自不同数据源的数据，并对数据进行处理后输出到多种输出源。Logstash是ELK Stash的重要组成部分。 工作原理Logstash的数据处理过程主要包括：Inputs, Filters, Outputs 三部分，如图：  Inputs：用于从数据源获取数据，常见的插件如beats、file、kafka、rabbitmq、">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/elk-logstash/elk-04.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/elk-logstash/elk-01.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/elk-logstash/elk-05.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/elk-logstash/elk-02.png">
+<meta property="article:published_time" content="2020-12-16T02:32:46.867Z">
+<meta property="article:modified_time" content="2020-12-16T15:49:32.352Z">
+<meta property="article:author" content="Kuro">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/elk-logstash/elk-04.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?code-JRipY21QjX";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+  
+
+
+  
+  <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
+  
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.gif" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-elk-logstash" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      elk-logstash
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-12-16
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p><img src="/images/elk-logstash/elk-04.png" alt="elk"></p>
+<h2 id="Logstash"><a href="#Logstash" class="headerlink" title="Logstash"></a>Logstash</h2><p>开源的流数据处理、转换（解析）和发送引擎，可以采集来自不同数据源的数据，并对数据进行处理后输出到多种输出源。Logstash是ELK Stash的重要组成部分。</p>
+<h3 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h3><p>Logstash的数据处理过程主要包括：<strong>Inputs</strong>, <strong>Filters</strong>, <strong>Outputs</strong> 三部分，如图：</p>
+<p><img src="/images/elk-logstash/elk-01.png" alt="elk"></p>
+<p><strong>Inputs</strong>：用于从数据源获取数据，常见的插件如beats、file、kafka、rabbitmq、log4j、redis等。<a href="https://www.elastic.co/guide/en/logstash/current/input-plugins.html" target="_blank" rel="noopener">参考</a></p>
+<p><strong>Filters</strong>：筛选器是Logstash管道中的数据处理器，input时会触发事件，触发filter对数据进行transport，即转换解析各种格式的数据，常见的过滤器插件如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">grok：解析和构造任意文本。是Logstash过滤器的基础，广泛用于从非结构化数据中导出结构</span><br><span class="line">      当前，Grok是Logstash中将非结构化日志数据解析为结构化和可查询内容的最佳方法。</span><br><span class="line">      </span><br><span class="line">mutate：对事件字段执行常规转换。支持对事件中字段进行重命名，删除，替换和修改。</span><br><span class="line"></span><br><span class="line">date：把字符串类型的时间字段转换成时间戳类型</span><br><span class="line"></span><br><span class="line">drop：完全删除事件，例如调试事件。</span><br><span class="line"></span><br><span class="line">clone：复制事件，可能会添加或删除字段。</span><br><span class="line"></span><br><span class="line">geoip：添加有关IP地址地理位置的信息。</span><br></pre></td></tr></table></figure>
+
+<p><strong>Outputs</strong>：用于数据输出，常见的插件如:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">elasticsearch：最高效、方便、易于查询的存储器，最有选择，官方推荐！</span><br><span class="line"></span><br><span class="line">file：将输出数据以文件的形式写入磁盘。[stupid](javascript:;)</span><br><span class="line"></span><br><span class="line">graphite：将事件数据发送到graphite，graphite是一种流行的开源工具，用于存储和绘制指标。</span><br><span class="line"></span><br><span class="line">statsd：将事件数据发送到statsd，该服务“通过UDP侦听统计信息（如计数器和计时器），并将聚合发送到一个或多个可插拔后端服务”。</span><br></pre></td></tr></table></figure>
+
+<h4 id="logstash-sample-yml"><a href="#logstash-sample-yml" class="headerlink" title="logstash-sample.yml"></a>logstash-sample.yml</h4><p>官方文档：<a href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-elasticsearch.html" target="_blank" rel="noopener">output</a></p>
+<p>logstash默认集成了beats，所以默认配置推荐使用beats进行日志采集，logstash进行分析。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ============================== inputs ===============================</span></span><br><span class="line"><span class="comment">#和beats的通讯端口</span></span><br><span class="line"><span class="string">input</span> <span class="string">&#123;</span></span><br><span class="line">  <span class="string">beats</span> <span class="string">&#123;</span></span><br><span class="line">    <span class="string">port</span> <span class="string">=&gt;</span> <span class="number">5044</span></span><br><span class="line">  <span class="string">&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ================================== Outputs ===================================</span></span><br><span class="line"><span class="comment">#将输出到es中</span></span><br><span class="line"><span class="string">output</span> <span class="string">&#123;</span></span><br><span class="line">  <span class="string">elasticsearch</span> <span class="string">&#123;</span></span><br><span class="line">    <span class="string">hosts</span> <span class="string">=&gt;</span> <span class="string">["http://192.168.163.129:9200"]</span></span><br><span class="line">    	<span class="string">index</span> <span class="string">=&gt;</span> <span class="string">"<span class="template-variable">%&#123;[@metadata][beat]&#125;</span>-<span class="template-variable">%&#123;[@metadata][version]&#125;</span>-<span class="template-variable">%&#123;+YYYY.MM.dd&#125;</span>"</span></span><br><span class="line">    	<span class="comment">#user =&gt; "elastic"</span></span><br><span class="line">    	<span class="comment">#password =&gt; "changeme"</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">#除了输出到es中，还输出到控制台</span></span><br><span class="line">    <span class="string">stdout</span> <span class="string">&#123;codec</span> <span class="string">=&gt;</span> <span class="string">rubydebug</span> <span class="string">&#125;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">#根据 beat中输入的数据携带的【tags】进行分类输出</span></span><br><span class="line">    <span class="comment">#if "kuro" in [tags] &#123;</span></span><br><span class="line">    <span class="comment">#	elasticsearch &#123;</span></span><br><span class="line">  <span class="comment">#		hosts =&gt; ["http://192.168.163.129:9200"]</span></span><br><span class="line">    <span class="comment">#		index =&gt; "%logstash-es-%&#123;+YYYY.MM.dd&#125;"</span></span><br><span class="line">    <span class="comment">#	&#125;</span></span><br><span class="line">    <span class="comment">#&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ================================== filter ===================================</span></span><br><span class="line"><span class="string">filter</span> <span class="string">&#123;</span></span><br><span class="line">  <span class="string">grok</span> <span class="string">&#123;</span></span><br><span class="line">      <span class="comment"># IP:grok提供的正则 client：提取数据后作为key</span></span><br><span class="line">    <span class="string">match</span> <span class="string">=&gt;</span> <span class="string">&#123;</span> <span class="string">"message"</span> <span class="string">=&gt;</span> <span class="string">"<span class="template-variable">%&#123;IP:client&#125;</span> <span class="template-variable">%&#123;WORD:method&#125;</span> <span class="template-variable">%&#123;URIPATHPARAM:request&#125;</span> <span class="template-variable">%&#123;NUMBER:bytes&#125;</span> <span class="template-variable">%&#123;NUMBER:duration&#125;</span>"</span> <span class="string">&#125;</span></span><br><span class="line">  <span class="string">&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//输入  message = 55.3.244.1 GET /index.html 15824 0.043</span></span><br><span class="line"><span class="comment">//过滤解析成以下格式：</span></span><br><span class="line">&#123;</span><br><span class="line">    client: 55.3.244.1</span><br><span class="line">    method: GET</span><br><span class="line">    request: /index.html</span><br><span class="line">    bytes: 15824</span><br><span class="line">    duration: 0.043</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#通过查看文件，能够看到logstash提供的封装好的正则表达式</span></span><br><span class="line">[root@localhost /]<span class="comment"># cd logstash-7.10.1-linux-x86_64/logstash-7.10.1/vendor/bundle/jruby/2.5.0/gems/logstash-patterns-core-4.1.2/patterns</span></span><br><span class="line">[root@localhost /]<span class="comment"># cat grok-pattens</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#运行</span></span><br><span class="line">[root@localhost /]<span class="comment"># ./bin/logstash -f config/logstash-sample.conf</span></span><br><span class="line"><span class="comment">#使用stdin启动</span></span><br><span class="line">[root@localhost /]<span class="comment"># ./bin/logstash -e "input &#123;stdin &#123;&#125;&#125; output&#123; stdout &#123;&#125;&#125;"</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Beats"><a href="#Beats" class="headerlink" title="Beats"></a>Beats</h2><p>基于golang语言开发，开源的、轻量级的日志收集器的统称。<a href="https://www.elastic.co/guide/en/beats/libbeat/current/beats-reference.html" target="_blank" rel="noopener">官方文档</a></p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li><p>开源：社区中维护了上百个beat，<a href="https://github.com/elastic/beats/blob/master/libbeat/docs/communitybeats.asciidoc" target="_blank" rel="noopener">社区地址</a></p>
+</li>
+<li><p>轻量级：体积小，功能单一、基于go语言开发，具有先天性能优势，不依赖于Java环境。</p>
+</li>
+<li><p>高性能：对CPU、内存和IO的资源占用极小。</p>
+</li>
+</ul>
+<p><strong>定位</strong>：就功能而言，Beats是弟弟，得益于Java生态优势，Logstash功能明显更加强大。但是Logstash在数据收集上的性能表现饱受诟病，Beats的诞生，其目的就是为了取代<strong>Logstash Forwarder</strong> 。</p>
+<p>官方支持的Beats（<a href="https://www.elastic.co/cn/downloads/beats" target="_blank" rel="noopener">下载地址</a>）</p>
+<p><img src="/images/elk-logstash/elk-05.png" alt="elk"></p>
+<h3 id="Filebeat"><a href="#Filebeat" class="headerlink" title="Filebeat"></a>Filebeat</h3><p><strong>文件日志监控采集 ，主要用于收集日志数据</strong>，<a href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation-configuration.html" target="_blank" rel="noopener">官方使用手册</a></p>
+<p>由于采集日志需要访问日志文件，意味需要将程序和采集的应用程序部署在同一台机器中，Logstash的Inputs和Filter会十分耗费机器性能，十分不合理，所以有了Beats这种轻量级日志收集器。</p>
+<p>通过让Beats进行inputs采集日志，经过Http协议传输到logstash中，这样就能使得logstash无需和应用程序部署在同一台机器中，可以用其他机器来承担Logstash的Filter的性能损耗。</p>
+<p><img src="/images/elk-logstash/elk-02.png" alt="elk"></p>
+<h4 id="filebeat-yml"><a href="#filebeat-yml" class="headerlink" title="filebeat.yml"></a>filebeat.yml</h4><p>官方文档： <a href="https://www.elastic.co/guide/en/beats/filebeat/current/configuration-filebeat-options.html" target="_blank" rel="noopener">inputs</a>     <a href="https://www.elastic.co/guide/en/beats/filebeat/current/configuring-output.html" target="_blank" rel="noopener">output</a></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ============================== Filebeat inputs ===============================</span></span><br><span class="line"><span class="attr">filebeat.inputs:</span></span><br><span class="line"><span class="comment">#定义输入类型是log</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">log</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 开启输入配置</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="comment">#配置输入log的来源路径</span></span><br><span class="line">  <span class="attr">paths:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/var/log/*.log</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/usr/local/error.log</span></span><br><span class="line">    </span><br><span class="line">  <span class="comment">#自定义当前采集的type的标签，可以用于logstash中进行逻辑归类</span></span><br><span class="line">  <span class="attr">tags:</span> <span class="string">["kuro"]</span></span><br><span class="line">  <span class="comment">#排除空行</span></span><br><span class="line">  <span class="attr">exclude_lines:</span> <span class="string">['^$']</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">#json的所有key都在一个大括号里</span></span><br><span class="line">  <span class="comment">#json.keys_under_root: true</span></span><br><span class="line">  <span class="comment">#当采集错误时增加一个error_key</span></span><br><span class="line">  <span class="comment">#json.add_error_key: true</span></span><br><span class="line">  <span class="comment">#当key值和系统key重复时覆盖</span></span><br><span class="line">  <span class="comment">#json.overwrite_keys: true</span></span><br><span class="line">  <span class="comment">#以json的格式输入日志</span></span><br><span class="line">  <span class="comment">#json.message_key: log</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment"># Multiline options</span></span><br><span class="line">  <span class="comment">#配置组合 1</span></span><br><span class="line">  <span class="attr">multiline:</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">pattern</span></span><br><span class="line">    <span class="comment">#非匹配到的内容往后追加  可选:before</span></span><br><span class="line">    <span class="attr">match:</span> <span class="string">after</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">#配置组合 1</span></span><br><span class="line">    <span class="attr">pattern:</span> <span class="string">'^\['</span></span><br><span class="line">    <span class="comment"># true表示和正则表达式匹配的作为第一行，false表示和正则不匹配的作为第一行</span></span><br><span class="line">    <span class="attr">negate:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#配置组合2</span></span><br><span class="line">    <span class="comment">#匹配以空格开头的内容</span></span><br><span class="line">    <span class="comment">#pattern: '^[[:space:]]'</span></span><br><span class="line">    <span class="comment">#negate: false</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//如这个案例，配置组合1 就会把后面的数据追加到第一行，整段作为一个事件</span></span><br><span class="line">[beat-logstash-some-name-<span class="number">832</span>-<span class="number">2015.11</span><span class="number">.28</span>] IndexNotFoundException[no such index]</span><br><span class="line">    at org.elasticsearch.cluster.metadata.Exception.resolve(Resolver.java:<span class="number">566</span>)</span><br><span class="line">    at org.elasticsearch.cluster.metadata.Exception.concreteIndices(Resolver.java:<span class="number">133</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//如这个案例，配置组合2 就会把非空格的当做第一行，以空格开头的数据则追加到第一行</span></span><br><span class="line">Exception in thread <span class="string">"main"</span> java.lang.NullPointerException</span><br><span class="line">        at com.example.myproject.Book.getTitle(Book.java:<span class="number">16</span>)</span><br><span class="line">        at com.example.myproject.Author.getBookTitles(Author.java:<span class="number">25</span>)</span><br><span class="line">        at com.example.myproject.Bootstrap.main(Bootstrap.java:<span class="number">14</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ================================== Outputs ===================================</span></span><br><span class="line"><span class="comment"># ---------------------------- Elasticsearch Output ----------------------------</span></span><br><span class="line"><span class="comment">#输出到ES中</span></span><br><span class="line"><span class="attr">output.elasticsearch:</span></span><br><span class="line">  <span class="attr">hosts:</span> <span class="string">["192.168.163.129:9200"]</span></span><br><span class="line">  <span class="comment">#动态索引名称</span></span><br><span class="line">  <span class="attr">index:</span> <span class="string">"<span class="template-variable">%&#123;[fields.log_type]&#125;</span>-<span class="template-variable">%&#123;[agent.version]&#125;</span>-<span class="template-variable">%&#123;+yyyy.MM.dd&#125;</span>"</span></span><br><span class="line">  <span class="comment">#协议</span></span><br><span class="line">  <span class="attr">protocol:</span> <span class="string">https</span></span><br><span class="line">  </span><br><span class="line"><span class="comment"># ---------------------------- Elasticsearch Output ----------------------------</span></span><br><span class="line"><span class="attr">output.elasticsearch:</span></span><br><span class="line">  <span class="attr">hosts:</span> <span class="string">["http://localhost:9200"]</span></span><br><span class="line">  <span class="attr">indices:</span></span><br><span class="line">    <span class="comment">#按照日志输出的级别归档到不同的index中</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">index:</span> <span class="string">"warning-<span class="template-variable">%&#123;[agent.version]&#125;</span>-<span class="template-variable">%&#123;+yyyy.MM.dd&#125;</span>"</span></span><br><span class="line">      <span class="attr">when.contains:</span></span><br><span class="line">        <span class="attr">message:</span> <span class="string">"WARN"</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">index:</span> <span class="string">"error-<span class="template-variable">%&#123;[agent.version]&#125;</span>-<span class="template-variable">%&#123;+yyyy.MM.dd&#125;</span>"</span></span><br><span class="line">      <span class="attr">when.contains:</span></span><br><span class="line">        <span class="attr">message:</span> <span class="string">"ERR"</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ------------------------------ Logstash Output -------------------------------</span></span><br><span class="line"><span class="comment">#输出到logstash中</span></span><br><span class="line"><span class="attr">output.logstash:</span></span><br><span class="line">  <span class="attr">hosts:</span> <span class="string">["localhost:5044",</span> <span class="string">"localhost:5045"</span><span class="string">]</span></span><br><span class="line">  <span class="comment">#有多节点则开启负载均衡</span></span><br><span class="line">  <span class="attr">loadbalance:</span> <span class="literal">true</span></span><br><span class="line">  <span class="comment">#索引名称</span></span><br><span class="line">  <span class="attr">index:</span> <span class="string">filebeat</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ------------------------------ console Output -------------------------------</span></span><br><span class="line"><span class="attr">output.console:</span></span><br><span class="line">  <span class="attr">pretty:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">支持的输入类型:</span><br><span class="line">  Azure Event Hub</span><br><span class="line">  Cloud Foundry</span><br><span class="line">  Container</span><br><span class="line">  Docker</span><br><span class="line">  Google Pub&#x2F;Sub</span><br><span class="line">  HTTP JSON</span><br><span class="line">  Kafka</span><br><span class="line">  Log</span><br><span class="line">  MQTT</span><br><span class="line">  NetFlow</span><br><span class="line">  Office 365 Management Activity API</span><br><span class="line">  Redis</span><br><span class="line">  S3</span><br><span class="line">  Stdin</span><br><span class="line">  Syslog</span><br><span class="line">  TCP</span><br><span class="line">  UDP</span><br><span class="line">  </span><br><span class="line">支持的输出类型：</span><br><span class="line">  Console</span><br><span class="line">  Elasticsearch</span><br><span class="line">  Logstash</span><br><span class="line">  Kafka</span><br><span class="line">  Redis</span><br><span class="line">  File</span><br><span class="line">  Elastic Cloud</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#运行：</span></span><br><span class="line">[root@localhost /]<span class="comment"># ./filebeat -e -c filebeat.yml</span></span><br></pre></td></tr></table></figure>
+
+<p>Filebeat是读取日志是会记录到读取日志的行号，当重启或者删除es的索引，他依旧会从记录的那一行之后开始读，曾经读取过的数据不会再次读取，若想要重新全量读取，则需要去把<code>data</code>文件夹的数据删除。</p>
+<h3 id="Packetbeat"><a href="#Packetbeat" class="headerlink" title="Packetbeat"></a>Packetbeat</h3><p>通过网络抓包、协议分析，基于协议和端口对一些系统通信进行监控和数据收集。是一个实时网络数据包分析器，可以将其与Elasticsearch一起使用，以提供应用程序监视和性能分析系统。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">支持的协议：</span><br><span class="line">  ICMP (v4 and v6)</span><br><span class="line">  DHCP (v4)</span><br><span class="line">  DNS</span><br><span class="line">  HTTP</span><br><span class="line">  AMQP 0.9.1</span><br><span class="line">  Cassandra</span><br><span class="line">  Mysql</span><br><span class="line">  PostgreSQL</span><br><span class="line">  Redis</span><br><span class="line">  Thrift-RPC</span><br><span class="line">  MongoDB</span><br><span class="line">  Memcache</span><br><span class="line">  NFS</span><br><span class="line">  TLS</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">#执行：</span></span><br><span class="line">[root@localhost /]<span class="comment"># sudo ./packetbeat -e -c packetbeat.yml -strict.perms=false</span></span><br></pre></td></tr></table></figure>
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2020年12月16日 23:49</p>
+        <p>原始链接： <a class="post-url" href="/2020/12/16/elk-logstash/" title="elk-logstash">https://midkuro.gitee.io/2020/12/16/elk-logstash/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.gif" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/12/16/elk-logstash/&title=《elk-logstash》 — Kuro's Blog&pic=https://midkuro.gitee.ioimages/logo.gif" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/12/16/elk-logstash/&title=《elk-logstash》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/12/16/elk-logstash/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《elk-logstash》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/12/16/elk-logstash/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/12/16/elk-logstash/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/12/16/elk-logstash/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#原理"><span class="post-toc-text">原理</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Logstash"><span class="post-toc-text">Logstash</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#工作原理"><span class="post-toc-text">工作原理</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#logstash-sample-yml"><span class="post-toc-text">logstash-sample.yml</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Beats"><span class="post-toc-text">Beats</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Filebeat"><span class="post-toc-text">Filebeat</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#filebeat-yml"><span class="post-toc-text">filebeat.yml</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Packetbeat"><span class="post-toc-text">Packetbeat</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/12/10/elasticearch-cluster/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Elasticsearch（八） 集群&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="elk-logstash" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2020 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Algorithm/">Algorithm</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Elasticsearch/">Elasticsearch</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/MYSQL/">MYSQL</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nginx/">Nginx</a><a class="category-link" href="/categories/Nginx/Redis/">Redis</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 17px;">ActiveMQ</a> <a href="/tags/Algorithm/" style="font-size: 10px;">Algorithm</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 16px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
