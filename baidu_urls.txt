@@ -13,7 +13,7 @@ https://midkuro.gitee.io/2020/11/10/ssm-frame/
 https://midkuro.gitee.io/2020/11/09/mybatis-plus/
 https://midkuro.gitee.io/2020/11/09/mybatis-mapper/
 https://midkuro.gitee.io/2020/11/09/mybatis-config/
-https://midkuro.gitee.io/2020/10/30/algorithm-advanced/
+https://midkuro.gitee.io/2020/10/30/algorithm-trainingcamp1/
 https://midkuro.gitee.io/2020/10/29/algorithm-base/
 https://midkuro.gitee.io/2020/10/29/juc-base/
 https://midkuro.gitee.io/2020/10/29/jvm-base/
