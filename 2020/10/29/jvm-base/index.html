@@ -29,9 +29,8 @@
 <meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-07.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-08.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-09.png">
-<meta property="og:image" content="https://midkuro.gitee.io/images/jvm-base/jvm-10.png">
 <meta property="article:published_time" content="2020-10-29T14:31:00.000Z">
-<meta property="article:modified_time" content="2020-12-07T03:42:45.186Z">
+<meta property="article:modified_time" content="2020-12-21T13:15:25.952Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="JVM">
@@ -243,7 +242,7 @@
 <figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 热点代码的阈值频次</span></span><br><span class="line"><span class="meta">-XX</span>:<span class="string">CompileThreshold = 10000</span></span><br><span class="line"><span class="comment"># 使用编译器运行</span></span><br><span class="line"><span class="attr">-Xcomp</span></span><br><span class="line"><span class="comment">#使用解释器运行</span></span><br><span class="line"><span class="attr">-Xint</span></span><br></pre></td></tr></table></figure>
 
 <h2 id="内存模型"><a href="#内存模型" class="headerlink" title="内存模型"></a>内存模型</h2><blockquote>
-<p>Synchronized加锁原语、CPU缓存、MESI、缓存行、缓存对齐 <a href="/2020/09/22/synchronized-process/">链接</a></p>
+<p>Synchronized加锁原语、CPU缓存、MESI、缓存行、缓存对齐 <a href="/2020/09/22/synchronized-process/">详细内容</a></p>
 </blockquote>
 <h2 id="对象定位"><a href="#对象定位" class="headerlink" title="对象定位"></a>对象定位</h2><p>句柄池、直接指针</p>
 <h2 id="原语指令"><a href="#原语指令" class="headerlink" title="原语指令"></a>原语指令</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Hello_03</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Hello_03 h = <span class="keyword">new</span> Hello_03();</span><br><span class="line">        <span class="keyword">int</span> i = h.m1();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">m1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">1</span>;</span><br><span class="line">        i = i++;</span><br><span class="line">        <span class="keyword">return</span> i;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -273,9 +272,7 @@
 
 <figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#区分概念：内存泄漏memory leak，内存溢出out of memory</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-XX:+PrintCommandLineFlags HelloGC</span></span><br><span class="line"><span class="comment">#-Xmn10M 新生代大小 -Xms40M 堆最小内存  -Xmx60M 堆最大内存 -XX:+PrintGC输出GC信息</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-Xmn10M -Xms40M -Xmx60M -XX:+PrintCommandLineFlags -XX:+PrintGC  HelloGC </span></span><br><span class="line"><span class="comment">#打印GC详细信息    打印GC时间     打印GC的原因</span></span><br><span class="line"><span class="attr">PrintGCDetails</span> <span class="string">PrintGCTimeStamps PrintGCCauses</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-XX:+UseConcMarkSweepGC -XX:+PrintCommandLineFlags HelloGC</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-XX:+PrintFlagsInitial 默认参数值</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-XX:+PrintFlagsFinal 最终参数值</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-XX:+PrintFlagsFinal | grep xxx 找到对应的参数</span></span><br><span class="line"><span class="attr">java</span> <span class="string">-XX:+PrintFlagsFinal -version |grep GC</span></span><br></pre></td></tr></table></figure>
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">eden space 5632K, 94% used [0x00000000ff980000,0x00000000ffeb3e28,0x00000000fff00000)</span><br><span class="line">                            后面的内存地址指的是，起始地址，使用空间结束地址，整体空间结束地址</span><br></pre></td></tr></table></figure>
-
-<p><img src="/images/jvm-base/jvm-10.png" alt="jvm"></p>
+<p><a href="/2020/05/21/garbage-collector/#GC日志">GC日志详解</a></p>
 <h2 id="调优"><a href="#调优" class="headerlink" title="调优"></a>调优</h2><blockquote>
 <ol>
 <li>吞吐量：用户代码时间 /（用户代码执行时间 + 垃圾回收时间）</li>
@@ -461,7 +458,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年12月07日 11:42</p>
+        <p>最后更新： 2020年12月21日 21:15</p>
         <p>原始链接： <a class="post-url" href="/2020/10/29/jvm-base/" title="&#39;JVM 虚拟机&#39;">https://midkuro.gitee.io/2020/10/29/jvm-base/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">
