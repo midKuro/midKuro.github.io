@@ -16,8 +16,8 @@ https://midkuro.gitee.io/2020/11/09/mybatis-config/
 https://midkuro.gitee.io/2020/10/30/algorithm-trainingcamp2/
 https://midkuro.gitee.io/2020/10/30/algorithm-trainingcamp1/
 https://midkuro.gitee.io/2020/10/29/algorithm-base/
-https://midkuro.gitee.io/2020/10/29/jvm-base/
 https://midkuro.gitee.io/2020/10/29/juc-base/
+https://midkuro.gitee.io/2020/10/29/jvm-base/
 https://midkuro.gitee.io/2020/10/29/io-base/
 https://midkuro.gitee.io/2020/10/24/spring-circularReferences/
 https://midkuro.gitee.io/2020/10/22/spring-initialization/
