@@ -39,7 +39,7 @@
 <meta property="og:image" content="https://midkuro.gitee.io/images/jvm-memory/memory-14.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/jvm-memory/memory-15.png">
 <meta property="article:published_time" content="2020-05-21T14:20:00.000Z">
-<meta property="article:modified_time" content="2020-12-06T14:02:38.646Z">
+<meta property="article:modified_time" content="2020-12-29T03:02:14.016Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="JVM">
@@ -292,7 +292,7 @@
 
 <figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 开启TLAB</span></span><br><span class="line"><span class="meta">-XX</span>:<span class="string">+UseTLAB</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># 关闭TLAB</span></span><br><span class="line"><span class="meta">-XX</span>:<span class="string">-UseTLAB</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># 设置每个TLAB区域占Eden区的大小比例</span></span><br><span class="line"><span class="meta">-XX</span>:<span class="string">TLABWasteTargetPercent</span></span><br></pre></td></tr></table></figure>
 
-<p>每一个TLAB空间大小都是固定的，默认的是Eden区大小的的1%，既然大小是固定的，那么肯定会出现空间浪费的情况，比如TLAB大小是100kb，已经被使用了90kb，此时有一个12kb的对象来申请空间，但是TLAB的剩余空间已经不足以分配给这个对象了，此时怎么办？</p>
+<p>每一个TLAB空间大小都是固定的，默认的是Eden区大小的1%，既然大小是固定的，那么肯定会出现空间浪费的情况，比如TLAB大小是100kb，已经被使用了90kb，此时有一个12kb的对象来申请空间，但是TLAB的剩余空间已经不足以分配给这个对象了，此时怎么办？</p>
 <p>是新申请一个TLAB，还是直接分配到Eden区？在设计TLAB的时候就已经考虑到这种情况了，<strong>使用变量refill_waste_limit来控制一个TLAB允许被浪费的空间大小</strong>。</p>
 <p><img src="/images/jvm-memory/memory-16.png" alt="memory"></p>
 <p><img src="/images/jvm-memory/memory-18.png" alt="memory"></p>
@@ -372,7 +372,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年12月06日 22:02</p>
+        <p>最后更新： 2020年12月29日 11:02</p>
         <p>原始链接： <a class="post-url" href="/2020/05/21/jvm-memory/" title="&#39;JVM（一） 运行时数据区域&#39;">https://midkuro.gitee.io/2020/05/21/jvm-memory/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">
