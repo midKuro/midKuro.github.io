@@ -13,12 +13,12 @@
   
 
 
-  <meta name="description" content="Redis集群Redis复制(Master&#x2F;Slave)Redis的复制，也就是我们所说的主从复制，主机数据更新后根据配置和策略，自动同步到备机的master&#x2F;slaver机制，Master以写为主，Slave以读为主的策略。主要用来读写分离和容灾恢复。 配从(库)不配主(库)，配置主从复制，只需要把从库指向一个主库，实现对主库的复制即可，不需要主库做任何操作。 可以通过命令配置达到效果，但是每次">
+  <meta name="description" content="Redis集群 AKF原则：水平赋值、服务拆分、数据分片  Redis复制(Master&#x2F;Slave)Redis的复制，也就是我们所说的主从复制，主机数据更新后根据配置和策略，自动同步到备机的master&#x2F;slaver机制，Master以写为主，Slave以读为主的策略。主要用来读写分离和容灾恢复。 配从(库)不配主(库)，配置主从复制，只需要把从库指向一个主库，实现对主库的复制即可，不需要主库做">
 <meta property="og:type" content="article">
 <meta property="og:title" content="&#39;Redis（三） 集群&#39;">
 <meta property="og:url" content="https://midkuro.gitee.io/2020/05/26/redis-cluster/index.html">
 <meta property="og:site_name" content="Kuro&#39;s Blog">
-<meta property="og:description" content="Redis集群Redis复制(Master&#x2F;Slave)Redis的复制，也就是我们所说的主从复制，主机数据更新后根据配置和策略，自动同步到备机的master&#x2F;slaver机制，Master以写为主，Slave以读为主的策略。主要用来读写分离和容灾恢复。 配从(库)不配主(库)，配置主从复制，只需要把从库指向一个主库，实现对主库的复制即可，不需要主库做任何操作。 可以通过命令配置达到效果，但是每次">
+<meta property="og:description" content="Redis集群 AKF原则：水平赋值、服务拆分、数据分片  Redis复制(Master&#x2F;Slave)Redis的复制，也就是我们所说的主从复制，主机数据更新后根据配置和策略，自动同步到备机的master&#x2F;slaver机制，Master以写为主，Slave以读为主的策略。主要用来读写分离和容灾恢复。 配从(库)不配主(库)，配置主从复制，只需要把从库指向一个主库，实现对主库的复制即可，不需要主库做">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://midkuro.gitee.io/images/nosql-redis/redis-25.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/nosql-redis/redis-26.png">
@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://midkuro.gitee.io/images/nosql-redis/redis-36.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/nosql-redis/redis-37.png">
 <meta property="article:published_time" content="2020-05-26T03:00:00.000Z">
-<meta property="article:modified_time" content="2020-12-08T01:31:36.840Z">
+<meta property="article:modified_time" content="2021-01-05T04:18:10.746Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Redis">
 <meta name="twitter:card" content="summary">
@@ -177,7 +177,10 @@
     <div class="article-entry post-content" itemprop="articleBody">
       
             
-            <h1 id="Redis集群"><a href="#Redis集群" class="headerlink" title="Redis集群"></a>Redis集群</h1><h2 id="Redis复制-Master-Slave"><a href="#Redis复制-Master-Slave" class="headerlink" title="Redis复制(Master/Slave)"></a>Redis复制(Master/Slave)</h2><p>Redis的复制，也就是我们所说的主从复制，主机数据更新后根据配置和策略，自动同步到备机的<code>master/slaver</code>机制，<strong><code>Master</code>以写为主，<code>Slave</code>以读为主的策略。主要用来读写分离和容灾恢复</strong>。</p>
+            <h1 id="Redis集群"><a href="#Redis集群" class="headerlink" title="Redis集群"></a>Redis集群</h1><blockquote>
+<p>AKF原则：水平赋值、服务拆分、数据分片</p>
+</blockquote>
+<h2 id="Redis复制-Master-Slave"><a href="#Redis复制-Master-Slave" class="headerlink" title="Redis复制(Master/Slave)"></a>Redis复制(Master/Slave)</h2><p>Redis的复制，也就是我们所说的主从复制，主机数据更新后根据配置和策略，自动同步到备机的<code>master/slaver</code>机制，<strong><code>Master</code>以写为主，<code>Slave</code>以读为主的策略。主要用来读写分离和容灾恢复</strong>。</p>
 <p><strong>配从(库)不配主(库)</strong>，配置主从复制，只需要把从库指向一个主库，实现对主库的复制即可，不需要主库做任何操作。</p>
 <p>可以通过命令配置达到效果，但是<strong>每次与<code>master</code>断开之后，都需要重新执行命令连接，除非配置进<code>redis.conf</code>文件</strong>，新版本的<code>slaveof</code>改名成<code>replicaof</code>。</p>
 <figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">slaveof</span> <span class="string">主库IP 主库端口</span></span><br></pre></td></tr></table></figure>
@@ -351,7 +354,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年12月08日 09:31</p>
+        <p>最后更新： 2021年01月05日 12:18</p>
         <p>原始链接： <a class="post-url" href="/2020/05/26/redis-cluster/" title="&#39;Redis（三） 集群&#39;">https://midkuro.gitee.io/2020/05/26/redis-cluster/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">

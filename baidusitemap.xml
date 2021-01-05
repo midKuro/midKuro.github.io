@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://midkuro.gitee.io/2020/06/27/springcloud-zuul/</loc>
+    <lastmod>2021-01-05</lastmod>
+  </url>
+  <url>
+    <loc>https://midkuro.gitee.io/2020/05/26/redis-cluster/</loc>
+    <lastmod>2021-01-05</lastmod>
+  </url>
+  <url>
     <loc>https://midkuro.gitee.io/2020/10/31/algorithm-trainingcamp3/</loc>
     <lastmod>2021-01-03</lastmod>
   </url>
@@ -113,10 +121,6 @@
     <lastmod>2020-12-08</lastmod>
   </url>
   <url>
-    <loc>https://midkuro.gitee.io/2020/05/26/redis-cluster/</loc>
-    <lastmod>2020-12-08</lastmod>
-  </url>
-  <url>
     <loc>https://midkuro.gitee.io/2020/05/26/redis-hash/</loc>
     <lastmod>2020-12-08</lastmod>
   </url>
@@ -186,10 +190,6 @@
   </url>
   <url>
     <loc>https://midkuro.gitee.io/2020/06/27/springcloud-config/</loc>
-    <lastmod>2020-11-12</lastmod>
-  </url>
-  <url>
-    <loc>https://midkuro.gitee.io/2020/06/27/springcloud-zuul/</loc>
     <lastmod>2020-11-12</lastmod>
   </url>
   <url>
