@@ -1,3 +1,4 @@
+https://midkuro.gitee.io/2021/01/05/distributed-transaction/
 https://midkuro.gitee.io/2020/12/11/elk-logstash/
 https://midkuro.gitee.io/2020/12/10/elasticearch-cluster/
 https://midkuro.gitee.io/2020/12/10/elasticearch-api/

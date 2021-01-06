@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://midkuro.gitee.io/2021/01/05/distributed-transaction/</loc>
+    <lastmod>2021-01-06</lastmod>
+  </url>
+  <url>
+    <loc>https://midkuro.gitee.io/2020/06/29/springcloud-seata/</loc>
+    <lastmod>2021-01-06</lastmod>
+  </url>
+  <url>
+    <loc>https://midkuro.gitee.io/2020/10/22/spring-initialization/</loc>
+    <lastmod>2021-01-06</lastmod>
+  </url>
+  <url>
     <loc>https://midkuro.gitee.io/2020/06/27/springcloud-zuul/</loc>
     <lastmod>2021-01-05</lastmod>
   </url>
@@ -277,10 +289,6 @@
     <lastmod>2020-11-12</lastmod>
   </url>
   <url>
-    <loc>https://midkuro.gitee.io/2020/06/29/springcloud-seata/</loc>
-    <lastmod>2020-11-12</lastmod>
-  </url>
-  <url>
     <loc>https://midkuro.gitee.io/2020/11/09/mybatis-plus/</loc>
     <lastmod>2020-11-12</lastmod>
   </url>
@@ -307,10 +315,6 @@
   <url>
     <loc>https://midkuro.gitee.io/2020/09/28/jdk8-hashmap/</loc>
     <lastmod>2020-10-22</lastmod>
-  </url>
-  <url>
-    <loc>https://midkuro.gitee.io/2020/10/22/spring-initialization/</loc>
-    <lastmod>2020-10-19</lastmod>
   </url>
   <url>
     <loc>https://midkuro.gitee.io/2020/10/24/spring-circularReferences/</loc>

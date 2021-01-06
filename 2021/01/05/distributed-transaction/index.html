@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;分布式事务&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
+  <meta name="description" content="分布式事务 面试题：在一台机器中，db本地事务如何保证？ 锁、redo、undo  TM - 事务协调者 定义全局事务的范围：开始全局事务、提交或回滚全局事务。 RM - 资源管理器 管理分支事务处理的资源，与TM交谈以注册分支事务和报告分支事务的状态，并驱动分支事务提交或回滚。 二阶段提交 为什么引入二阶段提交？ 因为每个服务无法感知其他服务的事务状况，需要协调者。     1234二阶段提交的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;分布式事务&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2021/01/05/distributed-transaction/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="分布式事务 面试题：在一台机器中，db本地事务如何保证？ 锁、redo、undo  TM - 事务协调者 定义全局事务的范围：开始全局事务、提交或回滚全局事务。 RM - 资源管理器 管理分支事务处理的资源，与TM交谈以注册分支事务和报告分支事务的状态，并驱动分支事务提交或回滚。 二阶段提交 为什么引入二阶段提交？ 因为每个服务无法感知其他服务的事务状况，需要协调者。     1234二阶段提交的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/distributed-transaction/transaction-01.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/distributed-transaction/transaction-08.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/distributed-transaction/transaction-09.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/distributed-transaction/transaction-02.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/distributed-transaction/transaction-10.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/distributed-transaction/transaction-05.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/distributed-transaction/transaction-06.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/distributed-transaction/transaction-07.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/distributed-transaction/transaction-03.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/distributed-transaction/transaction-04.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/distributed-transaction/transaction-11.png">
+<meta property="article:published_time" content="2021-01-05T04:03:00.000Z">
+<meta property="article:modified_time" content="2021-01-06T15:49:10.187Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Transaction">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/distributed-transaction/transaction-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?code-JRipY21QjX";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+  
+
+
+  
+  <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
+  
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.gif" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-distributed-transaction" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;分布式事务&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Transaction/">Transaction</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2021-01-05
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="分布式事务"><a href="#分布式事务" class="headerlink" title="分布式事务"></a>分布式事务</h1><blockquote>
+<p>面试题：在一台机器中，db本地事务如何保证？</p>
+<p>锁、redo、undo</p>
+</blockquote>
+<p><strong>TM - 事务协调者</strong></p>
+<p>定义全局事务的范围：开始全局事务、提交或回滚全局事务。</p>
+<p><strong>RM - 资源管理器</strong></p>
+<p>管理分支事务处理的资源，与TM交谈以注册分支事务和报告分支事务的状态，并驱动分支事务提交或回滚。</p>
+<h2 id="二阶段提交"><a href="#二阶段提交" class="headerlink" title="二阶段提交"></a>二阶段提交</h2><blockquote>
+<p>为什么引入二阶段提交？</p>
+<p>因为每个服务无法感知其他服务的事务状况，需要协调者。</p>
+</blockquote>
+<p><img src="/images/distributed-transaction/transaction-01.png" alt="transaction"></p>
+<p><img src="/images/distributed-transaction/transaction-08.png" alt="transaction"></p>
+<p><img src="/images/distributed-transaction/transaction-09.png" alt="transaction"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">二阶段提交的问题：</span><br><span class="line">1.TM事务管理器 单点故障</span><br><span class="line">2.阻塞资源</span><br><span class="line">3.两个服务数据不一致</span><br></pre></td></tr></table></figure>
+
+<p>二阶段提交的过程会锁定资源不释放。</p>
+<p>二阶段提交是为了降低服务1提交后，服务2挂了的概率。</p>
+<h2 id="三阶段提交"><a href="#三阶段提交" class="headerlink" title="三阶段提交"></a>三阶段提交</h2><p>三阶段提交是基于二阶段的基础上，在最前面增加了一个询问阶段。</p>
+<p><img src="/images/distributed-transaction/transaction-02.png" alt="transaction"></p>
+<p><strong>三阶段提交不能解决二阶段提交的所有问题，只是降低灾难发生的概率。</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.can commit ： 执行SQL不锁定资源</span><br><span class="line">2.pre commit ： 执行SQL锁定资源</span><br><span class="line">3.do  commit ： 提交SQL</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">三阶段提交和二阶段提交的区别：</span><br><span class="line">1.降低了锁定资源的概率和时长</span><br><span class="line">2.引入超时机制，同时在协调者（超时-中断事务）和参与者（超时,在pre中断，在do提交）中都引入了超时机制。</span><br><span class="line">3.在第一阶段和第二阶段之前插入一个准备阶段，保证了再最后提交阶段之前各参与节点的状态是一致的。</span><br><span class="line"></span><br><span class="line">TM事务协调者和RM资源拥有者的超时处理机制</span><br><span class="line">   TM：未收到反馈，给RM发中断事务的命令</span><br><span class="line">   RM：在三阶段，没有收到TM的命令，默认提交</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/distributed-transaction/transaction-10.png" alt="transaction"></p>
+<h2 id="消息队列"><a href="#消息队列" class="headerlink" title="消息队列"></a>消息队列</h2><p><img src="/images/distributed-transaction/transaction-05.png" alt="transaction"></p>
+<h2 id="LCN"><a href="#LCN" class="headerlink" title="LCN"></a>LCN</h2><p><strong>LCN：Lock（锁定事务单元），Confirm（确认事务），Notify（通知事务）</strong></p>
+<p><a href="https://www.codingapi.com/docs/txlcn-preface/" target="_blank" rel="noopener">官方文档</a>    TX-LCN由两大模块组成, TxClient（TC）、TxManager（TM），TxClient作为模块的依赖框架，提供TX-LCN的标准支持，TxManager作为分布式事务的控制放。事务发起方或者参与反都由TxClient端来控制。</p>
+<h3 id="事务控制原理"><a href="#事务控制原理" class="headerlink" title="事务控制原理"></a>事务控制原理</h3><p><img src="/images/distributed-transaction/transaction-06.png" alt="transaction"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">创建事务组</span><br><span class="line">是指在事务发起方开始执行业务代码之前先调用TxManager创建事务组对象，然后拿到事务标示GroupId的过程。</span><br><span class="line"></span><br><span class="line">加入事务组</span><br><span class="line">添加事务组是指参与方在执行完业务方法以后，将该模块的事务信息通知给TxManager的操作。</span><br><span class="line"></span><br><span class="line">通知事务组</span><br><span class="line">是指在发起方执行完业务代码以后，将发起方执行结果状态通知给TxManager,TxManager将根据事务最终状态和事务组的信息来通知相应的参与模块提交或回滚事务，并返回结果给事务发起方。</span><br></pre></td></tr></table></figure>
+
+<h3 id="协调机制本质"><a href="#协调机制本质" class="headerlink" title="协调机制本质"></a>协调机制本质</h3><p><img src="/images/distributed-transaction/transaction-07.png" alt="transaction"></p>
+<h3 id="代码应用"><a href="#代码应用" class="headerlink" title="代码应用"></a>代码应用</h3><h4 id="TM"><a href="#TM" class="headerlink" title="TM"></a>TM</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 创建tx-manager库</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">DATABASE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span>  <span class="string">`tx-manager`</span> <span class="keyword">DEFAULT</span> <span class="keyword">CHARSET</span> utf8 <span class="keyword">COLLATE</span> utf8_general_ci;</span><br><span class="line"><span class="keyword">USE</span> <span class="string">`tx-manager`</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">NAMES</span> utf8mb4;</span><br><span class="line"><span class="keyword">SET</span> FOREIGN_KEY_CHECKS = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ----------------------------</span></span><br><span class="line"><span class="comment">-- Table structure for t_tx_exception</span></span><br><span class="line"><span class="comment">-- ----------------------------</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">EXISTS</span> <span class="string">`t_tx_exception`</span>;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">`t_tx_exception`</span>  (</span><br><span class="line">  <span class="string">`id`</span> <span class="built_in">bigint</span>(<span class="number">20</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  <span class="string">`group_id`</span> <span class="built_in">varchar</span>(<span class="number">64</span>) <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> utf8mb4 <span class="keyword">COLLATE</span> utf8mb4_general_ci <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`unit_id`</span> <span class="built_in">varchar</span>(<span class="number">32</span>) <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> utf8mb4 <span class="keyword">COLLATE</span> utf8mb4_general_ci <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`mod_id`</span> <span class="built_in">varchar</span>(<span class="number">128</span>) <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> utf8mb4 <span class="keyword">COLLATE</span> utf8mb4_general_ci <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`transaction_state`</span> <span class="built_in">tinyint</span>(<span class="number">4</span>) <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`registrar`</span> <span class="built_in">tinyint</span>(<span class="number">4</span>) <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`ex_state`</span> <span class="built_in">tinyint</span>(<span class="number">4</span>) <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="literal">NULL</span> <span class="keyword">COMMENT</span> <span class="string">'0 待处理 1已处理'</span>,</span><br><span class="line">  <span class="string">`remark`</span> <span class="built_in">varchar</span>(<span class="number">10240</span>) <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="literal">NULL</span> <span class="keyword">COMMENT</span> <span class="string">'备注'</span>,</span><br><span class="line">  <span class="string">`create_time`</span> datetime(<span class="number">0</span>) <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  PRIMARY <span class="keyword">KEY</span> (<span class="string">`id`</span>) <span class="keyword">USING</span> BTREE</span><br><span class="line">) <span class="keyword">ENGINE</span> = <span class="keyword">InnoDB</span> AUTO_INCREMENT = <span class="number">967</span> <span class="built_in">CHARACTER</span> <span class="keyword">SET</span> = utf8mb4 <span class="keyword">COLLATE</span> = utf8mb4_general_ci ROW_FORMAT = Dynamic;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SET</span> FOREIGN_KEY_CHECKS = <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- tm  manager --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.codingapi.txlcn<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>txlcn-tm<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>5.0.2.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.codingapi.txlcn<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>txlcn-tc<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>5.0.2.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.codingapi.txlcn<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>txlcn-txmsg-netty<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>5.0.2.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#引入配置redis和DB...这里省略</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># TM事务管理器的服务端WEB访问端口。提供一个可视化的界面。端口自定义。</span></span><br><span class="line"><span class="meta">server.port</span>=<span class="string">7970</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># TM事务管理器，提供的WEB管理平台的登录密码。无用户名。 默认是codingapi</span></span><br><span class="line"><span class="meta">tx-lcn.manager.admin-key</span>=<span class="string">admin</span></span><br><span class="line"><span class="comment"># 日志。如果需要TM记录日志。则开启，赋值为true，并提供后续的配置。</span></span><br><span class="line"><span class="meta">tx-lcn.logger.enabled</span>=<span class="string">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 为日志功能，提供数据库连接。和之前配置的分布式事务管理依赖使用的数据源不同。</span></span><br><span class="line"><span class="meta">tx-lcn.logger.driver-class-name</span>=<span class="string">com.mysql.cj.jdbc.Driver</span></span><br><span class="line"><span class="meta">tx-lcn.logger.jdbc-url</span>=<span class="string">jdbc:mysql://localhost:3306/tx-manager?characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai</span></span><br><span class="line"><span class="meta">tx-lcn.logger.username</span>=<span class="string">root</span></span><br><span class="line"><span class="meta">tx-lcn.logger.password</span>=<span class="string">root</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableTransactionManagerServer</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LcnTmApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(LcnTmApplication<span class="class">.<span class="keyword">class</span>, <span class="title">args</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>访问<em><a href="http://localhost:7970" target="_blank" rel="noopener">http://localhost:7970</a></em>登录即可</p>
+<p><img src="/images/distributed-transaction/transaction-03.png" alt="transaction"></p>
+<p><img src="/images/distributed-transaction/transaction-04.png" alt="transaction"></p>
+<h4 id="TC"><a href="#TC" class="headerlink" title="TC"></a>TC</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- rm --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.codingapi.txlcn<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>txlcn-tc<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>5.0.2.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.codingapi.txlcn<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>txlcn-txmsg-netty<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>5.0.2.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#引入配置db...这里省略</span></span><br><span class="line"><span class="comment"># tm配置</span></span><br><span class="line"><span class="meta">tx-lcn</span>:<span class="string"></span></span><br><span class="line">  <span class="attr">client</span>:<span class="string"></span></span><br><span class="line"><span class="comment">    #TM Web界面提供的ip和端口</span></span><br><span class="line">    <span class="meta">manager-address</span>: <span class="string">127.0.0.1:8070</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="comment">//RM的注解</span></span><br><span class="line"><span class="meta">@EnableDistributedTransaction</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LcnPayApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(LcnPayApplication<span class="class">.<span class="keyword">class</span>, <span class="title">args</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@PostMapping</span>(<span class="string">"/add-pay"</span>)</span><br><span class="line"><span class="meta">@Transactional</span>(rollbackFor = Exception<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">//<span class="title">LCN</span>注解</span></span><br><span class="line"><span class="class">@<span class="title">LcnTransaction</span></span></span><br><span class="line"><span class="class"><span class="title">public</span> <span class="title">String</span> <span class="title">addPay</span>(@<span class="title">RequestBody</span> <span class="title">TblPay</span> <span class="title">bean</span>)</span>&#123;</span><br><span class="line">    <span class="comment">//调用其他服务产生其他事务...其他服务也需要增加相关配置和@EnableDistributedTransaction、@LcnTransaction</span></span><br><span class="line">  </span><br><span class="line">    <span class="comment">//自身服务的事务</span></span><br><span class="line">    tblPayDao.insert(bean);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">"新增支付成功"</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="集群"><a href="#集群" class="headerlink" title="集群"></a>集群</h4><p>TM起多个，TC配置多个地址即可.</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tx-lcn:</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">manager-address:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8070,127.0.0.1:8071</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="TCC"><a href="#TCC" class="headerlink" title="TCC"></a>TCC</h2><p><strong>TCC：Try、Confirm、Cancel</strong></p>
+<p><img src="/images/distributed-transaction/transaction-11.png" alt="transaction"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TCC主要是通过逆向SQL来达到回滚的作用，需要编写逆向SQL，会增加业务复杂度。</span><br><span class="line">所以用自带事务的中间件，比如mysql，不用TCC，用LCN。</span><br><span class="line">但是如Mongo、Redis这种没有事务的数据库，可以使用TCC。</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>在微服务互相调度的过程中，TCC和LCN是可以混合使用的。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderTccController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> TblOrderDao tblOrderDao;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> RestTemplate restTemplate;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Map&lt;String,Integer&gt; maps = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@PostMapping</span>(<span class="string">"/add-order-tcc"</span>)</span><br><span class="line">    <span class="meta">@Transactional</span>(rollbackFor = Exception<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">    @<span class="title">TccTransaction</span></span></span><br><span class="line"><span class="class">    <span class="title">public</span> <span class="title">String</span> <span class="title">add</span>(@<span class="title">RequestBody</span> <span class="title">TblOrder</span> <span class="title">bean</span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">        JSONObject date = <span class="keyword">new</span> JSONObject();</span><br><span class="line">        date.put(<span class="string">"payName"</span>,bean.getOrderName()+<span class="string">"pay"</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//调用另外服务的TCC</span></span><br><span class="line">        restTemplate.postForEntity(<span class="string">"http://lcn-pay/add-pay-tcc"</span>,date,String<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line">        tblOrderDao.insert(bean);</span><br><span class="line">        Integer id = bean.getId();</span><br><span class="line">        maps.put(<span class="string">"a"</span>,id);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//        int i = 1/0;</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"新增订单成功"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//不需要注解 方法名：comfirmMethod</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">confirmAdd</span><span class="params">(TblOrder bean)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">"order confirm "</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"新增订单成功"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//不需要注解 方法名：cancelMethod</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">cancelAdd</span><span class="params">(TblOrder bean)</span></span>&#123;</span><br><span class="line">        Integer a = maps.get(<span class="string">"a"</span>);</span><br><span class="line">        System.out.println(<span class="string">"a:"</span>+a);</span><br><span class="line">        tblOrderDao.deleteByPrimaryKey(a);</span><br><span class="line">        System.out.println(<span class="string">"order cancel "</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"新增订单成功"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Seata"><a href="#Seata" class="headerlink" title="Seata"></a>Seata</h2><p><a href="/2020/06/29/springcloud-seata/">跳转至Seata文章</a></p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2021年01月06日 23:49</p>
+        <p>原始链接： <a class="post-url" href="/2021/01/05/distributed-transaction/" title="&#39;分布式事务&#39;">https://midkuro.gitee.io/2021/01/05/distributed-transaction/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.gif" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2021/01/05/distributed-transaction/&title=《'分布式事务'》 — Kuro's Blog&pic=images/springcloud.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2021/01/05/distributed-transaction/&title=《'分布式事务'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2021/01/05/distributed-transaction/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'分布式事务'》 — Kuro's Blog&url=https://midkuro.gitee.io/2021/01/05/distributed-transaction/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2021/01/05/distributed-transaction/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2021/01/05/distributed-transaction/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Transaction/" class="color2">Transaction</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#分布式事务"><span class="post-toc-text">分布式事务</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#二阶段提交"><span class="post-toc-text">二阶段提交</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#三阶段提交"><span class="post-toc-text">三阶段提交</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#消息队列"><span class="post-toc-text">消息队列</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#LCN"><span class="post-toc-text">LCN</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#事务控制原理"><span class="post-toc-text">事务控制原理</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#协调机制本质"><span class="post-toc-text">协调机制本质</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#代码应用"><span class="post-toc-text">代码应用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#TM"><span class="post-toc-text">TM</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#TC"><span class="post-toc-text">TC</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#集群"><span class="post-toc-text">集群</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#TCC"><span class="post-toc-text">TCC</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Seata"><span class="post-toc-text">Seata</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+  
+    <a href="/2020/12/11/elk-logstash/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;ELK 之 logstash beats&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="distributed-transaction" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2021 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Elasticsearch/">Elasticsearch</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/Linux/">Linux</a><a class="category-link" href="/categories/MYSQL/">MYSQL</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Transaction/">Transaction</a><a class="category-link" href="/categories/Zookeeper/">Zookeeper</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/algorithm/">algorithm</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16px;">ActiveMQ</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a> <a href="/tags/Transaction/" style="font-size: 10px;">Transaction</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/algorithm/" style="font-size: 13px;">algorithm</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16px;">ActiveMQ</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MYSQL/" style="font-size: 12px;">MYSQL</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a> <a href="/tags/Transaction/" style="font-size: 10px;">Transaction</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/algorithm/" style="font-size: 13px;">algorithm</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
