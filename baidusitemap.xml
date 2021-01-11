@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://midkuro.gitee.io/2020/10/31/algorithm-trainingcamp4/</loc>
+    <lastmod>2021-01-09</lastmod>
+  </url>
+  <url>
+    <loc>https://midkuro.gitee.io/2020/10/31/algorithm-trainingcamp3/</loc>
+    <lastmod>2021-01-09</lastmod>
+  </url>
+  <url>
     <loc>https://midkuro.gitee.io/2021/01/05/distributed-transaction/</loc>
-    <lastmod>2021-01-06</lastmod>
+    <lastmod>2021-01-09</lastmod>
+  </url>
+  <url>
+    <loc>https://midkuro.gitee.io/2020/10/29/juc-base/</loc>
+    <lastmod>2021-01-08</lastmod>
   </url>
   <url>
     <loc>https://midkuro.gitee.io/2020/06/29/springcloud-seata/</loc>
-    <lastmod>2021-01-06</lastmod>
+    <lastmod>2021-01-07</lastmod>
   </url>
   <url>
     <loc>https://midkuro.gitee.io/2020/10/22/spring-initialization/</loc>
@@ -19,10 +31,6 @@
   <url>
     <loc>https://midkuro.gitee.io/2020/05/26/redis-cluster/</loc>
     <lastmod>2021-01-05</lastmod>
-  </url>
-  <url>
-    <loc>https://midkuro.gitee.io/2020/10/31/algorithm-trainingcamp3/</loc>
-    <lastmod>2021-01-03</lastmod>
   </url>
   <url>
     <loc>https://midkuro.gitee.io/2020/07/20/rocketmq-springboot/</loc>
@@ -66,10 +74,6 @@
   </url>
   <url>
     <loc>https://midkuro.gitee.io/2020/10/29/algorithm-base/</loc>
-    <lastmod>2020-12-28</lastmod>
-  </url>
-  <url>
-    <loc>https://midkuro.gitee.io/2020/10/29/juc-base/</loc>
     <lastmod>2020-12-28</lastmod>
   </url>
   <url>
