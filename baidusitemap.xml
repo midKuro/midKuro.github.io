@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://midkuro.gitee.io/2021/02/04/jdk7-hashmap/</loc>
+    <loc>https://midkuro.gitee.io/2021/02/04/jdk8-hashmap/</loc>
     <lastmod>2021-02-04</lastmod>
   </url>
   <url>
-    <loc>https://midkuro.gitee.io/2021/02/04/jdk8-hashmap/</loc>
+    <loc>https://midkuro.gitee.io/2020/10/29/juc-base/</loc>
+    <lastmod>2021-02-04</lastmod>
+  </url>
+  <url>
+    <loc>https://midkuro.gitee.io/2021/02/04/jdk7-hashmap/</loc>
     <lastmod>2021-02-04</lastmod>
   </url>
   <url>
@@ -83,10 +87,6 @@
   <url>
     <loc>https://midkuro.gitee.io/2021/01/05/distributed-transaction/</loc>
     <lastmod>2021-01-09</lastmod>
-  </url>
-  <url>
-    <loc>https://midkuro.gitee.io/2020/10/29/juc-base/</loc>
-    <lastmod>2021-01-08</lastmod>
   </url>
   <url>
     <loc>https://midkuro.gitee.io/2020/06/29/springcloud-seata/</loc>

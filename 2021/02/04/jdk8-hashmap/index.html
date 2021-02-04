@@ -43,7 +43,7 @@
 <meta property="og:image" content="https://midkuro.gitee.io/images/jdk8-hashmap/source-18.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/jdk8-hashmap/source-19.png">
 <meta property="article:published_time" content="2021-02-04T14:31:00.000Z">
-<meta property="article:modified_time" content="2021-02-04T05:51:59.412Z">
+<meta property="article:modified_time" content="2021-02-04T11:15:00.268Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="HashMap">
@@ -378,7 +378,65 @@
 
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//baseCount + CounterCell[] 的数据，累加起来就是总的Size</span></span><br><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">long</span> <span class="title">sumCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    CounterCell[] as = counterCells; CounterCell a;</span><br><span class="line">    <span class="keyword">long</span> sum = baseCount;</span><br><span class="line">    <span class="keyword">if</span> (as != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; as.length; ++i) &#123;</span><br><span class="line">            <span class="keyword">if</span> ((a = as[i]) != <span class="keyword">null</span>)</span><br><span class="line">                sum += a.value;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> sum;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<h2 id="HashMap区别"><a href="#HashMap区别" class="headerlink" title="HashMap区别"></a>HashMap区别</h2><blockquote>
+<p>JDK7和JDK8中的HashMap底层数据结构有什么区别?</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">JDK7:数组 + 链表</span><br><span class="line">JDK8:数组 + 链表 + 红黑树</span><br><span class="line">     链表包括单向链表和双向链表，双线链表主要是为了链表操作方便，在插入、扩容链表转红黑树的过程中使用</span><br></pre></td></tr></table></figure>
 
+<blockquote>
+<p>JDK8中的HashMap为什么要使用红黑树？</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">当元素个数小于一个阈值时，链表在整体效率上要高于红黑树，当元素个数大于此阈值时，链表整体的查询效率要低于红黑树，此阈值在HashMap中为8。转换成红黑树可以平衡插入和查询效率。</span><br><span class="line"></span><br><span class="line">链表查询效率：O(N)</span><br><span class="line">链表插入效率：O(1)</span><br><span class="line"></span><br><span class="line">红黑树查询效率：O(logN)</span><br><span class="line">红黑树插入效率：O(logN)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>JDK8中的HashMap什么时候将链表转化成红黑树？</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">当链表中的元素大于8，并且数组的长度大于等于64时，才会将链表转化成红黑树。</span><br><span class="line">当数组的长度低于64时，通过扩容数组大小来缩小链表的长度。</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>JDK8中的HashMap的put方法的实现过程？</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">1.根据Key生成HashCode</span><br><span class="line">2.判断当前HashMap对象中的数组是否为空，如果为空则初始化数组</span><br><span class="line">3.根据逻辑与运算，算出HashCode基于当前数组对应的数组下标i</span><br><span class="line">4.判断数组的第i个位置的元素(tab[i])是否为空</span><br><span class="line">   a.如果为空，则将key,value封装为Node对象赋值给tab[i]</span><br><span class="line">   b.如果不为空：</span><br><span class="line">     I.如果put方法传入进来的key等于tab[i].key，那么存在相同的key</span><br><span class="line">     II.如果不等于tab[i].key，则:</span><br><span class="line">       1.如果tab[i]的类型是TreeNode，插入红黑树之前判断树中是否存在相同的key,然后Key和Value插入到红黑树中</span><br><span class="line">       2.如果tab[i]的类型不是TreeNode，则表示当前是个链表，遍历寻找相同的key，找不到则插入，然后判断是否Size大于8，大于则树化。</span><br><span class="line">     III.如果上诉步骤发现相同的key，则更新value值，返回oldValue</span><br><span class="line">5.modCount++</span><br><span class="line">6.HashMap的元素个数size + 1</span><br><span class="line">7.如果size大于扩容阈值，则进行扩容</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>JDK8中HashMap的get方法的实现过程</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1.根据Key生成HashCode</span><br><span class="line">2.如果数组为空，则直接返回空</span><br><span class="line">3.如果数组不为空，则利用HashCode和数组长度通过逻辑与操作是厒Key所对应的数组下标i</span><br><span class="line">4.如果数组的第i个位置上没有元素，则直接返回空</span><br><span class="line">5.如果数组的第1个位置上的元素key等于get方法传进来的key，则返回该元素，并取该元素的value</span><br><span class="line">6.如果不等于则判断该元素有没有下一个元素，如果没有，返回空</span><br><span class="line">7.如果有则判断该元素的类型是链表节点还是红黑树节点</span><br><span class="line">  a.如果是链表则遍历链表</span><br><span class="line">  b.如果是红黑树则遍历红黑树</span><br><span class="line">8.找到则返回元素，没找到则返回空</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>JDK7与JDK8中HashMap的不同点</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.JDK8使用了红黑树</span><br><span class="line">2.JDK7中链表插入使用的头插法，但是会造成循环链表CPU100%的问题，JDK8使用尾插法</span><br><span class="line">3.JDK7的Hash算法比JDK8复杂，散列性更好能提高链表查询效率，而JDK8增加红黑树查询性能得到保障，所以简化了Hash算法</span><br><span class="line">4.扩容的过程JDK7可能会对Key进行reHash(和Hash种子有关)，而JDK8&#x3D;的Key没有reHash的过程</span><br><span class="line">5.JDK8中的扩容条件和JDK7不同，在JDK7中，若tab[i]为空，则不进行扩容，而JDK8移除了该条件</span><br><span class="line">6.JDK8增加了API：putIfAbsent(Key,Value)</span><br><span class="line">7.扩容过程转移元素的逻辑不同，JDK7是一次转移一个元素，JDK8是算出尾部同一个位置的数组直接头结点迁移</span><br></pre></td></tr></table></figure>
+
+<h2 id="ConcurrentHashMap区别"><a href="#ConcurrentHashMap区别" class="headerlink" title="ConcurrentHashMap区别"></a>ConcurrentHashMap区别</h2><blockquote>
+<p>JDK7中的ConcurrentHashMap是怎么保证并发安全的？</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">利用 Unsafe操作 + ReentrantLock + 分段思想</span><br><span class="line">Unsafe操作：</span><br><span class="line">1.compareAndSwapObject : CAS方式修改对象的属性</span><br><span class="line">2.putOrderedObject : 并发安全的给数组的某个位置赋值</span><br><span class="line">3.getObjectVolatile ： 并发安全的获取数组某个位置的元素</span><br><span class="line"></span><br><span class="line">分段思想是为了提高ConcurrentHashMap的并发量，分段越高则支持的最大并发量越高。</span><br><span class="line">并发量根据concurrencyLevel参数指定，内部类Segment表示一个段。</span><br><span class="line"></span><br><span class="line">每个Segment是一个小型的HashMap，Segment类继承ReentrantLock，所以自带重入锁，put方法时加锁，再插入值，然后解锁。</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>JDK7中的ConcurrentHashMap的底层原理</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ConcurrentHashMap底层是由两层嵌套数组实现的：</span><br><span class="line">1.ConcurrentHashMap对象中有一个属性segments，类型Segment[]</span><br><span class="line">2.Segment对象中有一个属性table,类型HashEntry[]</span><br><span class="line"></span><br><span class="line">当调用put方法时，根据Key计算出Segment[]数组下标，若为空，则初始化Segment对象，然后调用Segment对象的put方法.</span><br><span class="line">Segment对象的put方法会先加锁，然后根据Key计算出HashEntry[]数组下标，并放到链表中。</span><br><span class="line"></span><br><span class="line">枷锁过程是通过CAS加锁，超过一定次数就会阻塞等待加锁。</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>JDK8中的ConcurrentHashMap是怎么保证并发安全的？</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">利用 Unsafe操作 + synchronized关键字</span><br><span class="line">Unsave操作的使用和JDK7中的类似，主要负责并发安全的修改对象的属性活数组某个位置的值。</span><br><span class="line"></span><br><span class="line">synchronized主要负责对tab[i]元素时进行加锁(该位置不为空)，若该位置为空，则采用CAS赋值tab[i]</span><br><span class="line">tab[i]若是链表，则是链表头结点，若是红黑树，则是TreeBin对象。</span><br><span class="line"></span><br><span class="line">JDK8中也有分段锁的思想，只不过JDK7中段数是可以控制的，而JDK8中针对数组的每一个位置(tab[i]元素)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>JDK8中的ConcurrentHashMap的put方法的实现流程？</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">当向ConcurrentHashMap中put一个Key,Value时：</span><br><span class="line">1.首先根据Key计算对应的数组下标，如果该位置没有元素，则通过CAS去赋值该位置</span><br><span class="line">2.如果该位置有元素，则synchronized加锁</span><br><span class="line">3.加锁成功后，判断该元素的类型</span><br><span class="line">  a.如果是链表，则将新节点添加到链表中</span><br><span class="line">  b.如果是红黑树，则将新节点添加到红黑树中</span><br><span class="line">4.添加成功后，判断是否需要进行树化</span><br><span class="line">5.addCount，并发安全地对ConcurrentHashMap元素个数 + 1(采用了LongAdder思想)，然后判断是否需要扩容</span><br><span class="line">6.同时线程在put时如果发现当前ConcurrentHashMap正在进行扩容(tab[i]&#x3D;FWD类型的对象)，则会去帮助扩容(并发扩容)。</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>JDK7和JDK8中，统计元素个数的实现逻辑有什么区别？</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">JDK7:</span><br><span class="line">1.第一次遍历累加Segment[]数组中的count属性</span><br><span class="line">2.第二次遍历累加Segmeng[]数组中的count属性</span><br><span class="line">3.如果在两次遍历过程中，结果不相等，则再遍历第三次累加，和第二次的结果对比，若相等则返回</span><br><span class="line">4.若还是不等，则对Segment数组的上的所有元素加锁，然后计算</span><br><span class="line"></span><br><span class="line">JDK8：</span><br><span class="line">1.有一个baseCount的属性，供以CAS操作，并借鉴了LongAdder的设计思想</span><br><span class="line">2.当baseCount在CAS竞争激烈时，使用CounterCell[]数组提供多个篮子进行资源分散</span><br><span class="line">3.只要能对篮子中的值CAS成功后，即可</span><br><span class="line">4.最终统计时，通过累加baseCount + CounterCell[] 得到结果。</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>JDK7和JDK8中，都支持多线程并发扩容吗？</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">都支持多线程扩容。</span><br><span class="line">在JDK7中，扩容只是针对一个Segment对象中的HashEntry[]对象，所以能够达到多个线程同时扩容不同的Segment对象。</span><br><span class="line">在JDK8中，每个线程迁移指定步长下标的元素，并发操作，达到多线程同时扩容一个tab数组。</span><br><span class="line"></span><br><span class="line">JDK8的扩容性能更高，因为JDK8对任意一个线程都可以帮助扩容，而JDK7一个线程扩容一个Segment。</span><br></pre></td></tr></table></figure>
 
 <hr>
 <blockquote>
@@ -387,7 +445,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2021年02月04日 13:51</p>
+        <p>最后更新： 2021年02月04日 19:15</p>
         <p>原始链接： <a class="post-url" href="/2021/02/04/jdk8-hashmap/" title="&#39;JDK1.8 HashMap和ConcurrentHashMap 源码和实现&#39;">https://midkuro.gitee.io/2021/02/04/jdk8-hashmap/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">
@@ -507,7 +565,7 @@
 
     <aside class="post-toc-pos post-toc-top" id="post-toc">
         <nav class="post-toc-wrap">
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#HashMap的源码和分析"><span class="post-toc-text">HashMap的源码和分析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#JDK1-8"><span class="post-toc-text">JDK1.8</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#HashMap"><span class="post-toc-text">HashMap</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#案例"><span class="post-toc-text">案例</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#总结"><span class="post-toc-text">总结</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#源码"><span class="post-toc-text">源码</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#ConcurrentHashMap"><span class="post-toc-text">ConcurrentHashMap</span></a></li></ol></li></ol></li></ol>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#HashMap的源码和分析"><span class="post-toc-text">HashMap的源码和分析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#JDK1-8"><span class="post-toc-text">JDK1.8</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#HashMap"><span class="post-toc-text">HashMap</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#案例"><span class="post-toc-text">案例</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#总结"><span class="post-toc-text">总结</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#源码"><span class="post-toc-text">源码</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#ConcurrentHashMap"><span class="post-toc-text">ConcurrentHashMap</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#HashMap区别"><span class="post-toc-text">HashMap区别</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#ConcurrentHashMap区别"><span class="post-toc-text">ConcurrentHashMap区别</span></a></li></ol></li></ol>
         </nav>
     </aside>
     
