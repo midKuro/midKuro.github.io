@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://midkuro.gitee.io/2020/09/28/jdk8-hashmap/</loc>
-    <lastmod>2021-02-03</lastmod>
+    <loc>https://midkuro.gitee.io/2021/02/04/jdk7-hashmap/</loc>
+    <lastmod>2021-02-04</lastmod>
+  </url>
+  <url>
+    <loc>https://midkuro.gitee.io/2021/02/04/jdk8-hashmap/</loc>
+    <lastmod>2021-02-04</lastmod>
   </url>
   <url>
     <loc>https://midkuro.gitee.io/2020/10/31/algorithm-trainingcamp3/</loc>
@@ -339,10 +343,6 @@
   <url>
     <loc>https://midkuro.gitee.io/2020/10/24/spring-circularReferences/</loc>
     <lastmod>2020-10-19</lastmod>
-  </url>
-  <url>
-    <loc>https://midkuro.gitee.io/2020/09/28/jdk7-hashmap/</loc>
-    <lastmod>2020-09-29</lastmod>
   </url>
   <url>
     <loc>https://midkuro.gitee.io/2020/05/21/thread-safety/</loc>

@@ -126,6 +126,138 @@
       <div class="outer">
         <section id="main" class="body-wrap">
   
+    <article id="post-reactor-webflux" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/10/21/reactor-webflux/"  >&#39;响应式web&#39;</a>
+    </h1>
+  
+
+          
+              <span class="header-cate">
+                <i class="fa fa-map-marker"></i>
+                  
+                  <a href="/categories/Spring/">Spring</a>
+                  
+              </span>
+          
+      </header>
+    
+    <div class="article-entry " itemprop="articleBody">
+      
+        <div class="article-img">
+            <a href="/2020/10/21/reactor-webflux/" >
+                
+                <img src="/images/spring.jpg" alt="'响应式web'" title="'响应式web'">
+                
+            </a>
+        </div>
+        <div class="article-feed">
+            <p>
+                响应式web长轮训短轮询去服务端查询的时候，不管库存量有没有变化，服务器就立即返回结果了。
+长轮询则不是，在长轮询中，服务器如果检测到库存量没有变化的话，将会把当前请求挂起一段时间（这个时间也叫作超时时间，一般是90秒）。在这个时间里，服务器会去检测库存量有没有变化，检测到变化就立即返回，否则...
+            </p>
+        </div>
+      
+        
+    </div>
+    <footer class="article-footer">
+        
+        <ul class="article-footer-menu">
+            
+                <li><i class="fa fa-calendar"></i>2020-10-21</li>
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Java/" class="color5">Java</a>
+      
+    <a href="/tags/Spring/" class="color2">Spring</a>
+      
+  </li>
+
+        </ul>
+        
+            <a href="/2020/10/21/reactor-webflux/#more" class="article-more-link" >more&gt;&gt;</a>
+        
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article id="post-spring-extends" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/10/21/spring-extends/"  >&#39;Spring的扩展原理&#39;</a>
+    </h1>
+  
+
+          
+              <span class="header-cate">
+                <i class="fa fa-map-marker"></i>
+                  
+                  <a href="/categories/Spring/">Spring</a>
+                  
+              </span>
+          
+      </header>
+    
+    <div class="article-entry " itemprop="articleBody">
+      
+        <div class="article-img">
+            <a href="/2020/10/21/spring-extends/" >
+                
+                <img src="/images/spring.jpg" alt="'Spring的扩展原理'" title="'Spring的扩展原理'">
+                
+            </a>
+        </div>
+        <div class="article-feed">
+            <p>
+                Spring扩展原理BeanFactoryPostProcessor BeanPostProcessor：bean后置处理器，bean创建对象初始化前后进行拦截工作的
+BeanFactoryPostProcessor：beanFactory的后置处理器；
+
+在BeanFactory标准初始化之...
+            </p>
+        </div>
+      
+        
+    </div>
+    <footer class="article-footer">
+        
+        <ul class="article-footer-menu">
+            
+                <li><i class="fa fa-calendar"></i>2020-10-21</li>
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Java/" class="color5">Java</a>
+      
+    <a href="/tags/Spring/" class="color2">Spring</a>
+      
+  </li>
+
+        </ul>
+        
+            <a href="/2020/10/21/spring-extends/#more" class="article-more-link" >more&gt;&gt;</a>
+        
+    </footer>
+  </div>
+</article>
+
+
+  
     <article id="post-spring-transaction" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -248,143 +380,6 @@
         </ul>
         
             <a href="/2020/10/20/spring-aop/#more" class="article-more-link" >more&gt;&gt;</a>
-        
-    </footer>
-  </div>
-</article>
-
-
-  
-    <article id="post-jdk8-hashmap" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/28/jdk8-hashmap/"  >&#39;JDK1.8 HashMap和ConcurrentHashMap 源码和实现&#39;</a>
-    </h1>
-  
-
-          
-              <span class="header-cate">
-                <i class="fa fa-map-marker"></i>
-                  
-                  <a href="/categories/HashMap/">HashMap</a>
-                  
-              </span>
-          
-      </header>
-    
-    <div class="article-entry " itemprop="articleBody">
-      
-        <div class="article-img">
-            <a href="/2020/09/28/jdk8-hashmap/" >
-                
-                <img src="/images/java.jpg" alt="'JDK1.8 HashMap和ConcurrentHashMap 源码和实现'" title="'JDK1.8 HashMap和ConcurrentHashMap 源码和实现'">
-                
-            </a>
-        </div>
-        <div class="article-feed">
-            <p>
-                HashMap的源码和分析JDK1.8HashMap
-AVL树：
-在计算机科学中，AVL树是最先发明的自平衡二叉查找树。在AVL树中任何节点的两个子树的高度最大差别为1，所以它也被称为高度平衡树。增加和删除可能需要通过一次或多次树旋转来重新平衡这个树。
-特点：
-1.本身首先是一棵二叉搜索树。
-...
-            </p>
-        </div>
-      
-        
-    </div>
-    <footer class="article-footer">
-        
-        <ul class="article-footer-menu">
-            
-                <li><i class="fa fa-calendar"></i>2020-09-28</li>
-            
-            
-  <li class="article-footer-tags">
-    <i class="fa fa-tags"></i>
-      
-    <a href="/tags/Java/" class="color5">Java</a>
-      
-    <a href="/tags/HashMap/" class="color3">HashMap</a>
-      
-  </li>
-
-        </ul>
-        
-            <a href="/2020/09/28/jdk8-hashmap/#more" class="article-more-link" >more&gt;&gt;</a>
-        
-    </footer>
-  </div>
-</article>
-
-
-  
-    <article id="post-jdk7-hashmap" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/28/jdk7-hashmap/"  >&#39;JDK1.7 HashMap和ConcurrentHashMap 源码和实现&#39;</a>
-    </h1>
-  
-
-          
-              <span class="header-cate">
-                <i class="fa fa-map-marker"></i>
-                  
-                  <a href="/categories/HashMap/">HashMap</a>
-                  
-              </span>
-          
-      </header>
-    
-    <div class="article-entry " itemprop="articleBody">
-      
-        <div class="article-img">
-            <a href="/2020/09/28/jdk7-hashmap/" >
-                
-                <img src="/images/java.jpg" alt="'JDK1.7 HashMap和ConcurrentHashMap 源码和实现'" title="'JDK1.7 HashMap和ConcurrentHashMap 源码和实现'">
-                
-            </a>
-        </div>
-        <div class="article-feed">
-            <p>
-                HashMap的源码和分析JDK1.7HashMap
-问题：JDK1.7中，HashMap是通过什么原理实现的呢？
-答案：数组+链表
-问题：什么叫哈希碰撞（哈希冲突）？
-不同的键值通过哈希函数运算得到相同的哈希值，解决哈希冲突的方式有开放寻址法和链表法，ThreadLocalMap由于其元素个...
-            </p>
-        </div>
-      
-        
-    </div>
-    <footer class="article-footer">
-        
-        <ul class="article-footer-menu">
-            
-                <li><i class="fa fa-calendar"></i>2020-09-28</li>
-            
-            
-  <li class="article-footer-tags">
-    <i class="fa fa-tags"></i>
-      
-    <a href="/tags/Java/" class="color5">Java</a>
-      
-    <a href="/tags/HashMap/" class="color3">HashMap</a>
-      
-  </li>
-
-        </ul>
-        
-            <a href="/2020/09/28/jdk7-hashmap/#more" class="article-more-link" >more&gt;&gt;</a>
         
     </footer>
   </div>
