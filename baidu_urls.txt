@@ -1,3 +1,7 @@
+https://midkuro.gitee.io/2021/02/27/kafka-eagle/
+https://midkuro.gitee.io/2021/02/27/kafka-api/
+https://midkuro.gitee.io/2021/02/27/kafka-framework/
+https://midkuro.gitee.io/2021/02/26/kafka-base/
 https://midkuro.gitee.io/2021/02/04/jdk8-hashmap/
 https://midkuro.gitee.io/2021/02/04/jdk7-hashmap/
 https://midkuro.gitee.io/2021/02/03/file-FastDFS/
@@ -24,8 +28,8 @@ https://midkuro.gitee.io/2020/10/30/algorithm-trainingcamp2/
 https://midkuro.gitee.io/2020/10/30/algorithm-trainingcamp1/
 https://midkuro.gitee.io/2020/10/29/algorithm-base/
 https://midkuro.gitee.io/2020/10/29/jvm-base/
-https://midkuro.gitee.io/2020/10/29/io-base/
 https://midkuro.gitee.io/2020/10/29/juc-base/
+https://midkuro.gitee.io/2020/10/29/io-base/
 https://midkuro.gitee.io/2020/10/24/spring-circularReferences/
 https://midkuro.gitee.io/2020/10/22/spring-initialization/
 https://midkuro.gitee.io/2020/10/21/reactor-webflux/
@@ -94,4 +98,3 @@ https://midkuro.gitee.io/2020/05/20/linux-firewalld/
 https://midkuro.gitee.io/2020/05/20/jenkins-param/
 https://midkuro.gitee.io/2020/05/20/jenkins-upstream/
 https://midkuro.gitee.io/2020/05/20/jenkins-use/
-https://midkuro.gitee.io/2020/05/20/jenkins-install/

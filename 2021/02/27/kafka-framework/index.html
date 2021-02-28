@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Kafka的架构布局&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
+  <meta name="description" content="Kafka工作流程 Kafka 中消息是以 topic 进行分类的，生产者生产消息，消费者消费消息，都是面向 topic的。 topic 是逻辑上的概念，而 partition 是物理上的概念，每个 partition 对应于一个 log 文件，该 log 文件中存储的就是 producer 生产的数据。Producer 生产的数据会被不断追加到该log 文件末端，且每条数据都有自己的 offse">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Kafka的架构布局&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2021/02/27/kafka-framework/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Kafka工作流程 Kafka 中消息是以 topic 进行分类的，生产者生产消息，消费者消费消息，都是面向 topic的。 topic 是逻辑上的概念，而 partition 是物理上的概念，每个 partition 对应于一个 log 文件，该 log 文件中存储的就是 producer 生产的数据。Producer 生产的数据会被不断追加到该log 文件末端，且每条数据都有自己的 offse">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-02.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-03.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-04.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-05.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-06.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-07.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-08.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-09.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-10.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-11.png">
+<meta property="article:published_time" content="2021-02-27T01:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-27T13:21:19.098Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-02.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?code-JRipY21QjX";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+  
+
+
+  
+  <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
+  
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.gif" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-kafka-framework" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Kafka的架构布局&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Kafka/">Kafka</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2021-02-27
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Kafka"><a href="#Kafka" class="headerlink" title="Kafka"></a>Kafka</h1><h2 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h2><p><img src="/images/amqp-kafka/kafka-02.png" alt="kafka"></p>
+<p>Kafka 中消息是以 <strong>topic</strong> 进行分类的，生产者生产消息，消费者消费消息，都是面向 topic的。</p>
+<p>topic 是逻辑上的概念，而 partition 是物理上的概念，每个 partition 对应于一个 log 文件，该 log 文件中存储的就是 producer 生产的数据。Producer 生产的数据会被不断追加到该log 文件末端，且每条数据都有自己的 offset。</p>
+<p>消费者组中的每个消费者，都会实时记录自己消费到了哪个 offset，以便出错恢复时，从上次的位置继续消费。</p>
+<p><img src="/images/amqp-kafka/kafka-03.png" alt="kafka"></p>
+<p>由于生产者生产的消息会不断追加到 log 文件末尾，为防止 log 文件过大导致数据定位效率低下，Kafka 采取了<strong>分片</strong>和<strong>索引</strong>机制，将每个 partition 分为多个 segment。每个 segment对应两个文件——“.index”文件和“.log”文件。</p>
+<p>这些文件位于一个文件夹下，该文件夹的命名规则为：topic 名称+分区序号。例如，first 这个 topic 有三个分区，则其对应的文件夹为 first-0,first-1,first-2。 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">00000000000000000000.index</span><br><span class="line">00000000000000000000.log</span><br><span class="line">00000000000000170410.index</span><br><span class="line">00000000000000170410.log</span><br><span class="line">00000000000000239430.index</span><br><span class="line">00000000000000239430.log</span><br></pre></td></tr></table></figure>
+
+<p><strong>index 和 log 文件以当前 segment 的第一条消息的 offset 命名。</strong></p>
+<p><img src="/images/amqp-kafka/kafka-04.png" alt="kafka"></p>
+<p>“.index”文件存储大量的索引信息，“.log”文件存储大量的数据，<strong>索引文件中的元数据指向对应数据文件中 message 的物理偏移起始地址和数据长度</strong>。</p>
+<h2 id="Kafka生产者"><a href="#Kafka生产者" class="headerlink" title="Kafka生产者"></a>Kafka生产者</h2><h3 id="分区策略"><a href="#分区策略" class="headerlink" title="分区策略"></a>分区策略</h3><p><strong>分区的原因</strong></p>
+<p>（1）<strong>方便在集群中扩展</strong>，每个 Partition 可以通过调整以适应它所在的机器，而一个 topic又可以有多个 Partition 组成，因此整个集群就可以适应任意大小的数据了；</p>
+<p>（2）<strong>可以提高并发</strong>，因为可以以 Partition 为单位读写了。</p>
+<p><strong>分区的原则</strong></p>
+<p>我们需要将 producer 发送的数据封装成一个 <strong>ProducerRecord</strong> 对象。 </p>
+<p><img src="/images/amqp-kafka/kafka-05.png" alt="kafka"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1.指明 partition 的情况下，直接将指明的值直接作为 partiton 值；</span><br><span class="line"></span><br><span class="line">2.没有指明 partition 值但有 key 的情况下，将 key 的 hash 值与 topic 的 partition </span><br><span class="line">数进行取余得到 partition 值；</span><br><span class="line"></span><br><span class="line">3.既没有 partition 值又没有 key 值的情况下，第一次调用时随机生成一个整数（后</span><br><span class="line">面每次调用在这个整数上自增）</span><br><span class="line"> 将这个值与 topic 可用的 partition 总数取余得到 partition 值，也就是常说的 round-robin 算法。</span><br></pre></td></tr></table></figure>
+
+<p><strong>一个partition只能关联同一个消费组里的一个消费者，这样做的好处是partition中的offset不会产生并发和不安全的问题。</strong></p>
+<p><strong>也就是说，消费者必须小于等于partition，否则将出现无法被分配到partition的消费者，导致资源浪费。</strong></p>
+<h3 id="数据可靠性保证"><a href="#数据可靠性保证" class="headerlink" title="数据可靠性保证"></a>数据可靠性保证</h3><p>为保证 producer 发送的数据，能可靠的发送到指定的 topic，topic 的每个 partition 收到producer 发送的数据后，都需要向 producer 发送 ack（acknowledgement 确认收到），如果producer 收到 ack，就会进行下一轮的发送，否则重新发送数据。</p>
+<p><img src="/images/amqp-kafka/kafka-06.png" alt="kafka"></p>
+<blockquote>
+<p><strong>副本数据同步策略</strong></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>半数以上完成同步，就发送ack</td>
+<td>延迟低</td>
+<td>选举新的 leader 时，容忍 n 台节点的故障，需要 2n+1 个副本</td>
+</tr>
+<tr>
+<td>全部完成同步，才发送ack</td>
+<td>选举新的 leader 时，容忍 n 台节点的故障，需要 n+1 个副本</td>
+<td>延迟高</td>
+</tr>
+</tbody></table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Kafka 选择了第二种方案，原因如下：</span><br><span class="line">1.同样为了容忍 n 台节点的故障，第一种方案需要 2n+1 个副本，而第二种方案只需要 n+1</span><br><span class="line">个副本，而 Kafka 的每个分区都有大量的数据，第一种方案会造成大量数据的冗余。</span><br><span class="line">2.虽然第二种方案的网络延迟会比较高，但网络延迟对 Kafka 的影响较小。</span><br></pre></td></tr></table></figure>
+
+<h3 id="ISR"><a href="#ISR" class="headerlink" title="ISR"></a>ISR</h3><blockquote>
+<p>采用第二种方案之后，设想以下情景：</p>
+<p>leader 收到数据，所有 follower 都开始同步数据，但有一个 follower，因为某种故障，迟迟不能与 leader 进行同步，那 leader 就要一直等下去，直到它完成同步，才能发送 ack。这个问题怎么解决呢？</p>
+</blockquote>
+<p>Leader 维护了一个动态的 in-sync replica set (ISR)，意为和 leader 保持同步的 follower 集合。当 ISR 中的 follower 完成数据的同步之后，leader 就会给 follower 发送 ack。如果 follower长时间 未 向 leader 同 步 数 据 ， 则 该 follower 将 被 踢 出 ISR。</p>
+<p>这里的ISR的概念是Leader的候选者（Follower集合），Leader 发生故障之后，就会从 ISR 中选举新的 leader。</p>
+<p>在0.9之前，Kafka提供了两种逻辑来控制follower副本最多落后leader副本的消息数量。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">replica.lag.max.messages：</span><br><span class="line">follower相对于leader的 LEO的差值，落后当超过这个数量的时候就判定该follower是失效的，就会踢出ISR。</span><br><span class="line"></span><br><span class="line">replica.lag.time.max：</span><br><span class="line">多久没有向leader 请求数据，就会踢出ISR。</span><br></pre></td></tr></table></figure>
+
+<p>常见的导致follower和leader的数量同步跟不上的原因：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.新的副本（这是很常见的情况，每个新的副本加入都需要一段信息同步的追赶时期）</span><br><span class="line"></span><br><span class="line">2.网络IO等原因，某些机器IO处理速度变慢所导致持续消费落后。 </span><br><span class="line"></span><br><span class="line">3.进程卡住（Kafka 是Java 写出来的，Java 进程最容易卡住的问题是不是亲切，就是Full GC，及高频次GC）</span><br></pre></td></tr></table></figure>
+
+<p>在0.9之后的版本，移除掉了根据数量判断的策略<code>replica.lag.max.messages</code>，其原因如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.生产者批量batch产生消息，该消息量阈值超过replica.lag.max.messages的数量判断，导致follwer被移除ISR</span><br><span class="line">2.又由于follower和leader通信频繁，导致follower又被添加进ISR</span><br><span class="line">3.添加&#x2F;删除ISR，需要和Zookeeper进行信息交互，瞬间的批量消息，会导致频繁添加、删除ISR，导致频繁ZK交互。</span><br></pre></td></tr></table></figure>
+
+<p><strong>Kafka选择全部Follower完成同步，才发送ack到生产者，这里的全部Follower，指的是ISR里面的Follower集合。</strong></p>
+<h3 id="ack应答机制"><a href="#ack应答机制" class="headerlink" title="ack应答机制"></a>ack应答机制</h3><p>对于某些不太重要的数据，对数据的可靠性要求不是很高，能够容忍数据的少量丢失，所以没必要等 ISR 中的 follower 全部接收成功。所以 Kafka 为用户提供了三种可靠性级别，用户根据对可靠性和延迟的要求进行权衡，<br>选择以下的配置。</p>
+<blockquote>
+<p>acks 参数配置：</p>
+</blockquote>
+<p><code>acks = 0</code>：producer 不等待 broker 的 ack，这一操作提供了一个最低的延迟，broker 一接收到还没有写入磁盘就已经返回，当 broker 故障时有可能<strong>丢失数据</strong>； </p>
+<p><code>acks = 1</code>：producer 等待 broker 的 ack，partition 的 leader 落盘成功后返回 ack，如果在 follower同步成功之前 leader 故障，那么将会<strong>丢失数据</strong>；</p>
+<p><img src="/images/amqp-kafka/kafka-07.png" alt="kafka"></p>
+<p><code>acks = -1(all)</code>：producer 等待 broker 的 ack，partition 的 leader 和 （ISR中的）follower 全部落盘成功后才返回 ack。但是如果在 follower 同步完成后，broker 发送 ack 之前，leader 发生故障，那么会造成<strong>数据重复</strong>。</p>
+<p><img src="/images/amqp-kafka/kafka-08.png" alt="kafka"></p>
+<p>在极端场景下也有可能会丢失数据，比如ISR中没有Follower，这时候场景就退化到<code>acks = 1</code>的情况了。</p>
+<h3 id="故障处理细节"><a href="#故障处理细节" class="headerlink" title="故障处理细节"></a>故障处理细节</h3><p><img src="/images/amqp-kafka/kafka-09.png" alt="kafka"></p>
+<p><strong>LEO</strong>：指的是每个副本最大的<strong>offset</strong>；</p>
+<p><strong>HW</strong>：指的是消费者能见到的最大的<strong>offset</strong>，ISR 队列中最小的<strong>LEO</strong></p>
+<blockquote>
+<p><strong>follower 故障：</strong></p>
+</blockquote>
+<p>follower 发生故障后会被临时踢出 ISR，待该 follower 恢复后，follower 会读取本地磁盘记录的上次的 HW，并将 log 文件高于 HW 的部分截取掉，从 HW 开始向 leader 进行同步。等该 <strong>follower 的 LEO 大于等于该 Partition 的 HW</strong>，即 follower 追上 leader 之后，就可以重新加入 ISR 了。</p>
+<blockquote>
+<p><strong>leader 故障：</strong></p>
+</blockquote>
+<p>leader 发生故障之后，会从 ISR 中选出一个新的 leader，之后，为保证多个副本之间的数据一致性，其余的 follower 会先将各自的 log 文件<strong>高于 HW 的部分截掉</strong>，然后从新的 leader同步数据。</p>
+<p><strong>HW这只能保证副本之间的数据一致性，消费一致性，并不能保证数据不丢失或者不重复，应该由ACK应答机制来保证。</strong></p>
+<h3 id="Exactly-Once-语义"><a href="#Exactly-Once-语义" class="headerlink" title="Exactly Once 语义"></a><strong>Exactly Once</strong> 语义</h3><p>将服务器的 ACK 级别设置为-1，可以保证 Producer 到 Server 之间不会丢失数据，即 AtLeast Once 语义。相对的，将服务器 ACK 级别设置为 0，可以保证生产者每条消息只会被发送一次，<strong>即 At Most Once 语义。</strong></p>
+<p>At Least Once 可以保证数据不丢失，但是不能保证数据不重复；相对的，At Least Once可以保证数据不重复，但是不能保证数据不丢失。<strong>但是，对于一些非常重要的信息，比如说交易数据，下游数据消费者要求数据既不重复也不丢失，即 Exactly Once 语义。</strong></p>
+<p>在 0.11 版本以前的 Kafka，对此是无能为力的，只能保证数据不丢失，再在下游消费者对数据做全局去重。对于多个下游应用的情况，每个都需要单独做全局去重，这就对性能造成了很大影响。</p>
+<p>0.11 版本的 Kafka，引入了一项重大特性：幂等性。所谓的幂等性就是指 Producer 不论向 Server 发送多少次重复数据，Server 端都只会持久化一条。幂等性结合 At Least Once 语义，就构成了 Kafka 的 Exactly Once 语义。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">At Least Once + 幂等性 &#x3D; Exactly Once</span><br></pre></td></tr></table></figure>
+
+<p>要启用幂等性，只需要将 Producer 的参数中 <code>enable.idompotence</code> 设置为 <code>true</code> 即可。Kafka的幂等性实现其实就是将原来下游需要做的去重放在了数据上游。</p>
+<p>开启幂等性的 Producer 在初始化的时候会被分配一个 PID，发往同一 Partition 的消息会附带 Sequence Number。而Broker 端会对&lt;PID, Partition, SeqNumber&gt;做缓存，当具有相同主键的消息提交时，Broker 只会持久化一条。</p>
+<p>但是 PID 重启就会变化，同时不同的 Partition 也具有不同主键，<strong>所以幂等性无法保证跨分区跨会话的 Exactly Once。</strong></p>
+<h2 id="Kafka-消费者"><a href="#Kafka-消费者" class="headerlink" title="Kafka 消费者"></a>Kafka 消费者</h2><h3 id="消费方式"><a href="#消费方式" class="headerlink" title="消费方式"></a>消费方式</h3><blockquote>
+<p><strong>consumer 采用 pull（拉）模式从 broker 中读取数据。</strong></p>
+<p><strong>push（推）模式很难适应消费速率不同的消费者，因为消息发送速率是由 broker 决定的。</strong></p>
+</blockquote>
+<p>它的目标是尽可能以最快速度传递消息，但是这样很容易造成 consumer 来不及处理消息，典型的表现就是拒绝服务以及网络拥塞。而 pull 模式则可以根据 consumer 的消费能力以适当的速率消费消息。</p>
+<p><strong>pull 模式不足之处是，如果 kafka 没有数据，消费者可能会陷入循环中，一直返回空数</strong></p>
+<p><strong>据。</strong>针对这一点，Kafka 的消费者在消费数据时会传入一个时长参数 timeout，如果当前没有</p>
+<p>数据可供消费，consumer 会等待一段时间之后再返回，这段时长即为 timeout。</p>
+<h3 id="分区分配策略"><a href="#分区分配策略" class="headerlink" title="分区分配策略"></a>分区分配策略</h3><p>一个 consumer group 中有多个 consumer，一个 topic 有多个 partition，所以必然会涉及</p>
+<p>到 partition 的分配问题，即确定那个 partition 由哪个 consumer 来消费。</p>
+<p>Kafka 有两种分配策略，一是 RoundRobin，一是 Range，<strong>kafka默认采用 Range 策略</strong>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">RoundRobin：</span><br><span class="line">将消费组内所有消费者以及消费者所订阅的所有topic的partition按照字典序排序，然后通过轮询方式逐个将分区以此分配给每个消费者。</span><br><span class="line">【这种策略适用于消费者订阅的主题都相同时使用】</span><br><span class="line"></span><br><span class="line">优点：能够均衡所有主题的partition之后再进行分配</span><br><span class="line">缺点：消费组内的消费者订阅了不同主题时，会造成资源倾斜或者错乱。</span><br><span class="line"></span><br><span class="line">Range：</span><br><span class="line">同一个topic的partition进行字典排序，然后通过轮训的方式逐个将分区以此分配给每个消费者。</span><br><span class="line"></span><br><span class="line">优点：同一个topic中的partition分配到的消费者最多相差一个partition</span><br><span class="line">缺点：若多个topic，会导致多个消费者总体的partition过多，相差数最大值是topic的数量。</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>什么时候触发分区分配策略？</strong></p>
+<p><strong>当消费者数量发生变化时，会触发它的分区重新分配策略。</strong></p>
+</blockquote>
+<h3 id="offset-的维护"><a href="#offset-的维护" class="headerlink" title="offset 的维护"></a><strong>offset</strong> 的维护</h3><p>由于 consumer 在消费过程中可能会出现断电宕机等故障，consumer 恢复后，需要从故障前的位置的继续消费，所以 consumer 需要实时记录自己消费到了哪个 offset，以便故障恢复后继续消费。</p>
+<p><strong>以【消费者组 + 主题 + 分区】做唯一标识，存储offset。</strong></p>
+<p><img src="/images/amqp-kafka/kafka-10.png" alt="kafka"></p>
+<blockquote>
+<p>Kafka 0.9 版本之前，consumer 默认将 offset 保存在 Zookeeper 中，从 0.9 版本开始，consumer 默认将 offset 保存在 Kafka 一个内置的 topic 中，该 topic 为<strong>__consumer_offsets</strong>。</p>
+</blockquote>
+<h3 id="高效读写数据"><a href="#高效读写数据" class="headerlink" title="高效读写数据"></a>高效读写数据</h3><blockquote>
+<p>1.顺序写磁盘</p>
+<p>2.零拷贝技术</p>
+</blockquote>
+<p>Kafka 的 producer 生产数据，要写入到 log 文件中，写的过程是一直追加到文件末端，为顺序写。<br>官网有数据表明，同样的磁盘，顺序写能到 600M/s，而随机写只有 100K/s。这与磁盘的机械机构有关，顺序写之所以快，是因为其省去了大量磁头寻址的时间。</p>
+<h3 id="Zookeeper的作用"><a href="#Zookeeper的作用" class="headerlink" title="Zookeeper的作用"></a>Zookeeper的作用</h3><p>Kafka 集群中有一个 broker 会被选举为 Controller，负责管理集群 broker 的上下线，所有 topic 的分区副本分配和 leader 选举等工作。<br>Controller 的管理工作都是依赖于 Zookeeper 的。</p>
+<p>以下为 partition 的 leader 选举过程：</p>
+<p><img src="/images/amqp-kafka/kafka-11.png" alt="kafka"></p>
+<h2 id="Kafka事务"><a href="#Kafka事务" class="headerlink" title="Kafka事务"></a>Kafka事务</h2><h3 id="Producer-事务"><a href="#Producer-事务" class="headerlink" title="Producer 事务"></a>Producer 事务</h3><p>为了实现跨分区跨会话的事务，需要引入一个全局唯一的 Transaction ID，并将 Producer获得的PID Transaction ID 绑定。这样当Producer 重启后就可以通过正在进行的 TransactionID 获得原来的 PID。</p>
+<p>为了管理 Transaction，Kafka 引入了一个新的组件 Transaction Coordinator。Producer 就是通过和 Transaction Coordinator 交互获得 Transaction ID 对应的任务状态。</p>
+<p>Transaction Coordinator 还负责将事务所有写入 Kafka 的一个内部 Topic，这样即使整个服务重启，由于事务状态得到保存，进行中的事务状态可以得到恢复，从而继续进行。</p>
+<h3 id="Consumer-事务"><a href="#Consumer-事务" class="headerlink" title="Consumer 事务"></a>Consumer 事务</h3><p>上述事务机制主要是从 Producer 方面考虑，对于 Consumer 而言，事务的保证就会相对较弱，尤其时无法保证 Commit 的信息被精确消费。这是由于 Consumer 可以通过 offset 访问任意信息，而且不同的 Segment File 生命周期不同，同一事务的消息可能会出现重启后被删除的情况。</p>
+<h2 id="相关问题"><a href="#相关问题" class="headerlink" title="相关问题"></a>相关问题</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">2.Kafka 中的 HW、LEO 等分别代表什么？</span><br><span class="line">3.Kafka 中是怎么体现消息顺序性的？</span><br><span class="line">4.Kafka 中的分区器、序列化器、拦截器是否了解？它们之间的处理顺序是什么？</span><br><span class="line">5.Kafka 生产者客户端的整体结构是什么样子的？使用了几个线程来处理？分别是什么？</span><br><span class="line">6.“消费组中的消费者个数如果超过 topic 的分区，那么就会有消费者消费不到数据”这句</span><br><span class="line">话是否正确？</span><br><span class="line">7.消费者提交消费位移时提交的是当前消费到的最新消息的 offset 还是 offset+1？</span><br><span class="line">8.有哪些情形会造成重复消费？</span><br><span class="line">9.那些情景会造成消息漏消费？</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.Kafka 中的 ISR(InSyncRepli)、OSR(OutSyncRepli)、AR(AllRepli)代表什么？</span><br><span class="line"></span><br><span class="line">分区中的所有副本统称为AR（Assigned Replicas）。</span><br><span class="line">所有与leader副本保持一定程度同步的副本（包括leader副本在内）组成ISR（In-Sync Replicas），ISR集合是AR集合中的一个子集。</span><br><span class="line">与leader副本同步滞后过多的副本（不包括leader副本）组成OSR（Out-of-Sync Replicas）</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">2.Kafka 中的 HW、LEO 等分别代表什么？</span><br><span class="line"></span><br><span class="line">HW是High Watermark的缩写，俗称高水位，它标识了一个分区的消息偏移量（offset），消费者只能拉取到这个offset之前的消息。</span><br><span class="line"></span><br><span class="line">LEO是Log End Offset的缩写，它标识当前分区中下一条待写入消息的offset值，LEO的大小相当于当前日志分区中最后一条消息的offset值加1。</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">3.Kafka 中是怎么体现消息顺序性的？</span><br><span class="line">区间有序、单partition（全体有序）</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">4.Kafka 中的分区器、序列化器、拦截器是否了解？它们之间的处理顺序是什么？</span><br><span class="line"></span><br><span class="line">拦截器：拦截消息增加额外操作</span><br><span class="line">序列化器：序列化消息</span><br><span class="line">分区器：是消息分发到不同分区的策略</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">5.Kafka 生产者客户端的整体结构是什么样子的？使用了几个线程来处理？分别是什么？</span><br><span class="line"></span><br><span class="line">架构：main线程 + 拦截器 + 序列化器 + 分区器 + RecordAccumalator（缓冲区） + sender线程</span><br><span class="line">两个线程：main线程和sender线程</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">6.“消费组中的消费者个数如果超过 topic 的分区，那么就会有消费者消费不到数据”这句话是否正确？</span><br><span class="line">正确</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">7.消费者提交消费位移时提交的是当前消费到的最新消息的 offset 还是 offset+1？</span><br><span class="line">offset + 1</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">8.有哪些情形会造成重复消费？</span><br><span class="line">先处理，后提交的过程中间宕机</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">9.那些情景会造成消息漏消费？</span><br><span class="line">先提交，后处理的过程中间宕机</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">10.topic 的分区数可不可以增加？如果可以怎么增加？如果不可以，那又是为什么？</span><br><span class="line">可以，命令参数：--alter --partitions 10</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">11.topic 的分区数可不可以减少？如果可以怎么减少？如果不可以，那又是为什么？</span><br><span class="line">不可以，已经有数据存在，减少的话不知道数据应该放哪里</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">12.Kafka 有内部的 topic 吗？如果有是什么？有什么所用？</span><br><span class="line">__consumer_offsets_xx，用来记录各个topic的partition的消费者组的offsets。</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">14.Kafka 分区分配的策略？</span><br><span class="line">上文的分区分配策略</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">15.简述 Kafka 的日志目录结构？</span><br><span class="line">【index】 和【log】文件</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">16.如果我指定了一个 offset，Kafka Controller 怎么查找到对应的消息？</span><br><span class="line">a.通过二分查找定位index中的位置</span><br><span class="line">b.扫描index中数据具体在log中的偏移量offset</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">17.聊一聊 Kafka Controller 的作用？</span><br><span class="line">和zk打交道，元数据的更新、通知其他节点</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">18.Kafka 中有那些地方需要选举？这些地方的选举策略又有哪些？</span><br><span class="line">a.Controller：谁先注册zk谁就是</span><br><span class="line">b.Leader：ISR选举策略</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">19.Kafka 的哪些设计让它有如此高的性能？</span><br><span class="line">分布式 + 顺序读写磁盘 + 零拷贝技术</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">20.Kafka日志保存时间？</span><br><span class="line">7天</span><br></pre></td></tr></table></figure>
+
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2021年02月27日 21:21</p>
+        <p>原始链接： <a class="post-url" href="/2021/02/27/kafka-framework/" title="&#39;Kafka的架构布局&#39;">https://midkuro.gitee.io/2021/02/27/kafka-framework/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.gif" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2021/02/27/kafka-framework/&title=《'Kafka的架构布局'》 — Kuro's Blog&pic=images/kafka.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2021/02/27/kafka-framework/&title=《'Kafka的架构布局'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2021/02/27/kafka-framework/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Kafka的架构布局'》 — Kuro's Blog&url=https://midkuro.gitee.io/2021/02/27/kafka-framework/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2021/02/27/kafka-framework/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2021/02/27/kafka-framework/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Kafka/" class="color1">Kafka</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Kafka"><span class="post-toc-text">Kafka</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#工作流程"><span class="post-toc-text">工作流程</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Kafka生产者"><span class="post-toc-text">Kafka生产者</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#分区策略"><span class="post-toc-text">分区策略</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#数据可靠性保证"><span class="post-toc-text">数据可靠性保证</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#ISR"><span class="post-toc-text">ISR</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#ack应答机制"><span class="post-toc-text">ack应答机制</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#故障处理细节"><span class="post-toc-text">故障处理细节</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Exactly-Once-语义"><span class="post-toc-text">Exactly Once 语义</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Kafka-消费者"><span class="post-toc-text">Kafka 消费者</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#消费方式"><span class="post-toc-text">消费方式</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#分区分配策略"><span class="post-toc-text">分区分配策略</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#offset-的维护"><span class="post-toc-text">offset 的维护</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#高效读写数据"><span class="post-toc-text">高效读写数据</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Zookeeper的作用"><span class="post-toc-text">Zookeeper的作用</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Kafka事务"><span class="post-toc-text">Kafka事务</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Producer-事务"><span class="post-toc-text">Producer 事务</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Consumer-事务"><span class="post-toc-text">Consumer 事务</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#相关问题"><span class="post-toc-text">相关问题</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2021/02/27/kafka-api/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Kafka API&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2021/02/26/kafka-base/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Kafka的基本概念和安装&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="kafka-framework" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2021 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Dubbo/">Dubbo</a><a class="category-link" href="/categories/Elasticsearch/">Elasticsearch</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/FastDFS/">FastDFS</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kafka/">Kafka</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/Linux/">Linux</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Transaction/">Transaction</a><a class="category-link" href="/categories/Zookeeper/">Zookeeper</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/algorithm/">algorithm</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16px;">ActiveMQ</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Dubbo/" style="font-size: 10px;">Dubbo</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/FastDFS/" style="font-size: 10px;">FastDFS</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kafka/" style="font-size: 13px;">Kafka</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySql/" style="font-size: 12px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a> <a href="/tags/Transaction/" style="font-size: 10px;">Transaction</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/algorithm/" style="font-size: 15px;">algorithm</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16px;">ActiveMQ</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Dubbo/" style="font-size: 10px;">Dubbo</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/FastDFS/" style="font-size: 10px;">FastDFS</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kafka/" style="font-size: 13px;">Kafka</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySql/" style="font-size: 12px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a> <a href="/tags/Transaction/" style="font-size: 10px;">Transaction</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/algorithm/" style="font-size: 15px;">algorithm</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

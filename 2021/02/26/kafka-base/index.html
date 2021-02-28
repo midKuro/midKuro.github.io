@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Kafka的基本概念和安装&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
+  <meta name="description" content="Kafka基本概念 在0.9之前的版本中，offset存放在ZK中，在0.9之后的版本中，存放在kafka cluster中，原因是因为消费者本身就需要和kafka集群打交道，而没必要频繁地和ZK进行通信。 在ZK中，会产生一个Controller的节点，存储kafka集训相关的信息，最先启动的kafka机器充当集群的老大，主要和zookeeper做协调和交互。 12345678910111213">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Kafka的基本概念和安装&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2021/02/26/kafka-base/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Kafka基本概念 在0.9之前的版本中，offset存放在ZK中，在0.9之后的版本中，存放在kafka cluster中，原因是因为消费者本身就需要和kafka集群打交道，而没必要频繁地和ZK进行通信。 在ZK中，会产生一个Controller的节点，存储kafka集训相关的信息，最先启动的kafka机器充当集群的老大，主要和zookeeper做协调和交互。 12345678910111213">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-01.png">
+<meta property="article:published_time" content="2021-02-26T14:31:00.000Z">
+<meta property="article:modified_time" content="2021-02-27T06:08:06.786Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?code-JRipY21QjX";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+  
+
+
+  
+  <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
+  
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.gif" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-kafka-base" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Kafka的基本概念和安装&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Kafka/">Kafka</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2021-02-26
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Kafka"><a href="#Kafka" class="headerlink" title="Kafka"></a>Kafka</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p><img src="/images/amqp-kafka/kafka-01.png" alt="kafka"></p>
+<p><strong>在0.9之前的版本中，offset存放在ZK中，在0.9之后的版本中，存放在kafka cluster中，原因是因为消费者本身就需要和kafka集群打交道，而没必要频繁地和ZK进行通信。</strong></p>
+<p>在ZK中，会产生一个Controller的节点，存储kafka集训相关的信息，最先启动的kafka机器充当集群的老大，主要和zookeeper做协调和交互。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">Producer ：消息生产者，就是向 kafka broker 发消息的客户端；</span><br><span class="line"></span><br><span class="line">Consumer ：消息消费者，向 kafka broker 取消息的客户端；</span><br><span class="line"></span><br><span class="line">Consumer Group ：消费者组，由多个 consumer 组成。</span><br><span class="line">                 消费者组内每个消费者负责消费不同分区的数据，一个分区只能由一个组内消费者消费；</span><br><span class="line">                 消费者组之间互不影响。所有的消费者都属于某个消费者组，即消费者组是逻辑上的一个订阅者。 </span><br><span class="line">  </span><br><span class="line">Broker ：一台 kafka 服务器就是一个 broker。一个集群由多个 broker 组成。一个 broker可以容纳多个 topic。 </span><br><span class="line"></span><br><span class="line">Topic ：可以理解为一个队列，生产者和消费者面向的都是一个 topic</span><br><span class="line"></span><br><span class="line">Partition：为了实现扩展性，一个非常大的 topic 可以分布到多个 broker（即服务器）上</span><br><span class="line">           一个 topic 可以分为多个 partition，每个 partition 是一个有序的队列；</span><br><span class="line"></span><br><span class="line">Replica：副本，为保证集群中的某个节点发生故障时，该节点上的 partition 数据不丢失且 kafka 仍然能够继续工作</span><br><span class="line">        kafka 提供了副本机制，一个 topic 的每个分区都有若干个副本一个 leader 和若干个 follower。 </span><br><span class="line">  </span><br><span class="line">leader：每个分区多个副本的“主”，生产者发送数据的对象，以及消费者消费数据的对象都是 leader。 </span><br><span class="line"></span><br><span class="line">follower：每个分区多个副本中的“从”，实时从 leader 中同步数据，保持和 leader 数据的同步。</span><br><span class="line">         leader 发生故障时，某个 follower 会成为新的 follower。</span><br></pre></td></tr></table></figure>
+
+<p>kafka的消费原理和RocketMQ相似，和消费者所属的组相关，如果所有的消费者都属于一个消费者组，那么一个消费者能消费到该消息，如果均属于不同的组，所有消费者均能消费到该消息。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p><a href="http://kafka.apache.org/downloads.html" target="_blank" rel="noopener">官网地址</a></p>
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.解压安装包</span></span><br><span class="line">[root@localhost software]$ tar -zxvf kafka_2.11-0.11.0.0.tgz -C </span><br><span class="line">/opt/module/</span><br><span class="line"></span><br><span class="line"><span class="comment">#2.修改解压后的文件名称</span></span><br><span class="line">[root@localhost module]$ mv kafka_2.11-0.11.0.0/ kafka</span><br><span class="line"></span><br><span class="line"><span class="comment">#3.在/opt/module/kafka 目录下创建 logs 文件夹</span></span><br><span class="line">[root@localhost kafka]$ mkdir logs</span><br><span class="line"></span><br><span class="line"><span class="comment">#4.修改配置文件</span></span><br><span class="line">[root@localhost kafka]$ <span class="built_in">cd</span> config/</span><br><span class="line">[root@localhost config]$ vi server.properties</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#修改以下内容:</span></span><br><span class="line"><span class="comment">#port = 9092  默认对外提供的端口号是9092</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#broker 的全局唯一编号，不能重复</span></span><br><span class="line"><span class="meta">broker.id</span>=<span class="string">0</span></span><br><span class="line"><span class="comment">#删除 topic 功能使能</span></span><br><span class="line"><span class="meta">delete.topic.enable</span>=<span class="string">true</span></span><br><span class="line"><span class="comment">#处理网络请求的线程数量</span></span><br><span class="line"><span class="meta">num.network.threads</span>=<span class="string">3</span></span><br><span class="line"><span class="comment">#用来处理磁盘 IO 的现成数量</span></span><br><span class="line"><span class="meta">num.io.threads</span>=<span class="string">8</span></span><br><span class="line"><span class="comment">#发送套接字的缓冲区大小</span></span><br><span class="line"><span class="meta">socket.send.buffer.bytes</span>=<span class="string">102400</span></span><br><span class="line"><span class="comment">#接收套接字的缓冲区大小</span></span><br><span class="line"><span class="meta">socket.receive.buffer.bytes</span>=<span class="string">102400</span></span><br><span class="line"><span class="comment">#请求套接字的缓冲区大小</span></span><br><span class="line"><span class="meta">socket.request.max.bytes</span>=<span class="string">104857600</span></span><br><span class="line"><span class="comment">#kafka 运行【数据】存放的路径，不是日志！日志默认会放在logs目录中</span></span><br><span class="line"><span class="comment">#需要配置和logs不同的路径，才能达到data和logs分离存储</span></span><br><span class="line"><span class="meta">log.dirs</span>=<span class="string">/opt/module/kafka/data</span></span><br><span class="line"><span class="comment">#topic 在当前 broker 上的分区个数</span></span><br><span class="line"><span class="meta">num.partitions</span>=<span class="string">1</span></span><br><span class="line"><span class="comment">#用来恢复和清理 data 下数据的线程数量</span></span><br><span class="line"><span class="meta">num.recovery.threads.per.data.dir</span>=<span class="string">1</span></span><br><span class="line"><span class="comment">#segment 文件保留的最长时间，超时将被删除</span></span><br><span class="line"><span class="meta">log.retention.hours</span>=<span class="string">168</span></span><br><span class="line"><span class="comment">#配置连接 Zookeeper 集群地址</span></span><br><span class="line"><span class="meta">zookeeper.connect</span>=<span class="string">192.168.163.128:2181,192.168.163.129:2181,192.168.163.130:2181</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#5.配置环境变量</span></span><br><span class="line">[root@localhost module]$ sudo vi /etc/profile</span><br><span class="line"><span class="comment">#KAFKA_HOME</span></span><br><span class="line"><span class="built_in">export</span> KAFKA_HOME=/opt/module/kafka</span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$KAFKA_HOME</span>/bin</span><br><span class="line">[root@localhost module]$ <span class="built_in">source</span> /etc/profile</span><br><span class="line"></span><br><span class="line"><span class="comment">#6.发送安装包到另外两台机器(129,130)</span></span><br><span class="line"><span class="comment">#记得修改配置文件/opt/module/kafka/config/server.properties中的 broker.id=1、broker.id=2</span></span><br><span class="line"><span class="comment">#注：broker.id 不得重复</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="启动和关闭"><a href="#启动和关闭" class="headerlink" title="启动和关闭"></a>启动和关闭</h3><p>谁先启动，谁就是集群中的Master</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#启动集群 -daemon 用守护进程启动，后台运行，启动需要指定配置文件</span></span><br><span class="line">[root@localhost kafka]$ bin/kafka-server-start.sh -daemon config/server.properties</span><br><span class="line">[root@hadoop103 kafka]$ bin/kafka-server-start.sh -daemon</span><br><span class="line">config/server.properties</span><br><span class="line">[root@hadoop104 kafka]$ bin/kafka-server-start.sh -daemon</span><br><span class="line">config/server.properties</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#关闭集群</span></span><br><span class="line">[root@localhost kafka]$ bin/kafka-server-stop.sh stop</span><br><span class="line">[root@hadoop103 kafka]$ bin/kafka-server-stop.sh stop</span><br><span class="line">[root@hadoop104 kafka]$ bin/kafka-server-stop.sh stop</span><br></pre></td></tr></table></figure>
+
+<h2 id="命令操作"><a href="#命令操作" class="headerlink" title="命令操作"></a>命令操作</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#2.创建 topic</span></span><br><span class="line">[root@localhost kafka]$ bin/kafka-topics.sh --zookeeper 192.168.163.129:2181 --create --replication-factor 3 --partitions 1 --topic first</span><br><span class="line"><span class="comment">#选项说明：</span></span><br><span class="line"><span class="comment">#--topic 定义 topic 名</span></span><br><span class="line"><span class="comment">#--replication-factor 定义副本数</span></span><br><span class="line"><span class="comment">#--partitions 定义分区数</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#2.查看当前服务器中的所有 topic</span></span><br><span class="line">[root@localhost kafka]$ bin/kafka-topics.sh --zookeeper 192.168.163.129:2181 --list</span><br><span class="line"></span><br><span class="line"><span class="comment">#3.查看某个 Topic 的详情</span></span><br><span class="line">[root@localhost kafka]$ bin/kafka-topics.sh --zookeeper 192.168.163.129:2181 --describe --topic first</span><br><span class="line"></span><br><span class="line"><span class="comment">#4.修改分区数</span></span><br><span class="line">[root@localhost kafka]$ bin/kafka-topics.sh --zookeeper 192.168.163.129:2181 --alter --topic first --partitions 6</span><br><span class="line"></span><br><span class="line"><span class="comment">#5.删除 topic</span></span><br><span class="line"><span class="comment">#需要 server.properties 中设置 delete.topic.enable=true 否则只是标记删除。</span></span><br><span class="line">[root@localhost kafka]$ bin/kafka-topics.sh --zookeeper 192.168.163.129:2181 --delete --topic first</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#6.发送消息</span></span><br><span class="line">[root@localhost kafka]$ bin/kafka-console-producer.sh --broker-list 192.168.163.129:9092 --topic first</span><br><span class="line">&gt;hello world</span><br><span class="line">&gt;atguigu atguigu</span><br><span class="line"></span><br><span class="line"><span class="comment">#7.消费消息</span></span><br><span class="line"><span class="comment"># 旧版使用【--zookeeper】 新版推荐使用 【--bootstrap-server】</span></span><br><span class="line"><span class="comment"># 【--from-beginning】：会把主题中以往所有的数据都读取出来。</span></span><br><span class="line">[root@localhost kafka]$ bin/kafka-console-consumer.sh --zookeeper 192.168.163.129:2181 --topic first</span><br><span class="line">[root@localhost kafka]$ bin/kafka-console-consumer.sh --bootstrap-server 192.168.163.129:9092 --topic first</span><br><span class="line">[root@localhost kafka]$ bin/kafka-console-consumer.sh --bootstrap-server 192.168.163.129:9092 --from-beginning --topic first</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>kafka默认采用轮训的方式决定消息发送到哪个分区，主题持久化在磁盘中，offset也存储在kafka集群本地磁盘中</strong>。</p>
+</blockquote>
+<p>可以通过查看之前配置的<code>data</code>目录验证：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#主题分区的存储  主题名称：first  分区编号:0</span></span><br><span class="line">drwxr-xr-x. 2 root root    141 2月  27 00:13 first-0</span><br><span class="line"></span><br><span class="line"><span class="comment">#__consumer_offsert是一个特殊的topic，用来存储offset</span></span><br><span class="line">drwxr-xr-x. 2 root root    141 2月  27 00:16 __consumer_offsets-6</span><br><span class="line">drwxr-xr-x. 2 root root    141 2月  27 00:16 __consumer_offsets-9</span><br></pre></td></tr></table></figure>
+
+<p>0.9前的kafka版本中，<code>topic</code>的各个<code>partition</code>的各个<code>group</code>消费情况：【<code>offsets</code>】放在了zookeeper中，新版把这个offsert保存到了一个<code>__consumer_offsert</code>的<code>topic</code>下 ，默认是有50个分区，通过轮训的编号打散在各个broker中。</p>
+<h3 id="SHELL免密登录"><a href="#SHELL免密登录" class="headerlink" title="SHELL免密登录"></a>SHELL免密登录</h3><p>通过129机器生成ssh密钥，下发公钥到130和131机器上，进行免密登录配置。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.进入ssh文件夹，若没有这个文件夹，则先执行一次ssh命令</span></span><br><span class="line">[root@localhost ~]$ <span class="built_in">cd</span> ~/.ssh/</span><br><span class="line"></span><br><span class="line"><span class="comment">#2.运行以下命令后敲三下回车创建公私钥</span></span><br><span class="line">[root@localhost ~]$ ssh-keygen -t rsa</span><br><span class="line"></span><br><span class="line"><span class="comment">#3.拷贝 id_rsa文件中的内容到130和131机器上，第一次需要输入密码</span></span><br><span class="line"><span class="comment">#  运行完后，此时130机器上相同目录下会多一个 authorized_keys的文件</span></span><br><span class="line">[root@localhost ~]$ ssh-copy-id 192.168.163.130</span><br></pre></td></tr></table></figure>
+
+<h2 id="批量拷贝"><a href="#批量拷贝" class="headerlink" title="批量拷贝"></a>批量拷贝</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装rsync命令,sync只对差异文件做更新，性能更快，scp是把所有文件都复制过去。</span></span><br><span class="line"><span class="comment">#三台机器都需要装</span></span><br><span class="line">[root@localhost ~]$ yum -y install rsync</span><br><span class="line"></span><br><span class="line"><span class="comment">#基本语法:</span></span><br><span class="line">命令    选项参数    要拷贝的文件路径/名称    目的用户@主机:目的路径/名称</span><br><span class="line">rsync    -rvl       <span class="variable">$pdir</span>/<span class="variable">$fname</span>    <span class="variable">$user</span>@host:<span class="variable">$pdir</span>/<span class="variable">$fname</span></span><br><span class="line"></span><br><span class="line">-r	递归</span><br><span class="line">-v	显示复制过程</span><br><span class="line">-l	拷贝符号连接</span><br><span class="line"></span><br><span class="line"><span class="comment">#案例</span></span><br><span class="line">[root@localhost opt]$ rsync -rvl /opt/module/kafka/ root@192.168.1.130:/opt/module/kafka/</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建批量拷贝脚本</span></span><br><span class="line">[root@localhost bin]$ vi xsync.sh</span><br><span class="line"></span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#1 获取输入参数个数，如果没有参数，直接退出</span></span><br><span class="line">pcount=<span class="variable">$#</span></span><br><span class="line"><span class="keyword">if</span>((pcount==0)); <span class="keyword">then</span></span><br><span class="line"><span class="built_in">echo</span> no args;</span><br><span class="line"><span class="built_in">exit</span>;</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#2 basename 获取文件名称</span></span><br><span class="line">p1=<span class="variable">$1</span></span><br><span class="line">fname=`basename <span class="variable">$p1</span>`</span><br><span class="line"><span class="built_in">echo</span> fname=<span class="variable">$fname</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#3 dirname 获取上级目录到绝对路径</span></span><br><span class="line">pdir=`<span class="built_in">cd</span> -P $(dirname <span class="variable">$p1</span>); <span class="built_in">pwd</span>`</span><br><span class="line"><span class="built_in">echo</span> pdir=<span class="variable">$pdir</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#4 获取当前用户名称</span></span><br><span class="line">user=`whoami`</span><br><span class="line"></span><br><span class="line"><span class="comment">#5 循环 129同步到130,131机器上</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> 192.168.163.130 192.168.163.131</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">"========== <span class="variable">$i</span> =========="</span> </span><br><span class="line">  rsync -rvl <span class="variable">$pdir</span>/<span class="variable">$fname</span> <span class="variable">$user</span>@<span class="variable">$i</span>:<span class="variable">$pdir</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#赋予权限</span></span><br><span class="line">[root@localhost bin]$ chmod 777 xsync.sh</span><br><span class="line">[root@localhost bin]$ sh xsync.sh /opt/module/kafka/</span><br></pre></td></tr></table></figure>
+
+<h2 id="群起脚本"><a href="#群起脚本" class="headerlink" title="群起脚本"></a>群起脚本</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]$ vi kk.sh</span><br><span class="line"><span class="meta">#!bin/bash</span></span><br><span class="line"><span class="keyword">case</span> <span class="variable">$1</span> <span class="keyword">in</span></span><br><span class="line"><span class="string">"start"</span>)&#123;</span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> 192.168.163.129 192.168.163.130 192.168.163.131</span><br><span class="line">  <span class="keyword">do</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">"========== <span class="variable">$i</span> =========="</span> </span><br><span class="line">  ssh <span class="variable">$i</span> <span class="string">'/opt/module/kafka/bin/kafka-server-start.sh -daemon /opt/module/kafka/config/server.properties'</span></span><br><span class="line">  <span class="keyword">done</span></span><br><span class="line">&#125;;;</span><br><span class="line"></span><br><span class="line"><span class="string">"stop"</span>)&#123;</span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> 192.168.163.129 192.168.163.130 192.168.163.131</span><br><span class="line">  <span class="keyword">do</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">"========== <span class="variable">$i</span> =========="</span> </span><br><span class="line">  ssh <span class="variable">$i</span> <span class="string">'/opt/module/kafka/bin/kafka-server-stop.sh'</span></span><br><span class="line">  <span class="keyword">done</span></span><br><span class="line">&#125;;;</span><br><span class="line"><span class="keyword">esac</span></span><br></pre></td></tr></table></figure>
+
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2021年02月27日 14:08</p>
+        <p>原始链接： <a class="post-url" href="/2021/02/26/kafka-base/" title="&#39;Kafka的基本概念和安装&#39;">https://midkuro.gitee.io/2021/02/26/kafka-base/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.gif" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2021/02/26/kafka-base/&title=《'Kafka的基本概念和安装'》 — Kuro's Blog&pic=images/kafka.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2021/02/26/kafka-base/&title=《'Kafka的基本概念和安装'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2021/02/26/kafka-base/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Kafka的基本概念和安装'》 — Kuro's Blog&url=https://midkuro.gitee.io/2021/02/26/kafka-base/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2021/02/26/kafka-base/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2021/02/26/kafka-base/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Kafka/" class="color1">Kafka</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Kafka"><span class="post-toc-text">Kafka</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#基本概念"><span class="post-toc-text">基本概念</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安装"><span class="post-toc-text">安装</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#配置"><span class="post-toc-text">配置</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#启动和关闭"><span class="post-toc-text">启动和关闭</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#命令操作"><span class="post-toc-text">命令操作</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#SHELL免密登录"><span class="post-toc-text">SHELL免密登录</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#批量拷贝"><span class="post-toc-text">批量拷贝</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#群起脚本"><span class="post-toc-text">群起脚本</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2021/02/27/kafka-framework/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Kafka的架构布局&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2021/02/04/jdk8-hashmap/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;JDK1.8 HashMap和ConcurrentHashMap 源码和实现&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="kafka-base" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2021 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Dubbo/">Dubbo</a><a class="category-link" href="/categories/Elasticsearch/">Elasticsearch</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/FastDFS/">FastDFS</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kafka/">Kafka</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/Linux/">Linux</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Transaction/">Transaction</a><a class="category-link" href="/categories/Zookeeper/">Zookeeper</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/algorithm/">algorithm</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16px;">ActiveMQ</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Dubbo/" style="font-size: 10px;">Dubbo</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/FastDFS/" style="font-size: 10px;">FastDFS</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kafka/" style="font-size: 13px;">Kafka</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySql/" style="font-size: 12px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a> <a href="/tags/Transaction/" style="font-size: 10px;">Transaction</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/algorithm/" style="font-size: 15px;">algorithm</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16px;">ActiveMQ</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Dubbo/" style="font-size: 10px;">Dubbo</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/FastDFS/" style="font-size: 10px;">FastDFS</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kafka/" style="font-size: 13px;">Kafka</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySql/" style="font-size: 12px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 11px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a> <a href="/tags/Transaction/" style="font-size: 10px;">Transaction</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/algorithm/" style="font-size: 15px;">algorithm</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
