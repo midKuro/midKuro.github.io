@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;Kafka的架构维度整理&#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
+  <meta name="description" content="Kafka 架构维度整体架构 分区概念 批次消费  1234567891011121314151.消息默认保留的天数：7天2.默认开启异步自动提交，间隔时间5秒3.Consumer默认拉取条数限制：500条，一次poll会取多个分区的数据4.生产者携带key的分区策略默认使用Hash分区器5.消费者关联partition的分区分配策略默认使用Range6.zk的Controller节点是个临时节点">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;Kafka的架构维度整理&#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2021/02/28/kafka-frame/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="Kafka 架构维度整体架构 分区概念 批次消费  1234567891011121314151.消息默认保留的天数：7天2.默认开启异步自动提交，间隔时间5秒3.Consumer默认拉取条数限制：500条，一次poll会取多个分区的数据4.生产者携带key的分区策略默认使用Hash分区器5.消费者关联partition的分区分配策略默认使用Range6.zk的Controller节点是个临时节点">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-15.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-16.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-17.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-18.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-19.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-20.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-21.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-22.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-23.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-24.png">
+<meta property="article:published_time" content="2021-02-28T01:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-01T14:33:47.572Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-15.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?code-JRipY21QjX";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+  
+
+
+  
+  <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
+  
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.gif" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-kafka-frame" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;Kafka的架构维度整理&#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/Kafka/">Kafka</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2021-02-28
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="Kafka-架构维度"><a href="#Kafka-架构维度" class="headerlink" title="Kafka 架构维度"></a>Kafka 架构维度</h1><h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><p><img src="/images/amqp-kafka/kafka-15.png" alt="kafka"></p>
+<h2 id="分区概念"><a href="#分区概念" class="headerlink" title="分区概念"></a>分区概念</h2><p><img src="/images/amqp-kafka/kafka-16.png" alt="kafka"></p>
+<h2 id="批次消费"><a href="#批次消费" class="headerlink" title="批次消费"></a>批次消费</h2><p><img src="/images/amqp-kafka/kafka-17.png" alt="kafka"></p>
+<p><img src="/images/amqp-kafka/kafka-18.png" alt="kafka"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">1.消息默认保留的天数：7天</span><br><span class="line">2.默认开启异步自动提交，间隔时间5秒</span><br><span class="line">3.Consumer默认拉取条数限制：500条，一次poll会取多个分区的数据</span><br><span class="line">4.生产者携带key的分区策略默认使用Hash分区器</span><br><span class="line">5.消费者关联partition的分区分配策略默认使用Range</span><br><span class="line">6.zk的Controller节点是个临时节点，谁先向zk里写，谁就是controller</span><br><span class="line">7.zk的broker节点是个永久节点，存储partition等相关信息，当一个broker下线时，其他broker需要获取它的信息</span><br><span class="line">8.producer只能向partition的leader推送数据</span><br><span class="line">9.kakfa持久化方式：data(log) + index(offset、timestamp)</span><br><span class="line">10.ISR和OSR的默认超时阈值时间：10秒</span><br><span class="line">11.ACK的默认值：1  （0,1,-1）</span><br><span class="line">12.如果开启自动提交，然后自己代码手动提交，也会提交</span><br><span class="line">13.index和timestamp文件存储的都是范围数据，二分大致定位offset之后去log文件按照偏移量偏移后再定位精确数据</span><br><span class="line">14.如果ISR节点变少或者服务下线，消费者会造成一定时间的阻塞</span><br><span class="line">15.如果ISR增加节点，则不会造成阻塞，平滑使用</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">    创建TOPIC</span></span><br><span class="line"><span class="comment">    kafka-topics.sh --zookeeper node03:2181/kafka  --create --topic msb-items  --partitions 2  --replication-factor 2</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">producer</span><span class="params">()</span> <span class="keyword">throws</span> ExecutionException, InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">    String topic = <span class="string">"msb-items"</span>;</span><br><span class="line">    Properties p = <span class="keyword">new</span> Properties();</span><br><span class="line">    p.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,<span class="string">"node01:9092,node02:9092,node03:9092"</span>);</span><br><span class="line">    <span class="comment">//kafka  持久化数据的MQ  数据-&gt; byte[]，不会对数据进行干预，双方要约定编解码</span></span><br><span class="line">    <span class="comment">//kafka是一个app：：使用零拷贝  sendfile 系统调用实现快速数据消费</span></span><br><span class="line">    p.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>())</span>;</span><br><span class="line">    p.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>())</span>;</span><br><span class="line">    p.setProperty(ProducerConfig.ACKS_CONFIG, <span class="string">"-1"</span>);</span><br><span class="line"></span><br><span class="line">    KafkaProducer&lt;String, String&gt; producer = <span class="keyword">new</span> KafkaProducer&lt;String, String&gt;(p);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//现在的producer就是一个提供者，面向的其实是broker，虽然在使用的时候我们期望把数据打入topic</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">        msb-items</span></span><br><span class="line"><span class="comment">        2partition</span></span><br><span class="line"><span class="comment">        三种商品，每种商品有线性的3个ID</span></span><br><span class="line"><span class="comment">        相同的商品最好去到一个分区里</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt;<span class="number">3</span>; j++) &#123;</span><br><span class="line">                ProducerRecord&lt;String, String&gt; record = <span class="keyword">new</span> ProducerRecord&lt;&gt;(topic, <span class="string">"item"</span>+j,<span class="string">"val"</span> + i);</span><br><span class="line">                Future&lt;RecordMetadata&gt; send = producer</span><br><span class="line">                    .send(record);</span><br><span class="line"></span><br><span class="line">                RecordMetadata rm = send.get();</span><br><span class="line">                <span class="keyword">int</span> partition = rm.partition();</span><br><span class="line">                <span class="keyword">long</span> offset = rm.offset();</span><br><span class="line">                System.out.println(<span class="string">"key: "</span>+ record.key()+<span class="string">" val: "</span>+record.value()+<span class="string">" partition: "</span>+partition + <span class="string">" offset: "</span>+offset);</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">consumer</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">        kafka-consumer-groups.sh --bootstrap-server node02:9092  --list</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//基础配置</span></span><br><span class="line">    Properties p = <span class="keyword">new</span> Properties();</span><br><span class="line">    p.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,<span class="string">"node02:9092,node03:9092,node01:9092"</span>);</span><br><span class="line">    p.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>())</span>;</span><br><span class="line">    p.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>())</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//消费的细节</span></span><br><span class="line">    p.setProperty(ConsumerConfig.GROUP_ID_CONFIG,<span class="string">"OOXX"</span>);</span><br><span class="line">    <span class="comment">//KAKFA IS MQ  IS STORAGE</span></span><br><span class="line">    p.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,<span class="string">"earliest"</span>);<span class="comment">//第一次启动，米有offset</span></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">         *         "What to do when there is no initial offset in Kafka or if the current offset</span></span><br><span class="line"><span class="comment">         *         does not exist any more on the server</span></span><br><span class="line"><span class="comment">         *         (e.g. because that data has been deleted):</span></span><br><span class="line"><span class="comment">         *         &lt;ul&gt;</span></span><br><span class="line"><span class="comment">         *             &lt;li&gt;earliest: automatically reset the offset to the earliest offset</span></span><br><span class="line"><span class="comment">         *             &lt;li&gt;latest: automatically reset the offset to the latest offset&lt;/li&gt;</span></span><br><span class="line"><span class="comment">         *             &lt;li&gt;none: throw exception to the consumer if no previous offset is found for the consumer's group&lt;/li&gt;&lt;li&gt;anything else: throw exception to the consumer.&lt;/li&gt;</span></span><br><span class="line"><span class="comment">         *         &lt;/ul&gt;";</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">    p.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,<span class="string">"true"</span>);<span class="comment">//自动提交时异步提交，丢数据&amp;&amp;重复数据</span></span><br><span class="line">    <span class="comment">//一个运行的consumer ，那么自己会维护自己消费进度</span></span><br><span class="line">    <span class="comment">//一旦你自动提交，但是是异步的</span></span><br><span class="line">    <span class="comment">//1，还没到时间，挂了，没提交，重起一个consuemr，参照offset的时候，会重复消费</span></span><br><span class="line">    <span class="comment">//2，一个批次的数据还没写数据库成功，但是这个批次的offset背异步提交了，挂了，重起一个consuemr，参照offset的时候，会丢失消费</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//        p.setProperty(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG,"15000");//5秒</span></span><br><span class="line">    <span class="comment">//        p.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,""); // POLL 拉取数据，弹性，按需，拉取多少？</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="消费者rebalance"><a href="#消费者rebalance" class="headerlink" title="消费者rebalance"></a>消费者rebalance</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">KafkaConsumer&lt;String, String&gt; consumer = <span class="keyword">new</span> KafkaConsumer&lt;&gt;(p);</span><br><span class="line"><span class="comment">//kafka 的consumer会动态负载均衡 -- ConsumerRebalanceListener</span></span><br><span class="line">consumer.subscribe(Arrays.asList(<span class="string">"msb-items"</span>), <span class="keyword">new</span> ConsumerRebalanceListener() &#123;</span><br><span class="line">    <span class="comment">//在rebalance之前调用</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPartitionsRevoked</span><span class="params">(Collection&lt;TopicPartition&gt; partitions)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"---onPartitionsRevoked:"</span>);</span><br><span class="line">        Iterator&lt;TopicPartition&gt; iter = partitions.iterator();</span><br><span class="line">        <span class="keyword">while</span>(iter.hasNext())&#123;</span><br><span class="line">            System.out.println(iter.next().partition());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//在rebalance之后调用</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPartitionsAssigned</span><span class="params">(Collection&lt;TopicPartition&gt; partitions)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"---onPartitionsAssigned:"</span>);</span><br><span class="line">        Iterator&lt;TopicPartition&gt; iter = partitions.iterator();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span>(iter.hasNext())&#123;</span><br><span class="line">            System.out.println(iter.next().partition());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="三种手动commit"><a href="#三种手动commit" class="headerlink" title="三种手动commit"></a>三种手动commit</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 常识：如果想多线程处理多分区</span></span><br><span class="line"><span class="comment">             * 每poll一次，用一个语义：一个job启动</span></span><br><span class="line"><span class="comment">             * 一次job用多线程并行处理分区</span></span><br><span class="line"><span class="comment">             * 且，job应该被控制是串行的</span></span><br><span class="line"><span class="comment">             * 以上的知识点，其实如果你学过大数据</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">    ConsumerRecords&lt;String, String&gt; records = consumer.poll(Duration.ofMillis(<span class="number">0</span>));<span class="comment">// 0~n</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(!records.isEmpty())&#123;</span><br><span class="line">        <span class="comment">//以下代码的优化很重要</span></span><br><span class="line">        System.out.println(<span class="string">"-----------"</span>+records.count()+<span class="string">"-------------"</span>);</span><br><span class="line">        Set&lt;TopicPartition&gt; partitions = records.partitions(); <span class="comment">//每次poll的时候是取多个分区的数据</span></span><br><span class="line">        <span class="comment">//且每个分区内的数据是有序的</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">                 * 如果手动提交offset</span></span><br><span class="line"><span class="comment">                 * 1，按消息进度同步提交</span></span><br><span class="line"><span class="comment">                 * 2，按分区粒度同步提交</span></span><br><span class="line"><span class="comment">                 * 3，按当前poll的批次同步提交</span></span><br><span class="line"><span class="comment">                 *</span></span><br><span class="line"><span class="comment">                 * 思考：如果在多个线程下</span></span><br><span class="line"><span class="comment">                 * 1，以上1，3的方式不用多线程</span></span><br><span class="line"><span class="comment">                 * 2，以上2的方式最容易想到多线程方式处理，有没有问题？ 没有！分区多线程offset不冲突</span></span><br><span class="line"><span class="comment">                 */</span></span><br><span class="line">        <span class="keyword">for</span> (TopicPartition partition : partitions) &#123;</span><br><span class="line">            List&lt;ConsumerRecord&lt;String, String&gt;&gt; pRecords = records.records(partition);</span><br><span class="line">            <span class="comment">//流式计算：pRecords.stream().sorted()</span></span><br><span class="line">            <span class="comment">//在一个微批里，按分区获取poll回来的数据</span></span><br><span class="line">            <span class="comment">//线性按分区处理，还可以并行按分区处理用多线程的方式</span></span><br><span class="line">            Iterator&lt;ConsumerRecord&lt;String, String&gt;&gt; piter = pRecords.iterator();</span><br><span class="line">            <span class="keyword">while</span>(piter.hasNext())&#123;</span><br><span class="line">                ConsumerRecord&lt;String, String&gt; next = piter.next();</span><br><span class="line">                <span class="keyword">int</span> par = next.partition();</span><br><span class="line">                <span class="keyword">long</span> offset = next.offset();</span><br><span class="line">                String key = next.key();</span><br><span class="line">                String value = next.value();</span><br><span class="line">                <span class="keyword">long</span> timestamp = next.timestamp();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                System.out.println(<span class="string">"key: "</span>+ key+<span class="string">" val: "</span>+ value+ <span class="string">" partition: "</span>+par + <span class="string">" offset: "</span>+ offset+<span class="string">"time:: "</span>+ timestamp);</span><br><span class="line"></span><br><span class="line">                TopicPartition sp = <span class="keyword">new</span> TopicPartition(<span class="string">"msb-items"</span>, par);</span><br><span class="line">                OffsetAndMetadata om = <span class="keyword">new</span> OffsetAndMetadata(offset);</span><br><span class="line">                HashMap&lt;TopicPartition, OffsetAndMetadata&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">                map.put(sp,om);</span><br><span class="line"></span><br><span class="line">                <span class="comment">//这个是最安全的，每条记录级的更新，第一种</span></span><br><span class="line">                consumer.commitSync(map);</span><br><span class="line">                <span class="comment">//单线程，多线程，都可以</span></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">                     * 因为你都分区了</span></span><br><span class="line"><span class="comment">                     * 拿到了分区的数据集</span></span><br><span class="line"><span class="comment">                     * 期望的是先对数据整体加工</span></span><br><span class="line"><span class="comment">                     * 小问题会出现？  你怎么知道最后一条消息的offset？！！！！</span></span><br><span class="line"><span class="comment">                     * 感觉一定要有，kafka，很傻，你拿走了多少，我不关心，你告诉我你正确的最后一个消息offset</span></span><br><span class="line"><span class="comment">                     */</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">long</span> poff = pRecords.get(pRecords.size() - <span class="number">1</span>).offset();<span class="comment">//获取分区内最后一条消息的offset</span></span><br><span class="line">            OffsetAndMetadata pom = <span class="keyword">new</span> OffsetAndMetadata(poff);</span><br><span class="line">            HashMap&lt;TopicPartition, OffsetAndMetadata&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">            map.put(partition,pom);</span><br><span class="line">            consumer.commitSync(map);<span class="comment">//这个是第二种，分区粒度提交offset</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//这个就是按poll的批次提交offset，第3种</span></span><br><span class="line">        consumer.commitSync();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="按照时间戳定位offset"><a href="#按照时间戳定位offset" class="headerlink" title="按照时间戳定位offset"></a>按照时间戳定位offset</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 以下代码在未来开发的时候，向通过自定时间点的方式，自定义消费数据位置</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * 其实本质，核心知识是seek方法</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * 举一反三：</span></span><br><span class="line"><span class="comment">         * 1，通过时间换算出offset，再通过seek来自定义偏移</span></span><br><span class="line"><span class="comment">         * 2，如果你自己维护offset持久化~！！！通过seek完成</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line">Map&lt;TopicPartition, Long&gt; tts =<span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"><span class="comment">//通过consumer取回自己分配的分区 as</span></span><br><span class="line">Set&lt;TopicPartition&gt; as = consumer.assignment();</span><br><span class="line"></span><br><span class="line"><span class="comment">//自己填充一个hashmap，为每个分区设置对应的时间戳</span></span><br><span class="line"><span class="keyword">for</span> (TopicPartition partition : as) &#123;</span><br><span class="line">    tts.put(partition,<span class="number">1610629127300L</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//通过consumer的api，取回timeindex的数据</span></span><br><span class="line">Map&lt;TopicPartition, OffsetAndTimestamp&gt; offtime = consumer.offsetsForTimes(tts);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (TopicPartition partition : as) &#123;</span><br><span class="line">    <span class="comment">//通过取回的offset数据，通过consumer的seek方法，修正自己的消费偏移</span></span><br><span class="line">    OffsetAndTimestamp offsetAndTimestamp = offtime.get(partition);</span><br><span class="line">    <span class="comment">//如果不是通过time 换 offset，如果是从mysql读取回来，其本质是一样的</span></span><br><span class="line">    <span class="keyword">long</span> offset = offsetAndTimestamp.offset();  </span><br><span class="line">    System.out.println(offset);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//本质，consumer的seek偏移offset</span></span><br><span class="line">    consumer.seek(partition,offset);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="持久化方式"><a href="#持久化方式" class="headerlink" title="持久化方式"></a>持久化方式</h2><p><img src="/images/amqp-kafka/kafka-19.png" alt="kafka"></p>
+<h2 id="ACK"><a href="#ACK" class="headerlink" title="ACK"></a>ACK</h2><p><img src="/images/amqp-kafka/kafka-20.png" alt="kafka"></p>
+<p><img src="/images/amqp-kafka/kafka-21.png" alt="kafka"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">0，另外一个trade off：</span><br><span class="line">不要强调磁盘的可靠性，转向异地多机的同步</span><br><span class="line"></span><br><span class="line">1，如果拿磁盘做持久化，在做trade off</span><br><span class="line">优先pagecache或者绝对磁盘</span><br><span class="line"></span><br><span class="line">2，在多机集群分布式的时候</span><br><span class="line">tradeoff</span><br><span class="line">强一致，最终一致性(过半，ISR)</span><br><span class="line"></span><br><span class="line">像redis，宁可用HA，不用刻意追求AOF准确性</span><br><span class="line">像kafka，我们追求ack -1，不要太追求磁盘的可靠性</span><br><span class="line">还有trade off ，就是在HA场景下，如果有实例异常退出，是否需要立刻尝试重启</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">像Redis的主从集群，两台从机一台主机，如果从机异常退出了，在短时间内又加回集群，这时候只需要和主机做增量同步即可。</span><br><span class="line">如果时间过长，需要进行全量的RDB同步，需要和主机fork复制，会影响主机的性能</span><br><span class="line">如果有脚本频繁对有问题的从机进行重启，会拖垮主机造成雪崩现象</span><br></pre></td></tr></table></figure>
+
+<h2 id="kafka-的IO情况"><a href="#kafka-的IO情况" class="headerlink" title="kafka 的IO情况"></a>kafka 的IO情况</h2><p><img src="/images/amqp-kafka/kafka-22.png" alt="kafka"></p>
+<h2 id="偏移Seek"><a href="#偏移Seek" class="headerlink" title="偏移Seek"></a>偏移Seek</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Topic: msb-items PartitionCount:2 ReplicationFactor:3 Configs:</span><br><span class="line">Topic: msb-items Partition: 0 Leader: 3 Replicas: 3,2,1 Isr: 3,2,1</span><br><span class="line">Topic: msb-items Partition: 1 Leader: 1 Replicas: 1,3,2 Isr: 1,3,2</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/amqp-kafka/kafka-23.png" alt="kafka"></p>
+<p><img src="/images/amqp-kafka/kafka-24.png" alt="kafka"></p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2021年03月01日 22:33</p>
+        <p>原始链接： <a class="post-url" href="/2021/02/28/kafka-frame/" title="&#39;Kafka的架构维度整理&#39;">https://midkuro.gitee.io/2021/02/28/kafka-frame/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.gif" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2021/02/28/kafka-frame/&title=《'Kafka的架构维度整理'》 — Kuro's Blog&pic=images/kafka.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2021/02/28/kafka-frame/&title=《'Kafka的架构维度整理'》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2021/02/28/kafka-frame/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'Kafka的架构维度整理'》 — Kuro's Blog&url=https://midkuro.gitee.io/2021/02/28/kafka-frame/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2021/02/28/kafka-frame/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2021/02/28/kafka-frame/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Kafka/" class="color1">Kafka</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#Kafka-架构维度"><span class="post-toc-text">Kafka 架构维度</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#整体架构"><span class="post-toc-text">整体架构</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#分区概念"><span class="post-toc-text">分区概念</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#批次消费"><span class="post-toc-text">批次消费</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#消费者rebalance"><span class="post-toc-text">消费者rebalance</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#三种手动commit"><span class="post-toc-text">三种手动commit</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#按照时间戳定位offset"><span class="post-toc-text">按照时间戳定位offset</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#持久化方式"><span class="post-toc-text">持久化方式</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#ACK"><span class="post-toc-text">ACK</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#kafka-的IO情况"><span class="post-toc-text">kafka 的IO情况</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#偏移Seek"><span class="post-toc-text">偏移Seek</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2021/02/28/io-netty/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;Netty 网络编码的应用&#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2021/02/27/kafka-eagle/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;Kafka的监控&#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="kafka-frame" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2021 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Dubbo/">Dubbo</a><a class="category-link" href="/categories/Elasticsearch/">Elasticsearch</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/FastDFS/">FastDFS</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kafka/">Kafka</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/Linux/">Linux</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Transaction/">Transaction</a><a class="category-link" href="/categories/Zookeeper/">Zookeeper</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/algorithm/">algorithm</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16px;">ActiveMQ</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Dubbo/" style="font-size: 10px;">Dubbo</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/FastDFS/" style="font-size: 10px;">FastDFS</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kafka/" style="font-size: 14px;">Kafka</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySql/" style="font-size: 13px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 12px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a> <a href="/tags/Transaction/" style="font-size: 10px;">Transaction</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/algorithm/" style="font-size: 15px;">algorithm</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16px;">ActiveMQ</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Dubbo/" style="font-size: 10px;">Dubbo</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/FastDFS/" style="font-size: 10px;">FastDFS</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kafka/" style="font-size: 14px;">Kafka</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySql/" style="font-size: 13px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 12px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a> <a href="/tags/Transaction/" style="font-size: 10px;">Transaction</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/algorithm/" style="font-size: 15px;">algorithm</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
