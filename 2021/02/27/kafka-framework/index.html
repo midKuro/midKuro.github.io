@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-10.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/amqp-kafka/kafka-11.png">
 <meta property="article:published_time" content="2021-02-27T01:00:00.000Z">
-<meta property="article:modified_time" content="2021-03-01T02:43:32.598Z">
+<meta property="article:modified_time" content="2021-03-05T09:40:32.366Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="Kafka">
 <meta name="twitter:card" content="summary">
@@ -194,7 +194,7 @@
 <p><strong>分区的原则</strong></p>
 <p>我们需要将 producer 发送的数据封装成一个 <strong>ProducerRecord</strong> 对象。 </p>
 <p><img src="/images/amqp-kafka/kafka-05.png" alt="kafka"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1.指明 partition 的情况下，直接将指明的值直接作为 partiton 值；</span><br><span class="line"></span><br><span class="line">2.没有指明 partition 值但有 key 的情况下，将 key 的 hash 值与 topic 的 partition </span><br><span class="line">数进行取余得到 partition 值；</span><br><span class="line"></span><br><span class="line">3.既没有 partition 值又没有 key 值的情况下，第一次调用时随机生成一个整数（后</span><br><span class="line">面每次调用在这个整数上自增）</span><br><span class="line"> 将这个值与 topic 可用的 partition 总数取余得到 partition 值，也就是常说的 round-robin 算法。</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1.指明 partition 的情况下，直接将指明的值直接作为 partiton 值；</span><br><span class="line"></span><br><span class="line">2.没有指明 partition 值但有 key 的情况下，将 key 的 hash 值与 topic 的 partition数进行取余得到 partition 值；</span><br><span class="line"></span><br><span class="line">3.既没有 partition 值又没有 key 值的情况下，第一次调用时随机生成一个整数（后面每次调用在这个整数上自增）</span><br><span class="line">将这个值与 topic 可用的 partition 总数取余得到 partition 值，也就是常说的 round-robin 算法。</span><br></pre></td></tr></table></figure>
 
 <p><strong>一个partition只能关联同一个消费组里的一个消费者，这样做的好处是partition中的offset不会产生并发和不安全的问题。</strong></p>
 <p><strong>也就是说，消费者必须小于等于partition，否则将出现无法被分配到partition的消费者，导致资源浪费。</strong></p>
@@ -276,9 +276,7 @@
 <p><strong>push（推）模式很难适应消费速率不同的消费者，因为消息发送速率是由 broker 决定的。</strong></p>
 </blockquote>
 <p>它的目标是尽可能以最快速度传递消息，但是这样很容易造成 consumer 来不及处理消息，典型的表现就是拒绝服务以及网络拥塞。而 pull 模式则可以根据 consumer 的消费能力以适当的速率消费消息。</p>
-<p><strong>pull 模式不足之处是，如果 kafka 没有数据，消费者可能会陷入循环中，一直返回空数</strong></p>
-<p><strong>据。</strong>针对这一点，Kafka 的消费者在消费数据时会传入一个时长参数 timeout，如果当前没有</p>
-<p>数据可供消费，consumer 会等待一段时间之后再返回，这段时长即为 timeout。</p>
+<p><strong>pull 模式不足之处是，如果 kafka 没有数据，消费者可能会陷入循环中，一直返回空数据。</strong>针对这一点，Kafka 的消费者在消费数据时会传入一个时长参数 timeout，如果当前没有数据可供消费，consumer 会等待一段时间之后再返回，这段时长即为 timeout。</p>
 <h3 id="分区分配策略"><a href="#分区分配策略" class="headerlink" title="分区分配策略"></a>分区分配策略</h3><p>一个 consumer group 中有多个 consumer，一个 topic 有多个 partition，所以必然会涉及</p>
 <p>到 partition 的分配问题，即确定那个 partition 由哪个 consumer 来消费。</p>
 <p>Kafka 有两种分配策略，一是 RoundRobin，一是 Range，<strong>kafka默认采用 Range 策略</strong>。</p>
@@ -347,7 +345,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2021年03月01日 10:43</p>
+        <p>最后更新： 2021年03月05日 17:40</p>
         <p>原始链接： <a class="post-url" href="/2021/02/27/kafka-framework/" title="&#39;Kafka的架构布局&#39;">https://midkuro.gitee.io/2021/02/27/kafka-framework/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">
