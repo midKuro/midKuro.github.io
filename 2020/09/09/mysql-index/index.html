@@ -27,7 +27,7 @@
 <meta property="og:image" content="https://midkuro.gitee.io/images/mysql-index/index-64.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/mysql-index/index-65.png">
 <meta property="article:published_time" content="2020-09-09T15:00:00.000Z">
-<meta property="article:modified_time" content="2021-03-04T10:40:35.280Z">
+<meta property="article:modified_time" content="2021-03-06T15:21:30.931Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="MySql">
 <meta name="twitter:card" content="summary">
@@ -183,11 +183,11 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">创建索引的坏处：</span><br><span class="line">第一，创建索引和维护索引要耗费时间，这种时间随着数据量的增加而增加。</span><br><span class="line"></span><br><span class="line">第二，索引需要占物理空间，除了数据表占数据空间之外，每一个索引还要占一定的物理空间，如果要建立聚簇索引，那么需要的空间就会更大。</span><br><span class="line"></span><br><span class="line">第三，当对表中的数据进行增加、删除和修改的时候，索引也要动态的维护，这样就降低了数据的维护速度。</span><br></pre></td></tr></table></figure>
 
 <h2 id="聚簇索引"><a href="#聚簇索引" class="headerlink" title="聚簇索引"></a>聚簇索引</h2><p>聚簇索引也叫聚集索引，该索引中键值的逻辑顺序决定了表中相应行的物理顺序。<br>聚集索引确定表中数据的物理顺序。由于聚集索引规定数据在表中的物理存储顺序，<strong>因此一个表只能包含一个聚集索引，通常是主键。</strong></p>
-<h2 id="非聚集索引"><a href="#非聚集索引" class="headerlink" title="非聚集索引"></a>非聚集索引</h2><p>非聚集索引也称作副主索引，该索引中索引的逻辑顺序与磁盘上行的物理存储顺序不同。</p>
+<h2 id="非聚集索引"><a href="#非聚集索引" class="headerlink" title="非聚集索引"></a>非聚集索引</h2><p>非聚集索引也称作辅助索引，该索引中索引的逻辑顺序与磁盘上行的物理存储顺序不同。</p>
 <p>索引是通过二叉树的数据结构来描述的，我们可以这么理解聚簇索引：索引的叶节点就是数据节点。<strong>而非聚簇索引的叶节点仍然是索引节点，只不过有一个指针指向对应的数据块。</strong></p>
 <p><strong>聚集索引与辅助索引相同的是：不管是聚集索引还是辅助索引，其内部都是B+树的形式，即高度是平衡的，叶子结点存放着所有的数据。</strong></p>
 <p><strong>聚集索引与辅助索引不同的是：叶子结点存放的是否是一整行的信息</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">聚集索引</span><br><span class="line">1.纪录的索引顺序与无力顺序相同</span><br><span class="line">  因此更适合between and和order by操作</span><br><span class="line">2.叶子结点直接对应数据</span><br><span class="line">  从中间级的索引页的索引行直接对应数据页</span><br><span class="line">3.每张表只能创建一个聚集索引</span><br><span class="line"></span><br><span class="line">非聚集索引</span><br><span class="line">1.索引顺序和物理顺序无关</span><br><span class="line">2.叶子结点不直接指向数据页</span><br><span class="line">3.每张表可以有多个非聚集索引，需要更多磁盘和内容</span><br><span class="line">  多个索引会影响insert和update的速度</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">聚集索引</span><br><span class="line">1.纪录的索引顺序与物理顺序相同</span><br><span class="line">  因此更适合between and和order by操作</span><br><span class="line">2.叶子结点直接对应数据</span><br><span class="line">  从中间级的索引页的索引行直接对应数据页</span><br><span class="line">3.每张表只能创建一个聚集索引</span><br><span class="line"></span><br><span class="line">非聚集索引</span><br><span class="line">1.索引顺序和物理顺序无关</span><br><span class="line">2.叶子结点不直接指向数据页</span><br><span class="line">3.每张表可以有多个非聚集索引，需要更多磁盘和内容</span><br><span class="line">  多个索引会影响insert和update的速度</span><br></pre></td></tr></table></figure>
 
 <h2 id="唯一索引"><a href="#唯一索引" class="headerlink" title="唯一索引"></a>唯一索引</h2><p>唯一索引是不允许其中任何两行具有相同索引值的索引。</p>
 <p>当现有数据中存在重复的键值时，大多数数据库不允许将新创建的唯一索引与表一起保存。数据库还可能防止添加将在表中创建重复键值的新数据。</p>
@@ -233,7 +233,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2021年03月04日 18:40</p>
+        <p>最后更新： 2021年03月06日 23:21</p>
         <p>原始链接： <a class="post-url" href="/2020/09/09/mysql-index/" title="&#39;MySql 索引概念 &#39;">https://midkuro.gitee.io/2020/09/09/mysql-index/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">

@@ -1,4 +1,3 @@
-https://midkuro.gitee.io/2021/02/28/io-netty/
 https://midkuro.gitee.io/2021/02/28/kafka-frame/
 https://midkuro.gitee.io/2021/02/27/kafka-eagle/
 https://midkuro.gitee.io/2021/02/27/kafka-api/
@@ -98,3 +97,4 @@ https://midkuro.gitee.io/2020/05/20/linux-nodejs/
 https://midkuro.gitee.io/2020/05/20/linux-software/
 https://midkuro.gitee.io/2020/05/20/linux-systemctl/
 https://midkuro.gitee.io/2020/05/20/linux-firewalld/
+https://midkuro.gitee.io/2020/05/20/jenkins-param/
