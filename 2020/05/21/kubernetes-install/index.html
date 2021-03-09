@@ -20,16 +20,16 @@
 <meta property="og:site_name" content="Kuro&#39;s Blog">
 <meta property="og:description" content="K8S的安装方式最简单的方法是使用yum install kubernetes命令安装Kubernetes集群，但仍需修改各组件的启动参数，才能完成对Kubernetes集群的配置，整个过程比较复杂，也容易出错。但是对于新手来说是一个熟悉k8s的一个过程，可以适当借鉴学习。 Kubernetes从1.4版本开始引入了命令行工具kubeadm，致力于简化集群的安装过程，并解决Kubernetes集群">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://midkuro.gitee.io/img/in-post/kubernetes-install/kubernetes-1.png">
-<meta property="og:image" content="https://midkuro.gitee.io/img/in-post/kubernetes-install/kubernetes-2.png">
-<meta property="og:image" content="https://midkuro.gitee.io/img/in-post/kubernetes-install/kubernetes-3.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/kubernetes-install/kubernetes-1.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/kubernetes-install/kubernetes-2.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/kubernetes-install/kubernetes-3.png">
 <meta property="article:published_time" content="2020-05-21T14:00:00.000Z">
-<meta property="article:modified_time" content="2020-09-23T08:24:17.097Z">
+<meta property="article:modified_time" content="2021-03-09T03:19:28.708Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="DevOps">
 <meta property="article:tag" content="Kubernetes">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://midkuro.gitee.io/img/in-post/kubernetes-install/kubernetes-1.png">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/kubernetes-install/kubernetes-1.png">
   
   
     <link rel="icon" href="/favicon.ico">
@@ -256,16 +256,16 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl start flanneld.service</span><br><span class="line">systemctl enable flanneld.service</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">重启Master节点服务</span></span><br><span class="line">systemctl restart docker</span><br><span class="line">systemctl restart kube-apiserver</span><br><span class="line">systemctl restart kube-controller-manager</span><br><span class="line">systemctl restart kube-scheduler</span><br><span class="line">systemctl restart kubelet</span><br><span class="line">systemctl restart kube-proxy</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">重启Node节点服务</span></span><br><span class="line">systemctl restart docker</span><br><span class="line">systemctl restart kubelet</span><br><span class="line">systemctl restart kube-proxy</span><br></pre></td></tr></table></figure>
 
 <p><strong>7、测试网段</strong></p>
-<p><strong>以上的一系列操作，主要是为了让flanneld和docker创建的网络处于同一个网段，先通过设置etcd设置flanneld的网段范围，再配置docker启动前加载flanneld的配置</strong><br><img src="/img/in-post/kubernetes-install/kubernetes-1.png" alt="kubernetes-1"><br>从图中能够看到<code>docker0</code>和<code>flannel0</code>都处于同一个网段<code>172.16.0.0</code>中,可以用一个轻巧的容器测试一下</p>
+<p><strong>以上的一系列操作，主要是为了让flanneld和docker创建的网络处于同一个网段，先通过设置etcd设置flanneld的网段范围，再配置docker启动前加载flanneld的配置</strong><br><img src="/images/kubernetes-install/kubernetes-1.png" alt="kubernetes-1"><br>从图中能够看到<code>docker0</code>和<code>flannel0</code>都处于同一个网段<code>172.16.0.0</code>中,可以用一个轻巧的容器测试一下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">docker拉取网络镜像</span></span><br><span class="line">[root@localhost /]# docker pull docker.io/busybox</span><br><span class="line"><span class="meta">#</span><span class="bash">分别在Master节点及Node节点执行命令</span></span><br><span class="line">[root@localhost /]# docker run -it docker.io/busybox:latest</span><br></pre></td></tr></table></figure>
-<p><img src="/img/in-post/kubernetes-install/kubernetes-2.png" alt="kubernetes-2"><br><img src="/img/in-post/kubernetes-install/kubernetes-3.png" alt="kubernetes-3"><br>从图中可以看到，创建了两个容器，IP分别是<code>172.16.43.6</code>和<code>172.16.43.4</code>互相能够Ping通。</p>
+<p><img src="/images/kubernetes-install/kubernetes-2.png" alt="kubernetes-2"><br><img src="/images/kubernetes-install/kubernetes-3.png" alt="kubernetes-3"><br>从图中可以看到，创建了两个容器，IP分别是<code>172.16.43.6</code>和<code>172.16.43.4</code>互相能够Ping通。</p>
 <p>如果不能Ping通，则在每个<code>Node</code>节点上都配置相应的静态路由项</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">Master节点 <span class="comment">#172.16.9.0 为Node节点的flannel0的IP</span></span></span><br><span class="line">[root@localhost ~]# route add -net 172.16.9.0 netmask 255.255.255.0 gw 192.168.1.134    </span><br><span class="line"><span class="meta">#</span><span class="bash">Node节点 <span class="comment">#172.16.43.0 为Master节点的flannel0的IP</span></span></span><br><span class="line">[root@localhost ~]# route add -net 172.16.43.0 netmask 255.255.255.0 gw 192.168.1.132</span><br></pre></td></tr></table></figure>
 <p>这意味着，每一个新部署的容器都将使用这个Node（docker0的网桥IP）作为它的默认网关。而这些Node（类似路由器）都有其他docker0的路由信息，这样它们就能够相互连通了。</p>
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2020年09月23日 16:24</p>
+        <p>最后更新： 2021年03月09日 11:19</p>
         <p>原始链接： <a class="post-url" href="/2020/05/21/kubernetes-install/" title="&#39;kubernetes（二） 环境搭建&#39;">https://midkuro.gitee.io/2020/05/21/kubernetes-install/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   
-  <title>&#39;MySql 索引概念 &#39; | Kuro&#39;s Blog</title>
+  <title>&#39;MySql 概念 &#39; | Kuro&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
     <meta name="keywords" content="Kuro,Kuro's Blog" />
@@ -13,12 +13,12 @@
   
 
 
-  <meta name="description" content="MySql 索引 以下文章采自：索引介绍、索引原理、B+树结构  数据库索引，是数据库管理系统中一个排序的数据结构，以协助快速查询、更新数据库表中数据。索引的实现通常使用 B 树及其变种 B+ 树。 在数据之外，数据库系统还维护着满足特定查找算法的数据结构，这些数据结构以某种方式引用（指向）数据，这样就可以在这些数据结构上实现高级查找算法。这种数据结构，就是索引。 123为表设置索引要付出代价的：">
+  <meta name="description" content="MySqlMySql索引 以下文章采自：索引介绍、索引原理、B+树结构  数据库索引，是数据库管理系统中一个排序的数据结构，以协助快速查询、更新数据库表中数据。索引的实现通常使用 B 树及其变种 B+ 树。 在数据之外，数据库系统还维护着满足特定查找算法的数据结构，这些数据结构以某种方式引用（指向）数据，这样就可以在这些数据结构上实现高级查找算法。这种数据结构，就是索引。 123为表设置索引要付出">
 <meta property="og:type" content="article">
-<meta property="og:title" content="&#39;MySql 索引概念 &#39;">
+<meta property="og:title" content="&#39;MySql 概念 &#39;">
 <meta property="og:url" content="https://midkuro.gitee.io/2020/09/09/mysql-index/index.html">
 <meta property="og:site_name" content="Kuro&#39;s Blog">
-<meta property="og:description" content="MySql 索引 以下文章采自：索引介绍、索引原理、B+树结构  数据库索引，是数据库管理系统中一个排序的数据结构，以协助快速查询、更新数据库表中数据。索引的实现通常使用 B 树及其变种 B+ 树。 在数据之外，数据库系统还维护着满足特定查找算法的数据结构，这些数据结构以某种方式引用（指向）数据，这样就可以在这些数据结构上实现高级查找算法。这种数据结构，就是索引。 123为表设置索引要付出代价的：">
+<meta property="og:description" content="MySqlMySql索引 以下文章采自：索引介绍、索引原理、B+树结构  数据库索引，是数据库管理系统中一个排序的数据结构，以协助快速查询、更新数据库表中数据。索引的实现通常使用 B 树及其变种 B+ 树。 在数据之外，数据库系统还维护着满足特定查找算法的数据结构，这些数据结构以某种方式引用（指向）数据，这样就可以在这些数据结构上实现高级查找算法。这种数据结构，就是索引。 123为表设置索引要付出">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://midkuro.gitee.io/images/mysql-index/index-61.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/mysql-index/index-62.png">
@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://midkuro.gitee.io/images/mysql-index/index-69.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/mysql-index/index-70.png">
 <meta property="article:published_time" content="2020-09-09T15:00:00.000Z">
-<meta property="article:modified_time" content="2021-03-08T15:14:16.860Z">
+<meta property="article:modified_time" content="2021-03-09T05:19:55.688Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="MySql">
 <meta name="twitter:card" content="summary">
@@ -146,7 +146,7 @@
         
   
     <h1 class="post-title" itemprop="name">
-      &#39;MySql 索引概念 &#39;
+      &#39;MySql 概念 &#39;
     </h1>
     <div class="post-title-bar">
       <ul>
@@ -175,7 +175,7 @@
     <div class="article-entry post-content" itemprop="articleBody">
       
             
-            <h1 id="MySql-索引"><a href="#MySql-索引" class="headerlink" title="MySql 索引"></a>MySql 索引</h1><blockquote>
+            <h1 id="MySql"><a href="#MySql" class="headerlink" title="MySql"></a>MySql</h1><h2 id="MySql索引"><a href="#MySql索引" class="headerlink" title="MySql索引"></a>MySql索引</h2><blockquote>
 <p>以下文章采自：<a href="https://www.cnblogs.com/mike-mei/p/10728816.html" target="_blank" rel="noopener">索引介绍</a>、<a href="https://www.cnblogs.com/an-wen/p/11093603.html" target="_blank" rel="noopener">索引原理</a>、<a href="https://blog.csdn.net/qq_25800311/article/details/90748774" target="_blank" rel="noopener">B+树结构</a></p>
 </blockquote>
 <p><strong>数据库索引</strong>，是数据库管理系统中一个排序的数据结构，以协助快速查询、更新数据库表中数据。<strong>索引的实现通常使用 B 树及其变种 B+ 树</strong>。</p>
@@ -187,26 +187,20 @@
 
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">创建索引的坏处：</span><br><span class="line">第一，创建索引和维护索引要耗费时间，这种时间随着数据量的增加而增加。</span><br><span class="line"></span><br><span class="line">第二，索引需要占物理空间，除了数据表占数据空间之外，每一个索引还要占一定的物理空间，如果要建立聚簇索引，那么需要的空间就会更大。</span><br><span class="line"></span><br><span class="line">第三，当对表中的数据进行增加、删除和修改的时候，索引也要动态的维护，这样就降低了数据的维护速度。</span><br></pre></td></tr></table></figure>
 
-<h2 id="Hash索引"><a href="#Hash索引" class="headerlink" title="Hash索引"></a>Hash索引</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.基于哈希表的实现，只有精确匹配索引所有列的查询才有效</span><br><span class="line">2.在mysql中，只有memory的存储引擎显式支持哈希索引</span><br></pre></td></tr></table></figure>
+<h3 id="Hash索引"><a href="#Hash索引" class="headerlink" title="Hash索引"></a>Hash索引</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.基于哈希表的实现，只有精确匹配索引所有列的查询才有效</span><br><span class="line">2.在mysql中，只有memory的存储引擎显式支持哈希索引</span><br></pre></td></tr></table></figure>
 
-
-
-
-
-
-
-<h2 id="聚簇索引"><a href="#聚簇索引" class="headerlink" title="聚簇索引"></a>聚簇索引</h2><p>聚簇索引也叫聚集索引，该索引中键值的逻辑顺序决定了表中相应行的物理顺序。<br>聚集索引确定表中数据的物理顺序。由于聚集索引规定数据在表中的物理存储顺序，<strong>因此一个表只能包含一个聚集索引，通常是主键。</strong></p>
+<h3 id="聚簇索引"><a href="#聚簇索引" class="headerlink" title="聚簇索引"></a>聚簇索引</h3><p>聚簇索引也叫聚集索引，该索引中键值的逻辑顺序决定了表中相应行的物理顺序。<br>聚集索引确定表中数据的物理顺序。由于聚集索引规定数据在表中的物理存储顺序，<strong>因此一个表只能包含一个聚集索引，通常是主键。</strong></p>
 <p>不是单独的索引类型，而是一种数据存储方式，指的是数据行跟相邻的键值紧凑的存储在一起。</p>
-<h2 id="非聚集索引"><a href="#非聚集索引" class="headerlink" title="非聚集索引"></a>非聚集索引</h2><p>非聚集索引也称作辅助索引，该索引中索引的逻辑顺序与磁盘上行的物理存储顺序不同。</p>
+<h3 id="非聚集索引"><a href="#非聚集索引" class="headerlink" title="非聚集索引"></a>非聚集索引</h3><p>非聚集索引也称作辅助索引，该索引中索引的逻辑顺序与磁盘上行的物理存储顺序不同。</p>
 <p>索引是通过二叉树的数据结构来描述的，我们可以这么理解聚簇索引：索引的叶节点就是数据节点。<strong>而非聚簇索引的叶节点仍然是索引节点，只不过有一个指针指向对应的数据块。</strong></p>
 <p><strong>聚集索引与辅助索引相同的是：不管是聚集索引还是辅助索引，其内部都是B+树的形式，即高度是平衡的，叶子结点存放着所有的数据。</strong></p>
 <p><strong>聚集索引与辅助索引不同的是：叶子结点存放的是否是一整行的信息。</strong></p>
 <p>数据文件跟索引文件分开存放。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">聚集索引</span><br><span class="line">1.纪录的索引顺序与物理顺序相同</span><br><span class="line">  因此更适合between and和order by操作</span><br><span class="line">2.叶子结点直接对应数据</span><br><span class="line">  从中间级的索引页的索引行直接对应数据页</span><br><span class="line">3.每张表只能创建一个聚集索引</span><br><span class="line"></span><br><span class="line">非聚集索引</span><br><span class="line">1.索引顺序和物理顺序无关</span><br><span class="line">2.叶子结点不直接指向数据页</span><br><span class="line">3.每张表可以有多个非聚集索引，需要更多磁盘和内容</span><br><span class="line">  多个索引会影响insert和update的速度</span><br></pre></td></tr></table></figure>
 
-<h2 id="唯一索引"><a href="#唯一索引" class="headerlink" title="唯一索引"></a>唯一索引</h2><p>唯一索引是不允许其中任何两行具有相同索引值的索引。</p>
+<h3 id="唯一索引"><a href="#唯一索引" class="headerlink" title="唯一索引"></a>唯一索引</h3><p>唯一索引是不允许其中任何两行具有相同索引值的索引。</p>
 <p>当现有数据中存在重复的键值时，大多数数据库不允许将新创建的唯一索引与表一起保存。数据库还可能防止添加将在表中创建重复键值的新数据。</p>
-<h2 id="主键索引"><a href="#主键索引" class="headerlink" title="主键索引"></a>主键索引</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.主键不允许空值，唯一索引允许空值</span><br><span class="line">2.主键只允许一个，唯一索引允许多个</span><br><span class="line">3.主键产生唯一的聚集索引，唯一索引产生唯一的非聚集索引</span><br></pre></td></tr></table></figure>
+<h3 id="主键索引"><a href="#主键索引" class="headerlink" title="主键索引"></a>主键索引</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.主键不允许空值，唯一索引允许空值</span><br><span class="line">2.主键只允许一个，唯一索引允许多个</span><br><span class="line">3.主键产生唯一的聚集索引，唯一索引产生唯一的非聚集索引</span><br></pre></td></tr></table></figure>
 
 <p><img src="/images/mysql-index/index-61.png" alt="mysql"></p>
 <blockquote>
@@ -215,13 +209,13 @@
 <p><img src="/images/mysql-index/index-62.png" alt="mysql"></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">如果插入的是 ID &#x3D; 350 的一行数据，由于 B+ 树是有序的，那么需要将下面的叶子节点进行移动，腾出位置来插入 ID &#x3D; 350 的数据，这样就会比较消耗时间。</span><br><span class="line">如果刚好 R4 所在的数据页已经满了，需要进行页分裂操作，这样会更加糟糕。</span><br><span class="line"></span><br><span class="line">但是，如果我们的主键是自增的，每次插入的 ID 都会比前面的大，那么我们每次只需要在后面插入就行， 不需要移动位置、分裂等操作，这样可以提高性能。</span><br></pre></td></tr></table></figure>
 
-<h2 id="单列索引"><a href="#单列索引" class="headerlink" title="单列索引"></a>单列索引</h2><p>即一个索引只包含单个列，一个表可以有多个单列索引，但这不是组合索引；</p>
+<h3 id="单列索引"><a href="#单列索引" class="headerlink" title="单列索引"></a>单列索引</h3><p>即一个索引只包含单个列，一个表可以有多个单列索引，但这不是组合索引；</p>
 <p><strong>当一个表中查询大的情况下，where条件中有多个，如果使用多个单列索引，根据mysql优化器策略，造成可能只使用一个索引，其他索引会失效，导致会全盘扫描表。</strong></p>
-<h2 id="组合索引"><a href="#组合索引" class="headerlink" title="组合索引"></a>组合索引</h2><p>即一个索引包含多个列。</p>
+<h3 id="组合索引"><a href="#组合索引" class="headerlink" title="组合索引"></a>组合索引</h3><p>即一个索引包含多个列。</p>
 <p><strong>当一个表中查询大的情况下，where条件中有多个，那么可以使用组合查询,不会扫描表，直接从索引中获取，查询效率高。</strong></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">场景：</span><br><span class="line">设置单列索引：name</span><br><span class="line">设置组合索引：name,age</span><br><span class="line"></span><br><span class="line">SQL：select name from user where name &#x3D; &#39;admin&#39;;</span><br><span class="line"></span><br><span class="line">Mysql优化器优化后，它会走组合索引，而不是走单列索引。</span><br></pre></td></tr></table></figure>
 
-<h2 id="覆盖索引"><a href="#覆盖索引" class="headerlink" title="覆盖索引"></a>覆盖索引</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1、如果一个索引包含所有需要查询的字段的值，我们称之为覆盖索引</span><br><span class="line"></span><br><span class="line">2、不是所有类型的索引都可以称为覆盖索引，覆盖索引必须要存储索引列的值</span><br></pre></td></tr></table></figure>
+<h3 id="覆盖索引"><a href="#覆盖索引" class="headerlink" title="覆盖索引"></a>覆盖索引</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1、如果一个索引包含所有需要查询的字段的值，我们称之为覆盖索引</span><br><span class="line"></span><br><span class="line">2、不是所有类型的索引都可以称为覆盖索引，覆盖索引必须要存储索引列的值</span><br></pre></td></tr></table></figure>
 
 
 
@@ -258,11 +252,42 @@
 <h3 id="undolog"><a href="#undolog" class="headerlink" title="undolog"></a>undolog</h3><p><img src="/images/mysql-index/index-68.png" alt="mysql"></p>
 <h3 id="binlog"><a href="#binlog" class="headerlink" title="binlog"></a>binlog</h3><p><img src="/images/mysql-index/index-69.png" alt="mysql"></p>
 <p><img src="/images/mysql-index/index-70.png" alt="mysql"></p>
+<h2 id="MyISAM表锁"><a href="#MyISAM表锁" class="headerlink" title="MyISAM表锁"></a>MyISAM表锁</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE &#96;mylock&#96; (</span><br><span class="line">  &#96;id&#96; int(11) NOT NULL AUTO_INCREMENT,</span><br><span class="line">  &#96;NAME&#96; varchar(20) DEFAULT NULL,</span><br><span class="line">  PRIMARY KEY (&#96;id&#96;)</span><br><span class="line">) ENGINE&#x3D;MyISAM DEFAULT CHARSET&#x3D;utf8;</span><br><span class="line"></span><br><span class="line">INSERT INTO &#96;mylock&#96; (&#96;id&#96;, &#96;NAME&#96;) VALUES (&#39;1&#39;, &#39;a&#39;);</span><br><span class="line">INSERT INTO &#96;mylock&#96; (&#96;id&#96;, &#96;NAME&#96;) VALUES (&#39;2&#39;, &#39;b&#39;);</span><br><span class="line">INSERT INTO &#96;mylock&#96; (&#96;id&#96;, &#96;NAME&#96;) VALUES (&#39;3&#39;, &#39;c&#39;);</span><br><span class="line">INSERT INTO &#96;mylock&#96; (&#96;id&#96;, &#96;NAME&#96;) VALUES (&#39;4&#39;, &#39;d&#39;);</span><br></pre></td></tr></table></figure>
+
+<p><strong>表级锁：</strong>开销小，加锁快；不会出现死锁；锁定粒度大，发生锁冲突的概率最高，并发度最低。<br><strong>行级锁：</strong>开销大，加锁慢；会出现死锁；锁定粒度最小，发生锁冲突的概率最低，并发度也最高。</p>
+<h3 id="表共享读锁"><a href="#表共享读锁" class="headerlink" title="表共享读锁"></a>表共享读锁</h3><p>一个session使用lock table给表加读锁，这个session可以锁定表中的记录，<strong>但更新和访问其他表都会提示错误</strong>，同时，另一个session可以查询表中的记录，但更新就会出现锁等待。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#获得表的read锁定</span><br><span class="line">lock table mylock read;</span><br><span class="line"></span><br><span class="line">#释放锁</span><br><span class="line">unlock tables;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#获取表的read local(session)锁定</span><br><span class="line">lock table mylock read local</span><br><span class="line"></span><br><span class="line">#其他session可以查询该表的记录、可以进行插入操作，但是更新会阻塞</span><br></pre></td></tr></table></figure>
+
+<h3 id="表独占写锁"><a href="#表独占写锁" class="headerlink" title="表独占写锁"></a>表独占写锁</h3><p>当一个线程获得对一个表的写锁之后，只有持有锁的线程可以对表进行更新操作。其他线程的读写操作都会等待，直到锁释放为止。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#获取表的write锁定</span><br><span class="line">lock table mylock write;</span><br><span class="line"></span><br><span class="line">#获取表的write锁定</span><br><span class="line">unlock tables；</span><br></pre></td></tr></table></figure>
+
+<p>可以通过检查table_locks_waited和table_locks_immediate状态变量来分析系统上的表锁定争夺： </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show status like 'table%';</span><br><span class="line">+<span class="comment">-----------------------+-------+</span></span><br><span class="line">| Variable_name         | Value |</span><br><span class="line">+<span class="comment">-----------------------+-------+</span></span><br><span class="line">| Table_locks_immediate | 352   |</span><br><span class="line">| Table_locks_waited    | 2     |</span><br><span class="line">+<span class="comment">-----------------------+-------+</span></span><br><span class="line"><span class="comment">--如果Table_locks_waited的值比较高，则说明存在着较严重的表级锁争用情况。</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>MyISAM在执行查询语句之前，会自动给涉及的所有表加读锁，在执行更新操作前，会自动给涉及的表加写锁，这个过程并不需要用户干预，因此用户一般不需要使用命令来显式加锁，上例中的加锁时为了演示效果。</strong></p>
+<h2 id="InnoDB锁"><a href="#InnoDB锁" class="headerlink" title="InnoDB锁"></a>InnoDB锁</h2><p><strong>InnoDB行锁是通过给索引上的索引项加锁来实现的</strong>，这一点MySQL与Oracle不同，后者是通过在数据块中对相应数据行加锁来实现的。InnoDB这种行锁实现特点意味着：只有通过索引条件检索数据，InnoDB才使用行级锁，<strong>否则，InnoDB将使用表锁！</strong>  </p>
+<p><strong>在不通过索引条件查询的时候，innodb使用的是表锁而不是行锁。</strong></p>
+<h3 id="行共享锁"><a href="#行共享锁" class="headerlink" title="行共享锁"></a>行共享锁</h3><p>共享锁又称读锁。允许多个事务对统一数据可以共享一把锁，都能访问到数据库，但是只能读不能修改，如果有其他事务进行修改操作，会被阻塞直到共享锁释放才修改成功。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#关闭事务自动提交</span><br><span class="line">set autocommit&#x3D;0;</span><br><span class="line">#共享锁，其他事务能查，但是不能修改</span><br><span class="line">select * from student where id &#x3D; 1 lock in share mode;</span><br><span class="line"></span><br><span class="line">commit;</span><br></pre></td></tr></table></figure>
+
+<h3 id="行排他锁"><a href="#行排他锁" class="headerlink" title="行排他锁"></a>行排他锁</h3><p>排他锁又称写锁。排它锁不能与其他锁并存，如果一个事务获取了一个数据行的排它锁，其他事务就不能在获取该行的锁，只有当前获取了排它锁的事务可以对数据进行读取和修改。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#关闭事务自动提交</span><br><span class="line">set autocommit&#x3D;0;</span><br><span class="line">#排它锁，其他事务能查，但是不能修改、也不能加其他锁</span><br><span class="line">select * from student where id &#x3D; 1 for undate;</span><br><span class="line"></span><br><span class="line">commit;</span><br></pre></td></tr></table></figure>
+
+
+
+<p> 可以通过检查InnoDB_row_lock状态变量来分析系统上的行锁的争夺情况： </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show status like 'innodb_row_lock%';</span><br><span class="line">+<span class="comment">-------------------------------+-------+</span></span><br><span class="line">| Variable_name                 | Value |</span><br><span class="line">+<span class="comment">-------------------------------+-------+</span></span><br><span class="line">| Innodb_row_lock_current_waits | 0     |</span><br><span class="line">| Innodb_row_lock_time          | 18702 |</span><br><span class="line">| Innodb_row_lock_time_avg      | 18702 |</span><br><span class="line">| Innodb_row_lock_time_max      | 18702 |</span><br><span class="line">| Innodb_row_lock_waits         | 1     |</span><br><span class="line">+<span class="comment">-------------------------------+-------+</span></span><br><span class="line"><span class="comment">--如果发现锁争用比较严重，如InnoDB_row_lock_waits和InnoDB_row_lock_time_avg的值比较高</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="自增锁"><a href="#自增锁" class="headerlink" title="自增锁"></a>自增锁</h3><p>针对自增列自增长的一个特殊的表级别锁。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#默认值1，代表连续，事务未提交则id永远丢失，会接着新的id递增</span><br><span class="line">show variables like &#39;innodb_autoinc_lock_mode&#39;;</span><br></pre></td></tr></table></figure>
+
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2021年03月08日 23:14</p>
-        <p>原始链接： <a class="post-url" href="/2020/09/09/mysql-index/" title="&#39;MySql 索引概念 &#39;">https://midkuro.gitee.io/2020/09/09/mysql-index/</a></p>
+        <p>最后更新： 2021年03月09日 13:19</p>
+        <p>原始链接： <a class="post-url" href="/2020/09/09/mysql-index/" title="&#39;MySql 概念 &#39;">https://midkuro.gitee.io/2020/09/09/mysql-index/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">
                 <img src="/images/logo.gif" alt="Kuro">
@@ -319,7 +344,7 @@
     <div class="post-share-list" id="share-list">
         <ul class="share-icons">
           <li>
-            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/09/09/mysql-index/&title=《'MySql 索引概念 '》 — Kuro's Blog&pic=images/mysql.jpg" data-title="微博">
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/09/09/mysql-index/&title=《'MySql 概念 '》 — Kuro's Blog&pic=images/mysql.jpg" data-title="微博">
               <i class="fa fa-weibo"></i>
             </a>
           </li>
@@ -329,7 +354,7 @@
             </a>
           </li>
           <li>
-            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/09/09/mysql-index/&title=《'MySql 索引概念 '》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/09/09/mysql-index/&title=《'MySql 概念 '》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
               <i class="fa fa-qq"></i>
             </a>
           </li>
@@ -339,7 +364,7 @@
             </a>
           </li>
           <li>
-            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'MySql 索引概念 '》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/09/09/mysql-index/&via=https://midkuro.gitee.io" data-title="Twitter">
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'MySql 概念 '》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/09/09/mysql-index/&via=https://midkuro.gitee.io" data-title="Twitter">
               <i class="fa fa-twitter"></i>
             </a>
           </li>
@@ -379,7 +404,7 @@
 
     <aside class="post-toc-pos post-toc-top" id="post-toc">
         <nav class="post-toc-wrap">
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#MySql-索引"><span class="post-toc-text">MySql 索引</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Hash索引"><span class="post-toc-text">Hash索引</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#聚簇索引"><span class="post-toc-text">聚簇索引</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#非聚集索引"><span class="post-toc-text">非聚集索引</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#唯一索引"><span class="post-toc-text">唯一索引</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#主键索引"><span class="post-toc-text">主键索引</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#单列索引"><span class="post-toc-text">单列索引</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#组合索引"><span class="post-toc-text">组合索引</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#覆盖索引"><span class="post-toc-text">覆盖索引</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#局部性原理和磁盘预读"><span class="post-toc-text">局部性原理和磁盘预读</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#页分裂"><span class="post-toc-text">页分裂</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#页合并"><span class="post-toc-text">页合并</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#B树演变成B-树的过程和原因"><span class="post-toc-text">B树演变成B+树的过程和原因</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Order-By"><span class="post-toc-text">Order By</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#子查询"><span class="post-toc-text">子查询</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#索引优化"><span class="post-toc-text">索引优化</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#索引下推"><span class="post-toc-text">索引下推</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Mysql存储引擎"><span class="post-toc-text">Mysql存储引擎</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#redolog"><span class="post-toc-text">redolog</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#undolog"><span class="post-toc-text">undolog</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#binlog"><span class="post-toc-text">binlog</span></a></li></ol></li></ol></li></ol>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#MySql"><span class="post-toc-text">MySql</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#MySql索引"><span class="post-toc-text">MySql索引</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Hash索引"><span class="post-toc-text">Hash索引</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#聚簇索引"><span class="post-toc-text">聚簇索引</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#非聚集索引"><span class="post-toc-text">非聚集索引</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#唯一索引"><span class="post-toc-text">唯一索引</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#主键索引"><span class="post-toc-text">主键索引</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#单列索引"><span class="post-toc-text">单列索引</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#组合索引"><span class="post-toc-text">组合索引</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#覆盖索引"><span class="post-toc-text">覆盖索引</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#局部性原理和磁盘预读"><span class="post-toc-text">局部性原理和磁盘预读</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#页分裂"><span class="post-toc-text">页分裂</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#页合并"><span class="post-toc-text">页合并</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#B树演变成B-树的过程和原因"><span class="post-toc-text">B树演变成B+树的过程和原因</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Order-By"><span class="post-toc-text">Order By</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#子查询"><span class="post-toc-text">子查询</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#索引优化"><span class="post-toc-text">索引优化</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#索引下推"><span class="post-toc-text">索引下推</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Mysql存储引擎"><span class="post-toc-text">Mysql存储引擎</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#redolog"><span class="post-toc-text">redolog</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#undolog"><span class="post-toc-text">undolog</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#binlog"><span class="post-toc-text">binlog</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#MyISAM表锁"><span class="post-toc-text">MyISAM表锁</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#表共享读锁"><span class="post-toc-text">表共享读锁</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#表独占写锁"><span class="post-toc-text">表独占写锁</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#InnoDB锁"><span class="post-toc-text">InnoDB锁</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#行共享锁"><span class="post-toc-text">行共享锁</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#行排他锁"><span class="post-toc-text">行排他锁</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#自增锁"><span class="post-toc-text">自增锁</span></a></li></ol></li></ol></li></ol>
         </nav>
     </aside>
     

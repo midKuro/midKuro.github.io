@@ -2,7 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://midkuro.gitee.io/2020/09/09/mysql-index/</loc>
-    <lastmod>2021-03-08</lastmod>
+    <lastmod>2021-03-09</lastmod>
+  </url>
+  <url>
+    <loc>https://midkuro.gitee.io/2020/05/21/kubernetes-install/</loc>
+    <lastmod>2021-03-09</lastmod>
   </url>
   <url>
     <loc>https://midkuro.gitee.io/2021/02/27/kafka-framework/</loc>
@@ -383,10 +387,6 @@
   <url>
     <loc>https://midkuro.gitee.io/2020/05/21/thread-safety/</loc>
     <lastmod>2020-09-24</lastmod>
-  </url>
-  <url>
-    <loc>https://midkuro.gitee.io/2020/05/21/kubernetes-install/</loc>
-    <lastmod>2020-09-23</lastmod>
   </url>
   <url>
     <loc>https://midkuro.gitee.io/2020/05/21/docker-use/</loc>
