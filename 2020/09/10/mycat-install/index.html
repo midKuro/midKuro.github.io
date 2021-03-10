@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;MyCat 的安装及使用 &#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
+  <meta name="description" content="MyCat安装首先准备四台虚拟机，安装好mysql，方便后续做读写分离和主从复制。 1234192.168.85.111 node01192.168.85.112 node02192.168.85.113 node03192.168.85.114 node04  解压从官网下载需要的安装包，并且上传到具体的虚拟机中，我们在使用的时候将包上传到node01这台虚拟机，由node01充当mycat。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;MyCat 的安装及使用 &#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/09/10/mycat-install/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="MyCat安装首先准备四台虚拟机，安装好mysql，方便后续做读写分离和主从复制。 1234192.168.85.111 node01192.168.85.112 node02192.168.85.113 node03192.168.85.114 node04  解压从官网下载需要的安装包，并且上传到具体的虚拟机中，我们在使用的时候将包上传到node01这台虚拟机，由node01充当mycat。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/mysql-mycat/mycat-04.png">
+<meta property="article:published_time" content="2020-09-10T02:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-10T09:37:06.710Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="MySql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/mysql-mycat/mycat-04.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?code-JRipY21QjX";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+  
+
+
+  
+  <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
+  
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.gif" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-mycat-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;MyCat 的安装及使用 &#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/MySql/">MySql</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-09-10
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="MyCat"><a href="#MyCat" class="headerlink" title="MyCat"></a>MyCat</h1><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>首先准备四台虚拟机，安装好mysql，方便后续做读写分离和主从复制。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">192.168.85.111 node01</span><br><span class="line">192.168.85.112 node02</span><br><span class="line">192.168.85.113 node03</span><br><span class="line">192.168.85.114 node04</span><br></pre></td></tr></table></figure>
+
+<h3 id="解压"><a href="#解压" class="headerlink" title="解压"></a>解压</h3><p>从官网<a href="http://dl.mycat.org.cn/1.6.7.5/2020-4-10/" target="_blank" rel="noopener">下载</a>需要的安装包，并且上传到具体的虚拟机中，我们在使用的时候将包上传到node01这台虚拟机，由node01充当mycat。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">解压文件到&#x2F;usr&#x2F;local文件夹下</span><br><span class="line">tar -zxvf  Mycat-server-1.6.7.5-release-20200422133810-linux.tar.gz -C &#x2F;usr&#x2F;local</span><br><span class="line">配置环境变量</span><br><span class="line">vi &#x2F;etc&#x2F;profile</span><br><span class="line">添加如下配置信息：</span><br><span class="line">export MYCAT_HOME&#x3D;&#x2F;usr&#x2F;local&#x2F;mycat</span><br><span class="line">export PATH&#x3D;$MYCAT_HOME&#x2F;bin:$PATH:$JAVA_HOME&#x2F;bin</span><br></pre></td></tr></table></figure>
+
+<p>当执行到这步的时候，其实就可以启动了，但是为了能正确显示出效果，最好修改下mycat的具体配置，让我们能够正常进行访问。</p>
+<h3 id="配置mycat"><a href="#配置mycat" class="headerlink" title="配置mycat"></a>配置mycat</h3><p>进入到/usr/local/mycat/conf目录下，修改该文件夹下的配置文件</p>
+<p>1、修改server.xml文件</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- - - Licensed under the Apache License, Version 2.0 (the "License"); </span></span><br><span class="line"><span class="comment">	- you may not use this file except in compliance with the License. - You </span></span><br><span class="line"><span class="comment">	may obtain a copy of the License at - - http://www.apache.org/licenses/LICENSE-2.0 </span></span><br><span class="line"><span class="comment">	- - Unless required by applicable law or agreed to in writing, software - </span></span><br><span class="line"><span class="comment">	distributed under the License is distributed on an "AS IS" BASIS, - WITHOUT </span></span><br><span class="line"><span class="comment">	WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. - See the </span></span><br><span class="line"><span class="comment">	License for the specific language governing permissions and - limitations </span></span><br><span class="line"><span class="comment">	under the License. --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">mycat</span>:server <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"server.dtd"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">mycat:server</span> <span class="attr">xmlns:mycat</span>=<span class="string">"http://io.mycat/"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">user</span> <span class="attr">name</span>=<span class="string">"root"</span> <span class="attr">defaultAccount</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"password"</span>&gt;</span>123456<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"schemas"</span>&gt;</span>TESTDB<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"defaultSchema"</span>&gt;</span>TESTDB<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">user</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">mycat:server</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>2、修改schema.xml文件</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0"?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">mycat</span>:schema <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"schema.dtd"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">mycat:schema</span> <span class="attr">xmlns:mycat</span>=<span class="string">"http://io.mycat/"</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- name：逻辑库</span></span><br><span class="line"><span class="comment">         checkSQLschema ：是否自带库名</span></span><br><span class="line"><span class="comment">         sqlMaxLimit：默认数据限制，如果SQL语句没带限制，会默认带上，如果带了，则以带的为准</span></span><br><span class="line"><span class="comment">         dataNode:真实数据库节点</span></span><br><span class="line"><span class="comment">    --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">schema</span> <span class="attr">name</span>=<span class="string">"TESTDB"</span> <span class="attr">checkSQLschema</span>=<span class="string">"false"</span> <span class="attr">sqlMaxLimit</span>=<span class="string">"100"</span> <span class="attr">dataNode</span>=<span class="string">"dn1"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">schema</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- database ： 真实节点的库名 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dataNode</span> <span class="attr">name</span>=<span class="string">"dn1"</span> <span class="attr">dataHost</span>=<span class="string">"host1"</span> <span class="attr">database</span>=<span class="string">"msb"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!--</span></span><br><span class="line"><span class="comment">        maxCon:最大连接数</span></span><br><span class="line"><span class="comment">        balance：读库和写库的负载均衡策略</span></span><br><span class="line"><span class="comment">     --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dataHost</span> <span class="attr">name</span>=<span class="string">"host1"</span> <span class="attr">maxCon</span>=<span class="string">"1000"</span> <span class="attr">minCon</span>=<span class="string">"10"</span> <span class="attr">balance</span>=<span class="string">"0"</span></span></span><br><span class="line"><span class="tag">              <span class="attr">writeType</span>=<span class="string">"0"</span> <span class="attr">dbType</span>=<span class="string">"mysql"</span> <span class="attr">dbDriver</span>=<span class="string">"native"</span> <span class="attr">switchType</span>=<span class="string">"1"</span>  <span class="attr">slaveThreshold</span>=<span class="string">"100"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">heartbeat</span>&gt;</span>select user()<span class="tag">&lt;/<span class="name">heartbeat</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">writeHost</span> <span class="attr">host</span>=<span class="string">"hostM1"</span> <span class="attr">url</span>=<span class="string">"192.168.85.111:3306"</span> <span class="attr">user</span>=<span class="string">"root"</span> <span class="attr">password</span>=<span class="string">"123456"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">&lt;!-- 读库配置，可以配置同一个库，也可以配置读写分离的 从库--&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">readHost</span> <span class="attr">host</span>=<span class="string">"hostS1"</span> <span class="attr">url</span>=<span class="string">"192.168.85.112:3306"</span> <span class="attr">user</span>=<span class="string">"root"</span> <span class="attr">password</span>=<span class="string">"123456"</span>&gt;</span><span class="tag">&lt;/<span class="name">readHost</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">writeHost</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dataHost</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">mycat:schema</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">balance&#x3D;0:不开启读写分离机制，所有读操作都发送到当前可用的writehost上</span><br><span class="line"></span><br><span class="line">balance&#x3D;1:全部的readhost和stand by writehost参与select 语句的负载均衡，简单的说，当双主双从模式下，其他的节点都参与select语句的负载均衡</span><br><span class="line"></span><br><span class="line">balance&#x3D;2:所有读操作都随机的在writehost，readhost上分发</span><br><span class="line"></span><br><span class="line">balance&#x3D;3:所有读请求随机的分发到readhost执行，writehost不负担读压力</span><br></pre></td></tr></table></figure>
+
+<h3 id="启动mycat"><a href="#启动mycat" class="headerlink" title="启动mycat"></a>启动mycat</h3><p>mycat的启动有两种方式，一种是控制台启动，一种是后台启动，在初学的时候建议大家使用控制台启动的方式，当配置文件写错之后，可以方便的看到错误，及时修改，但是在生产环境中，使用后台启动的方式比较稳妥。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#控制台启动：去mycat/bin目录下执行 </span></span><br><span class="line">[root@localhost bin]<span class="comment"># ./mycat console</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#后台启动：去mycat/bin目录下执行 </span></span><br><span class="line">[root@localhost bin]<span class="comment"># ./mycat start</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="登录验证"><a href="#登录验证" class="headerlink" title="登录验证"></a>登录验证</h3><p><strong>管理窗口的登录</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#从另外的虚拟机去登录访问当前mycat，输入如下命令即可</span></span><br><span class="line">[root@localhost bin]<span class="comment"># mysql -uroot -p123456 -P 9066 -h 192.168.85.111</span></span><br></pre></td></tr></table></figure>
+
+<p>此时访问的是mycat的管理窗口，可以通过show @@help查看可以执行的命令</p>
+<p><strong>数据窗口的登录</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#从另外的虚拟机去登录访问mycat，输入命令如下：</span></span><br><span class="line">[root@localhost bin]<span class="comment"># mysql -uroot -p123456 -P8066 -h 192.168.85.111</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><a href="/2020/09/10/mysql-cluster/">MYSQL一主一从搭建文档</a></p>
+</blockquote>
+<h2 id="双主双从"><a href="#双主双从" class="headerlink" title="双主双从"></a>双主双从</h2><h3 id="MYSQL配置"><a href="#MYSQL配置" class="headerlink" title="MYSQL配置"></a>MYSQL配置</h3><p>在上述的一主一从的架构设计中，很容易出现单点的问题，所以我们要想让生产环境中的配置足够稳定，可以配置双主双从，解决单点的问题。</p>
+<p><img src="/images/mysql-mycat/mycat-04.png" alt="mycat"></p>
+<p>在此架构中，可以让一台主机用来处理所有写请求，此时，它的从机和备机，以及备机的从机负责所有读请求，当主机宕机之后，另一台主机负责写请求，两台主机互为备机。</p>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>角色</th>
+<th>ip</th>
+<th>主机名</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>master1</td>
+<td>192.168.85.111</td>
+<td>node01</td>
+</tr>
+<tr>
+<td>2</td>
+<td>slave1</td>
+<td>192.168.85.112</td>
+<td>node02</td>
+</tr>
+<tr>
+<td>3</td>
+<td>master2</td>
+<td>192.168.85.113</td>
+<td>node03</td>
+</tr>
+<tr>
+<td>4</td>
+<td>slave2</td>
+<td>192.168.85.114</td>
+<td>node04</td>
+</tr>
+</tbody></table>
+<p>1、修改node01上的/etc/my.cnf文件</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#主服务器唯一ID</span></span><br><span class="line"><span class="meta">server-id</span>=<span class="string">1</span></span><br><span class="line"><span class="comment">#启用二进制日志</span></span><br><span class="line"><span class="meta">log-bin</span>=<span class="string">mysql-bin</span></span><br><span class="line"><span class="comment"># 设置不要复制的数据库(可设置多个)</span></span><br><span class="line"><span class="meta">binlog-ignore-db</span>=<span class="string">mysql</span></span><br><span class="line"><span class="meta">binlog-ignore-db</span>=<span class="string">information_schema</span></span><br><span class="line"><span class="comment">#设置需要复制的数据库</span></span><br><span class="line"><span class="meta">binlog-do-db</span>=<span class="string">msb</span></span><br><span class="line"><span class="comment">#设置logbin格式</span></span><br><span class="line"><span class="attr">binlog_format</span>=<span class="string">STATEMENT</span></span><br><span class="line"><span class="comment"># 在作为从数据库的时候， 有写入操作也要更新二进制日志文件</span></span><br><span class="line"><span class="attr">log-slave-updates</span></span><br><span class="line"><span class="comment">#表示自增长字段每次递增的量，指自增字段的起始值，其默认值是1， 取值范围是1 .. 65535</span></span><br><span class="line"><span class="meta">auto-increment-increment</span>=<span class="string">2</span></span><br><span class="line"><span class="comment"># 表示自增长字段从哪个数开始，指字段一次递增多少，他的取值范围是1 .. 65535</span></span><br><span class="line"><span class="meta">auto-increment-offset</span>=<span class="string">1</span></span><br></pre></td></tr></table></figure>
+
+<p>2、修改node03上的/etc/my.cnf文件</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#主服务器唯一ID</span></span><br><span class="line"><span class="string">server-id=3</span></span><br><span class="line"><span class="comment">#启用二进制日志</span></span><br><span class="line"><span class="string">log-bin=mysql-bin</span></span><br><span class="line"><span class="comment"># 设置不要复制的数据库(可设置多个)</span></span><br><span class="line"><span class="string">binlog-ignore-db=mysql</span></span><br><span class="line"><span class="string">binlog-ignore-db=information_schema</span></span><br><span class="line"><span class="comment">#设置需要复制的数据库</span></span><br><span class="line"><span class="string">binlog-do-db=msb</span></span><br><span class="line"><span class="comment">#设置logbin格式</span></span><br><span class="line"><span class="string">binlog_format=STATEMENT</span></span><br><span class="line"><span class="comment"># 在作为从数据库的时候，有写入操作也要更新二进制日志文件</span></span><br><span class="line"><span class="string">log-slave-updates</span></span><br><span class="line"><span class="comment">#表示自增长字段每次递增的量，指自增字段的起始值，其默认值是1，取值范围是1 .. 65535</span></span><br><span class="line"><span class="string">auto-increment-increment=2</span></span><br><span class="line"><span class="comment"># 表示自增长字段从哪个数开始，指字段一次递增多少，他的取值范围是1 .. 65535</span></span><br><span class="line"><span class="string">auto-increment-offset=2</span></span><br></pre></td></tr></table></figure>
+
+<p>3、修改node02上的/etc/my.cnf文件</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#从服务器唯一ID</span></span><br><span class="line"><span class="string">server-id=2</span></span><br><span class="line"><span class="comment">#启用中继日志</span></span><br><span class="line"><span class="string">relay-log=mysql-relay</span></span><br></pre></td></tr></table></figure>
+
+<p>4、修改node04上的/etc/my.cnf文件</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#从服务器唯一ID</span></span><br><span class="line"><span class="string">server-id=4</span></span><br><span class="line"><span class="comment">#启用中继日志</span></span><br><span class="line"><span class="string">relay-log=mysql-relay</span></span><br></pre></td></tr></table></figure>
+
+<p>5、所有主机重新启动mysql服务</p>
+<p>6、在两台主机node01,node03上授权同步命令</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GRANT</span> <span class="keyword">REPLICATION</span> <span class="keyword">SLAVE</span> <span class="keyword">ON</span> *.* <span class="keyword">TO</span> <span class="string">'root'</span>@<span class="string">'%'</span> <span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'123456'</span>;</span><br></pre></td></tr></table></figure>
+
+<p>7、查看两台主机的状态</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> <span class="keyword">master</span> <span class="keyword">status</span>;</span><br></pre></td></tr></table></figure>
+
+<p>8、在node02上执行要复制的主机</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CHANGE</span> <span class="keyword">MASTER</span> <span class="keyword">TO</span> MASTER_HOST=<span class="string">'192.168.85.111'</span>,MASTER_USER=<span class="string">'root'</span>,MASTER_PASSWORD=<span class="string">'123456'</span>,MASTER_LOG_FILE=<span class="string">'mysql-bin.000001'</span>,MASTER_LOG_POS=<span class="number">154</span>;</span><br></pre></td></tr></table></figure>
+
+<p>9、在node04上执行要复制的主机</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CHANGE</span> <span class="keyword">MASTER</span> <span class="keyword">TO</span> MASTER_HOST=<span class="string">'192.168.85.113'</span>,MASTER_USER=<span class="string">'root'</span>,MASTER_PASSWORD=<span class="string">'123456'</span>,MASTER_LOG_FILE=<span class="string">'mysql-bin.000001'</span>,MASTER_LOG_POS=<span class="number">154</span>;</span><br></pre></td></tr></table></figure>
+
+<p>10、启动两个从机的slave并且查看状态，当看到两个参数都是yes的时候表示成功</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">start</span> <span class="keyword">slave</span>;</span><br><span class="line"><span class="keyword">show</span> <span class="keyword">slave</span> <span class="keyword">status</span>;</span><br></pre></td></tr></table></figure>
+
+<p>11、完成node01跟node03的相互复制</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--在node01上执行</span></span><br><span class="line"><span class="keyword">CHANGE</span> <span class="keyword">MASTER</span> <span class="keyword">TO</span> MASTER_HOST=<span class="string">'192.168.85.113'</span>,MASTER_USER=<span class="string">'root'</span>,MASTER_PASSWORD=<span class="string">'123456'</span>,MASTER_LOG_FILE=<span class="string">'mysql-bin.000001'</span>,MASTER_LOG_POS=<span class="number">442</span>;</span><br><span class="line"><span class="comment">--开启slave</span></span><br><span class="line"><span class="keyword">start</span> <span class="keyword">slave</span></span><br><span class="line"><span class="comment">--查看状态</span></span><br><span class="line"><span class="keyword">show</span> <span class="keyword">slave</span> <span class="keyword">status</span>\G</span><br><span class="line"><span class="comment">--在node03上执行</span></span><br><span class="line"><span class="keyword">CHANGE</span> <span class="keyword">MASTER</span> <span class="keyword">TO</span> MASTER_HOST=<span class="string">'192.168.85.111'</span>,MASTER_USER=<span class="string">'root'</span>,MASTER_PASSWORD=<span class="string">'123456'</span>,MASTER_LOG_FILE=<span class="string">'mysql-bin.000002'</span>,MASTER_LOG_POS=<span class="number">442</span>;</span><br><span class="line"><span class="comment">--开启slave</span></span><br><span class="line"><span class="keyword">start</span> <span class="keyword">slave</span></span><br><span class="line"><span class="comment">--查看状态</span></span><br><span class="line"><span class="keyword">show</span> <span class="keyword">slave</span> <span class="keyword">status</span>\G</span><br></pre></td></tr></table></figure>
+
+<h3 id="MyCat配置"><a href="#MyCat配置" class="headerlink" title="MyCat配置"></a>MyCat配置</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0"?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">mycat</span>:schema <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"schema.dtd"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">mycat:schema</span> <span class="attr">xmlns:mycat</span>=<span class="string">"http://io.mycat/"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">schema</span> <span class="attr">name</span>=<span class="string">"TESTDB"</span> <span class="attr">checkSQLschema</span>=<span class="string">"false"</span> <span class="attr">sqlMaxLimit</span>=<span class="string">"100"</span> <span class="attr">dataNode</span>=<span class="string">"dn1"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">schema</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">dataNode</span> <span class="attr">name</span>=<span class="string">"dn1"</span> <span class="attr">dataHost</span>=<span class="string">"host1"</span> <span class="attr">database</span>=<span class="string">"msb"</span> /&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">&lt;!--使用的是双主双从的架构 balance = 1 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dataHost</span> <span class="attr">name</span>=<span class="string">"host1"</span> <span class="attr">maxCon</span>=<span class="string">"1000"</span> <span class="attr">minCon</span>=<span class="string">"10"</span> <span class="attr">balance</span>=<span class="string">"1"</span></span></span><br><span class="line"><span class="tag">              <span class="attr">writeType</span>=<span class="string">"0"</span> <span class="attr">dbType</span>=<span class="string">"mysql"</span> <span class="attr">dbDriver</span>=<span class="string">"native"</span> <span class="attr">switchType</span>=<span class="string">"1"</span>  <span class="attr">slaveThreshold</span>=<span class="string">"100"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">heartbeat</span>&gt;</span>select user()<span class="tag">&lt;/<span class="name">heartbeat</span>&gt;</span></span><br><span class="line">        </span><br><span class="line">        <span class="tag">&lt;<span class="name">writeHost</span> <span class="attr">host</span>=<span class="string">"hostM1"</span> <span class="attr">url</span>=<span class="string">"192.168.85.111:3306"</span> <span class="attr">user</span>=<span class="string">"root"</span></span></span><br><span class="line"><span class="tag">                   <span class="attr">password</span>=<span class="string">"123456"</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">readHost</span> <span class="attr">host</span>=<span class="string">"hostS1"</span> <span class="attr">url</span>=<span class="string">"192.168.85.112:3306"</span> <span class="attr">user</span>=<span class="string">"root"</span> <span class="attr">password</span>=<span class="string">"123456"</span>&gt;</span><span class="tag">&lt;/<span class="name">readHost</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">writeHost</span>&gt;</span></span><br><span class="line">        </span><br><span class="line">        <span class="tag">&lt;<span class="name">writeHost</span> <span class="attr">host</span>=<span class="string">"hostM2"</span> <span class="attr">url</span>=<span class="string">"192.168.85.113:3306"</span> <span class="attr">user</span>=<span class="string">"root"</span></span></span><br><span class="line"><span class="tag">                   <span class="attr">password</span>=<span class="string">"123456"</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">readHost</span> <span class="attr">host</span>=<span class="string">"hostS2"</span> <span class="attr">url</span>=<span class="string">"192.168.85.114:3306"</span> <span class="attr">user</span>=<span class="string">"root"</span> <span class="attr">password</span>=<span class="string">"123456"</span>&gt;</span><span class="tag">&lt;/<span class="name">readHost</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">writeHost</span>&gt;</span></span><br><span class="line">        </span><br><span class="line">    <span class="tag">&lt;/<span class="name">dataHost</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">mycat:schema</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">writeType:表示写操作发送到哪台机器</span><br><span class="line">   writeType&#x3D;0:所有写操作都发送到配置的第一个writeHost，第一个挂了切换到还生存的第二个</span><br><span class="line">   writeType&#x3D;1:所有写操作都随机的发送到配置的writehost中，1.5之后废弃</span><br><span class="line">   </span><br><span class="line">需要注意的是：writehost重新启动之后以切换后的为准，切换记录在配置文件dnindex.properties中</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">switchType:表示如何进行切换</span><br><span class="line">   switchType&#x3D;1:默认值，自动切换</span><br><span class="line">   switchType&#x3D;-1:表示不自动切换</span><br><span class="line">   switchType&#x3D;2 :基于mysql主从同步的状态决定是否切换</span><br></pre></td></tr></table></figure>
+
+<p><strong>node01,node03互做备机，负责写的宕机切换，其他机器充作读请求的响应。</strong></p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2021年03月10日 17:37</p>
+        <p>原始链接： <a class="post-url" href="/2020/09/10/mycat-install/" title="&#39;MyCat 的安装及使用 &#39;">https://midkuro.gitee.io/2020/09/10/mycat-install/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.gif" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/09/10/mycat-install/&title=《'MyCat 的安装及使用 '》 — Kuro's Blog&pic=images/mysql.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/09/10/mycat-install/&title=《'MyCat 的安装及使用 '》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/09/10/mycat-install/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'MyCat 的安装及使用 '》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/09/10/mycat-install/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/09/10/mycat-install/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/09/10/mycat-install/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/MySql/" class="color1">MySql</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#MyCat"><span class="post-toc-text">MyCat</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安装"><span class="post-toc-text">安装</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#解压"><span class="post-toc-text">解压</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#配置mycat"><span class="post-toc-text">配置mycat</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#启动mycat"><span class="post-toc-text">启动mycat</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#登录验证"><span class="post-toc-text">登录验证</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#双主双从"><span class="post-toc-text">双主双从</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#MYSQL配置"><span class="post-toc-text">MYSQL配置</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#MyCat配置"><span class="post-toc-text">MyCat配置</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/09/10/mycat-split/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;MyCat 垂直切分和水平切分 &#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/09/10/mycat-base/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;MyCat 的基本介绍及安装 &#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="mycat-install" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2021 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Dubbo/">Dubbo</a><a class="category-link" href="/categories/Elasticsearch/">Elasticsearch</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/FastDFS/">FastDFS</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Java/">Java</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kafka/">Kafka</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/Linux/">Linux</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Transaction/">Transaction</a><a class="category-link" href="/categories/Zookeeper/">Zookeeper</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/algorithm/">algorithm</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/invoke/">invoke</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16px;">ActiveMQ</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Dubbo/" style="font-size: 10px;">Dubbo</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/FastDFS/" style="font-size: 10px;">FastDFS</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kafka/" style="font-size: 15px;">Kafka</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySql/" style="font-size: 17px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 12px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a> <a href="/tags/Transaction/" style="font-size: 10px;">Transaction</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/algorithm/" style="font-size: 15px;">algorithm</a> <a href="/tags/invoke/" style="font-size: 10px;">invoke</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16px;">ActiveMQ</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Dubbo/" style="font-size: 10px;">Dubbo</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/FastDFS/" style="font-size: 10px;">FastDFS</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kafka/" style="font-size: 15px;">Kafka</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySql/" style="font-size: 17px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 12px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a> <a href="/tags/Transaction/" style="font-size: 10px;">Transaction</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/algorithm/" style="font-size: 15px;">algorithm</a> <a href="/tags/invoke/" style="font-size: 10px;">invoke</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>

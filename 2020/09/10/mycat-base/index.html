@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>&#39;MyCat 的基本介绍及安装 &#39; | Kuro&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="Kuro,Kuro's Blog" />
+  
+  
+    <meta name="baidu_site_verification" content="code-JRipY21QjX" />
+  
+
+
+  <meta name="description" content="MyCat官方网站 mycat是什么对于DBA而言，可以这么理解mycat： ​        Mycat就是MySQL Server,而Mycat后面连接的MySQL Server,就好像是MySQL的存储引擎，如InnoDB,MyISAM等，因此，Mycat本身并不存储数据，数据是再后端的MySQL上存储的，因此数据可靠性以及事务都是MySQL保证的，简单说，Mycat就是MySQL最佳伴侣，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="&#39;MyCat 的基本介绍及安装 &#39;">
+<meta property="og:url" content="https://midkuro.gitee.io/2020/09/10/mycat-base/index.html">
+<meta property="og:site_name" content="Kuro&#39;s Blog">
+<meta property="og:description" content="MyCat官方网站 mycat是什么对于DBA而言，可以这么理解mycat： ​        Mycat就是MySQL Server,而Mycat后面连接的MySQL Server,就好像是MySQL的存储引擎，如InnoDB,MyISAM等，因此，Mycat本身并不存储数据，数据是再后端的MySQL上存储的，因此数据可靠性以及事务都是MySQL保证的，简单说，Mycat就是MySQL最佳伴侣，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://midkuro.gitee.io/images/mysql-mycat/mycat-01.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/mysql-mycat/mycat-02.png">
+<meta property="og:image" content="https://midkuro.gitee.io/images/mysql-mycat/mycat-03.png">
+<meta property="article:published_time" content="2020-09-10T02:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-09T08:51:30.765Z">
+<meta property="article:author" content="Kuro">
+<meta property="article:tag" content="MySql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://midkuro.gitee.io/images/mysql-mycat/mycat-01.png">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<script src="/js/pace.min.js"></script>
+
+  
+
+  
+	<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?code-JRipY21QjX";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+
+  
+
+
+  
+  <!-- <meta name="baidu-site-verification" content="code-JRipY21QjX" /> -->
+  
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">Kuro&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a  href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a  href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a  href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.gif" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        Kuro&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        坚持 是一种品格
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="Kuro"  href="//midkuro.gitee.io">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/midKuro/midkuro.github.io">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-mycat-base" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      &#39;MyCat 的基本介绍及安装 &#39;
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+              <li>
+                  <i class="fa fa-book"></i>
+                  
+                      <a href="/categories/MySql/">MySql</a>
+                  
+              </li>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2020-09-10
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <h1 id="MyCat"><a href="#MyCat" class="headerlink" title="MyCat"></a>MyCat</h1><p><a href="http://www.mycat.org.cn/" target="_blank" rel="noopener">官方网站</a></p>
+<h2 id="mycat是什么"><a href="#mycat是什么" class="headerlink" title="mycat是什么"></a>mycat是什么</h2><p>对于<strong>DBA</strong>而言，可以这么理解mycat：</p>
+<p>​        <strong>Mycat就是MySQL Server,而Mycat后面连接的MySQL Server,就好像是MySQL的存储引擎，如InnoDB,MyISAM等，因此，Mycat本身并不存储数据，数据是再后端的MySQL上存储的，因此数据可靠性以及事务都是MySQL保证的，简单说，Mycat就是MySQL最佳伴侣，它再一定程度上让MySQL拥有了能跟Oracle PK的能力。</strong></p>
+<p>​        对于<strong>软件工程师</strong>来说，可以这么理解mycat:</p>
+<p>​        <strong>Mycat就是一个近似等于MySQL的数据库服务器，你可以用连接MySQL的方式去连接Mycat，除了端口不同，默认的mycat端口是8066而不是mysql的3306，因此需要再连接字符串上增加端口信息，大多数情况下，可以用你熟悉的对象映射框架使用mycat，但建议对于分片表，尽量使用基础的SQL语句，因为这样能达到最佳性能，特别是几千万甚至几百亿条记录的情况下。</strong></p>
+<p>​        对于<strong>架构师</strong>来说，可以这么理解mycat：</p>
+<p>​        <strong>mycat是一个强大的数据库中间件，不仅仅可以用作读写分离、以及分库分表、容灾备份，而且可以用于多租户应用开发，云平台基础设施，让你的架构具备很强的适应性和灵活性，借助于即将发布的mycat只能优化模块，系统的数据访问瓶颈和热点一目了然，根据这些统计分析数据，你可以自动或手工调整后端存储，将不同的表映射到不同的存储引擎上，而整个应用的代码一行也不用改变。</strong></p>
+<h2 id="mycat的原理"><a href="#mycat的原理" class="headerlink" title="mycat的原理"></a>mycat的原理</h2><p>mycat的原理中最重要的一个动作是“拦截”，它拦截了用户发送过来的SQL语句，首先对SQL语句做了一些特定的分析：如分片分析、路由分析、读写分离分析、缓存分析等，然后将此SQL发送后端的真实数据库，并将返回的结果做适当的处理，最终再返回给用户。</p>
+<p><img src="/images/mysql-mycat/mycat-01.png" alt="mycat"></p>
+<p>​    上述图片里，orders表被分为了三个分片datanode（简称dn），这三个分片是分布在两台MySQL Server上（Datahost），即datanode=database@datahost方式，因此你可以用一台到N台服务器来分片，分片规则为（sharding rule）典型的字符串枚举分片规则，一个规则的定义是分片字段（sharding column）+分片函数（rule function）,这里的分片字段为prov而分片函数为字符串枚举方式。</p>
+<h2 id="为什么使用mycat"><a href="#为什么使用mycat" class="headerlink" title="为什么使用mycat"></a>为什么使用mycat</h2><p>1、java与数据库紧耦合，<strong>解耦</strong></p>
+<p>2、高访问量高并发对数据库的压力，<strong>负载均衡</strong></p>
+<p>3、读写请求数据不一致，读写分离，主从复制</p>
+<h2 id="数据库中间件对比"><a href="#数据库中间件对比" class="headerlink" title="数据库中间件对比"></a>数据库中间件对比</h2><table>
+<thead>
+<tr>
+<th>对比项目</th>
+<th>mycat</th>
+<th>mango</th>
+<th>cobar</th>
+<th>heisenberg</th>
+<th>altas</th>
+<th>amoeba</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据切片</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>读写分离</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>宕机自动切换</td>
+<td>支持</td>
+<td>不支持</td>
+<td>支持</td>
+<td>不支持</td>
+<td>半支持，影响写</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>mysql协议</td>
+<td>前后端支持</td>
+<td>JDBC</td>
+<td>前端支持</td>
+<td>前后端支持</td>
+<td>前后端支持</td>
+<td>JDBC</td>
+</tr>
+<tr>
+<td>支持的数据库</td>
+<td>mysql，oracle，mongodb，postgresql</td>
+<td>mysql</td>
+<td>mysql</td>
+<td>mysql</td>
+<td>mysql</td>
+<td>mysql，mongodb</td>
+</tr>
+<tr>
+<td>社区活跃度</td>
+<td>高</td>
+<td>活跃</td>
+<td>停滞</td>
+<td>低</td>
+<td>中等</td>
+<td>停滞</td>
+</tr>
+<tr>
+<td>文档资料</td>
+<td>极丰富</td>
+<td>较齐全</td>
+<td>较齐全</td>
+<td>较少</td>
+<td>中等</td>
+<td>缺少</td>
+</tr>
+<tr>
+<td>是否开源</td>
+<td>开源</td>
+<td>开源</td>
+<td>开源</td>
+<td>开源</td>
+<td>开源</td>
+<td>开源</td>
+</tr>
+<tr>
+<td>是否支持事务</td>
+<td>弱XA</td>
+<td>支持</td>
+<td>单库强一致，分布式弱事务</td>
+<td>单库强一致，多库弱事务</td>
+<td>单库强一致，分布弱事务</td>
+<td>不支持</td>
+</tr>
+</tbody></table>
+<h2 id="mycat的核心概念"><a href="#mycat的核心概念" class="headerlink" title="mycat的核心概念"></a>mycat的核心概念</h2><p>mycat是数据库中间件，就是介于数据库与应用之间，进行数据处理和交互的中间服务。从原有的一个库，被切分为多个分片数据库，所有的分片数据库集群构成了整个完整的数据库存储。</p>
+<p><img src="/images/mysql-mycat/mycat-02.png" alt="mycat"></p>
+<h3 id="逻辑库"><a href="#逻辑库" class="headerlink" title="逻辑库"></a>逻辑库</h3><p>对于实际应用而言，其实并不需要知道中间件的存在，开发人员只需要知道数据库的概念即可，所以数据库中间件可以被看作是一个或多个数据库集群构成的逻辑库。</p>
+<p><img src="/images/mysql-mycat/mycat-03.png" alt="mycat"></p>
+<h3 id="逻辑表"><a href="#逻辑表" class="headerlink" title="逻辑表"></a>逻辑表</h3><p>既然有逻辑库，那么就应该有逻辑表，在分布式数据库中，对应用来说，读写数据的表就是逻辑表。逻辑表可以使数据切分后，分步在一个或多个分片库中，也可以不做数据切分，不分片，只有一个表构成</p>
+<h3 id="分片表"><a href="#分片表" class="headerlink" title="分片表"></a>分片表</h3><p>分片表，是指哪些原有的很大数据的表，需要切分到多个数据库的表，这样每一个分片都会有一部分数据，所有分片构成了完整的数据。</p>
+<h3 id="非分片表"><a href="#非分片表" class="headerlink" title="非分片表"></a>非分片表</h3><p>一个数据库中并不是所有的表都很大，某些表是可以不用进行切分的，非分片是相对分片表来说的，就是那些不需要进行数据切分的表。</p>
+<h3 id="ER表"><a href="#ER表" class="headerlink" title="ER表"></a>ER表</h3><p>关系型数据库是基于实体关系模型之上，通过其描述了真实世界中事物与关系，mycat中的ER表既是来源于此。根据这一思路，提出了基于ER关系的数据分片策略，子表的记录与所关联的父表记录存放在同一个数据分片上，即子类依赖于父类，通过表分组保证数据join不会跨库操作。</p>
+<p>表分组是解决跨分片数据join的一种很好的思路，也是数据切分规划的重要一条规则。</p>
+<h3 id="全局表"><a href="#全局表" class="headerlink" title="全局表"></a>全局表</h3><p>一个真实的业务系统中，往往存在大量的类似字典表的表，这些表基本上很少变动，字典表具有以下几个特点：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1、变动不频繁</span><br><span class="line">2、数据量总体变化不大</span><br><span class="line">3、数据规模不大，很少有超过数十万条记录</span><br></pre></td></tr></table></figure>
+
+<p>对于这类的表，在分片的情况下，当业务表因为规模而进行分片以后，业务表与这些附属的字典表之间的关联，就成了比较棘手的问题，所以mycat中通过数据冗余来解决这类表的join，即所有的分片都有一份数据的拷贝，所有将字典表或者符合字典表特性的一些表定义为全局表。</p>
+<p>数据冗余是解决跨分片数据join的一种很好思路，也是数据切分规划的另外一条重要原则</p>
+<h3 id="分片节点（dataNode）"><a href="#分片节点（dataNode）" class="headerlink" title="分片节点（dataNode）"></a>分片节点（dataNode）</h3><p>数据切分后，一个大表被分到不同的分片数据库上面，每个表分片所在的数据库就是分片节点（dataNode）</p>
+<h3 id="节点主机（dataHost）"><a href="#节点主机（dataHost）" class="headerlink" title="节点主机（dataHost）"></a>节点主机（dataHost）</h3><p>数据切分后，每个分片节点（dataNode）不一定都会独占一台机器，同一机器上面可以有多个分片数据库，这样一个或多个分片节点（dataNode）所在的机器就是节点主机（dataHost）,为了规避单节点主机并发数限制，尽量将读写压力高的分片节点（dataNode）均衡的放在不同的节点主机（dataHost）。</p>
+<h3 id="分片规则"><a href="#分片规则" class="headerlink" title="分片规则"></a>分片规则</h3><p>数据切分是指一个大表被分成若干个分片表，就需要一定的规则，这样按照某种规则把数据分到某个分片的规则就是分片规则，数据切分选择合适的分片规则非常重要，将极大的避免后续数据处理的难度。</p>
+<h3 id="全局序列号"><a href="#全局序列号" class="headerlink" title="全局序列号"></a>全局序列号</h3><p>数据切分后，原有的关系数据库中的主键约束在分布式条件下将无法使用，因此需要引入外部机制保证数据唯一性标识，这种保证全局性的数据唯一标识的机制就是全局序列号。</p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2021年03月09日 16:51</p>
+        <p>原始链接： <a class="post-url" href="/2020/09/10/mycat-base/" title="&#39;MyCat 的基本介绍及安装 &#39;">https://midkuro.gitee.io/2020/09/10/mycat-base/</a></p>
+        <footer>
+            <a href="https://midkuro.gitee.io">
+                <img src="/images/logo.gif" alt="Kuro">
+                Kuro
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://midkuro.gitee.io/2020/09/10/mycat-base/&title=《'MyCat 的基本介绍及安装 '》 — Kuro's Blog&pic=images/mysql.jpg" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://midkuro.gitee.io/2020/09/10/mycat-base/&title=《'MyCat 的基本介绍及安装 '》 — Kuro's Blog&source=坚持 是一种品格" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://midkuro.gitee.io/2020/09/10/mycat-base/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《'MyCat 的基本介绍及安装 '》 — Kuro's Blog&url=https://midkuro.gitee.io/2020/09/10/mycat-base/&via=https://midkuro.gitee.io" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://midkuro.gitee.io/2020/09/10/mycat-base/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=https://midkuro.gitee.io/2020/09/10/mycat-base/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/MySql/" class="color1">MySql</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+    <aside class="post-toc-pos post-toc-top" id="post-toc">
+        <nav class="post-toc-wrap">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#MyCat"><span class="post-toc-text">MyCat</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#mycat是什么"><span class="post-toc-text">mycat是什么</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#mycat的原理"><span class="post-toc-text">mycat的原理</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#为什么使用mycat"><span class="post-toc-text">为什么使用mycat</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#数据库中间件对比"><span class="post-toc-text">数据库中间件对比</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#mycat的核心概念"><span class="post-toc-text">mycat的核心概念</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#逻辑库"><span class="post-toc-text">逻辑库</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#逻辑表"><span class="post-toc-text">逻辑表</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#分片表"><span class="post-toc-text">分片表</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#非分片表"><span class="post-toc-text">非分片表</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#ER表"><span class="post-toc-text">ER表</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#全局表"><span class="post-toc-text">全局表</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#分片节点（dataNode）"><span class="post-toc-text">分片节点（dataNode）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#节点主机（dataHost）"><span class="post-toc-text">节点主机（dataHost）</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#分片规则"><span class="post-toc-text">分片规则</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#全局序列号"><span class="post-toc-text">全局序列号</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+
+<nav id="article-nav">
+  
+    <a href="/2020/09/10/mycat-install/" id="article-nav-newer" class="article-nav-link-wrap">
+
+      <span class="article-nav-title">
+        <i class="fa fa-hand-o-left" aria-hidden="true"></i>
+        
+          &#39;MyCat 的安装及使用 &#39;
+        
+      </span>
+    </a>
+  
+  
+    <a href="/2020/09/10/mysql-cluster/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;MySQL 主从复制 &#39;</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+        <div id="SOHUCS" sid="mycat-base" ></div>
+<script type="text/javascript">
+    (function(){
+        var appid = 'cyuQBWutQ';
+        var conf = '7882bf42fa9e8bed0d20d7c215c57a71';
+        var width = window.innerWidth || document.documentElement.clientWidth;
+        if (width < 960) {
+            window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2021 Kuro<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "https://midkuro.gitee.io",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            <a class="category-link" href="/categories/ActiveMQ/">ActiveMQ</a><a class="category-link" href="/categories/Cache/">Cache</a><a class="category-link" href="/categories/Config/">Config</a><a class="category-link" href="/categories/Cryptography/">Cryptography</a><a class="category-link" href="/categories/Docker/">Docker</a><a class="category-link" href="/categories/Druid/">Druid</a><a class="category-link" href="/categories/Dubbo/">Dubbo</a><a class="category-link" href="/categories/Elasticsearch/">Elasticsearch</a><a class="category-link" href="/categories/Eureka/">Eureka</a><a class="category-link" href="/categories/FastDFS/">FastDFS</a><a class="category-link" href="/categories/Feign/">Feign</a><a class="category-link" href="/categories/Firewall/">Firewall</a><a class="category-link" href="/categories/HTTPS/">HTTPS</a><a class="category-link" href="/categories/HashMap/">HashMap</a><a class="category-link" href="/categories/Hystrix/">Hystrix</a><a class="category-link" href="/categories/JVM/">JVM</a><a class="category-link" href="/categories/Java/">Java</a><a class="category-link" href="/categories/Jenkins/">Jenkins</a><a class="category-link" href="/categories/Kafka/">Kafka</a><a class="category-link" href="/categories/Kubernetes/">Kubernetes</a><a class="category-link" href="/categories/LVS/">LVS</a><a class="category-link" href="/categories/Linux/">Linux</a><a class="category-link" href="/categories/MySql/">MySql</a><a class="category-link" href="/categories/Mybatis/">Mybatis</a><a class="category-link" href="/categories/NIO/">NIO</a><a class="category-link" href="/categories/Nacos/">Nacos</a><a class="category-link" href="/categories/Netty/">Netty</a><a class="category-link" href="/categories/Nodejs/">Nodejs</a><a class="category-link" href="/categories/Redis/">Redis</a><a class="category-link" href="/categories/RocketMQ/">RocketMQ</a><a class="category-link" href="/categories/SSO/">SSO</a><a class="category-link" href="/categories/Seata/">Seata</a><a class="category-link" href="/categories/Security/">Security</a><a class="category-link" href="/categories/Sentinel/">Sentinel</a><a class="category-link" href="/categories/Spring/">Spring</a><a class="category-link" href="/categories/Spring/Mybatis/">Mybatis</a><a class="category-link" href="/categories/Spring/Mybatis/SpringMVC/">SpringMVC</a><a class="category-link" href="/categories/Starter/">Starter</a><a class="category-link" href="/categories/Stream/">Stream</a><a class="category-link" href="/categories/Synchronized/">Synchronized</a><a class="category-link" href="/categories/Systemctl/">Systemctl</a><a class="category-link" href="/categories/Thread/">Thread</a><a class="category-link" href="/categories/Transaction/">Transaction</a><a class="category-link" href="/categories/Zookeeper/">Zookeeper</a><a class="category-link" href="/categories/Zuul/">Zuul</a><a class="category-link" href="/categories/algorithm/">algorithm</a><a class="category-link" href="/categories/binary/">binary</a><a class="category-link" href="/categories/invoke/">invoke</a><a class="category-link" href="/categories/springMVC/">springMVC</a>
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16px;">ActiveMQ</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Dubbo/" style="font-size: 10px;">Dubbo</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/FastDFS/" style="font-size: 10px;">FastDFS</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kafka/" style="font-size: 15px;">Kafka</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySql/" style="font-size: 17px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 12px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a> <a href="/tags/Transaction/" style="font-size: 10px;">Transaction</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/algorithm/" style="font-size: 15px;">algorithm</a> <a href="/tags/invoke/" style="font-size: 10px;">invoke</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a  href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a  href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/ActiveMQ/" style="font-size: 16px;">ActiveMQ</a> <a href="/tags/Cryptography/" style="font-size: 12px;">Cryptography</a> <a href="/tags/DevOps/" style="font-size: 19px;">DevOps</a> <a href="/tags/Docker/" style="font-size: 13px;">Docker</a> <a href="/tags/Dubbo/" style="font-size: 10px;">Dubbo</a> <a href="/tags/Elasticsearch/" style="font-size: 17px;">Elasticsearch</a> <a href="/tags/FastDFS/" style="font-size: 10px;">FastDFS</a> <a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/HashMap/" style="font-size: 11px;">HashMap</a> <a href="/tags/JVM/" style="font-size: 13px;">JVM</a> <a href="/tags/Java/" style="font-size: 20px;">Java</a> <a href="/tags/Kafka/" style="font-size: 15px;">Kafka</a> <a href="/tags/Kubernetes/" style="font-size: 11px;">Kubernetes</a> <a href="/tags/LVS/" style="font-size: 10px;">LVS</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySql/" style="font-size: 17px;">MySql</a> <a href="/tags/Mybatis/" style="font-size: 12px;">Mybatis</a> <a href="/tags/NIO/" style="font-size: 13px;">NIO</a> <a href="/tags/Netty/" style="font-size: 12px;">Netty</a> <a href="/tags/Nginx/" style="font-size: 10px;">Nginx</a> <a href="/tags/Redis/" style="font-size: 15px;">Redis</a> <a href="/tags/RocketMQ/" style="font-size: 12px;">RocketMQ</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/SpringBoot/" style="font-size: 14px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 18px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 10px;">SpringMVC</a> <a href="/tags/Thread/" style="font-size: 13px;">Thread</a> <a href="/tags/Transaction/" style="font-size: 10px;">Transaction</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/algorithm/" style="font-size: 15px;">algorithm</a> <a href="/tags/invoke/" style="font-size: 10px;">invoke</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+
+<script src="/js/search.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  
+<script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  
+<script src="/js/animate.js"></script>
+
+
+
+  
+<script src="/js/pop-img.js"></script>
+
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
