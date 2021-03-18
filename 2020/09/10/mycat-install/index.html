@@ -22,7 +22,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://midkuro.gitee.io/images/mysql-mycat/mycat-04.png">
 <meta property="article:published_time" content="2020-09-10T02:00:00.000Z">
-<meta property="article:modified_time" content="2021-03-10T09:37:06.710Z">
+<meta property="article:modified_time" content="2021-03-11T06:33:35.237Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="MySql">
 <meta name="twitter:card" content="summary">
@@ -269,10 +269,125 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">switchType:表示如何进行切换</span><br><span class="line">   switchType&#x3D;1:默认值，自动切换</span><br><span class="line">   switchType&#x3D;-1:表示不自动切换</span><br><span class="line">   switchType&#x3D;2 :基于mysql主从同步的状态决定是否切换</span><br></pre></td></tr></table></figure>
 
 <p><strong>node01,node03互做备机，负责写的宕机切换，其他机器充作读请求的响应。</strong></p>
+<h2 id="配置详解"><a href="#配置详解" class="headerlink" title="配置详解"></a>配置详解</h2><h3 id="schema-xml"><a href="#schema-xml" class="headerlink" title="schema.xml"></a>schema.xml</h3><p>schema.xml作为mycat中重要地配置文件之一，管理者mycat的逻辑库、表、分片规则、DataNode以及DataSource。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">schema</span> <span class="attr">name</span>=<span class="string">"TESTDB"</span> <span class="attr">checkSQLschema</span>=<span class="string">"false"</span> <span class="attr">sqlMaxLimit</span>=<span class="string">"100"</span> <span class="attr">dataNode</span>=<span class="string">"dn1"</span>&gt;</span><span class="tag">&lt;/<span class="name">schema</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>dataNode：</strong>该属性用于绑定逻辑库到某个具体的database上。</p>
+<p><strong>checkSQLschema：</strong>当该值为true时，如果执行select * from TESTDB.user，那么mycat会将语句修改为select * from user,即把表示schema的字符去掉，避免发送到后端数据库执行时报错。</p>
+<p><strong>sqlMaxLimit：</strong>当该值设置为某个数值的时候，每次执行的sql语句，如果没有加上limit语句，mycat也会自动加上对应的值。例如，当设置值为100的时候，那么select * from user的效果跟执行select * from user limit 100相同。</p>
+<p>如果不设置该值的话，mycat默认会把所有的数据信息都查询出来，造成过多的输出，所以，还是建议设置一个具体的值，以减少过多的数据返回。当然sql语句中可以显式的制定limit的大小，不受该属性的约束。</p>
+<h4 id="table"><a href="#table" class="headerlink" title="table"></a>table</h4><p>table标签定义了mycat中的逻辑表，所有需要拆分的表都需要在这个标签中定义。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">table</span> <span class="attr">name</span>=<span class="string">"travelrecord"</span> <span class="attr">dataNode</span>=<span class="string">"dn1,dn2,dn3"</span> <span class="attr">rule</span>=<span class="string">"auto-sharding-long"</span> &gt;</span><span class="tag">&lt;/<span class="name">table</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>name：</strong>定义逻辑表的表名，这个名字就如同创建表的时候指定的表名一样，同个schema标签中定义的名字必须唯一。</p>
+<p><strong>dataNode：</strong>定义这个逻辑表所属的dataNode，该属性的值需要和dataNode标签中的name属性值对应，如果需要定义的dn过多，可以使用如下方法减少配置：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">table</span> <span class="attr">name</span>=<span class="string">"travelrecord"</span> <span class="attr">dataNode</span>=<span class="string">"multipleDn$0-99,multipleDn2$100-199"</span> <span class="attr">rule</span>=<span class="string">"auto-shardinglong"</span> &gt;</span><span class="tag">&lt;/<span class="name">table</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dataNode</span> <span class="attr">name</span>=<span class="string">"multipleDn$0-99"</span> <span class="attr">dataHost</span>=<span class="string">"localhost1"</span> <span class="attr">database</span>=<span class="string">"db$0-99"</span> &gt;</span><span class="tag">&lt;/<span class="name">dataNode</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dataNode</span> <span class="attr">name</span>=<span class="string">"multipleDn2$100-199"</span> <span class="attr">dataHost</span>=<span class="string">"localhost1"</span> <span class="attr">database</span>=<span class="string">" db$100-199"</span> &gt;</span><span class="tag">&lt;/<span class="name">dataNode</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>rule：</strong>该属性用于指定逻辑表要使用的规则名字，规则名字在rule.xml中定义，必须与tableRule标签中的name属性值一一对应</p>
+<p><strong>ruleRequired：</strong>该属性用于指定表是否绑定分片规则，如果配置为true，但没有配置具体rule的话，程序会报错。</p>
+<p><strong>primaryKey：</strong>该逻辑表对应真实表的主键，例如：分片的规则是使用非主键进行分片的，那么在使用主键查询的时候，就会发送查询语句到所有配置的DN上，如果使用改属性配置真实表的主键。那么mycat会缓存主键与具体DN的信息，那么再次使用非主键进行查询的时候就不会进行广播式的查询，就会直接发送语句到具体的DN，但是尽管配置改属性，如果缓存没有命中的话，还是会发送语句给具体的DN来获得数据</p>
+<p><strong>type：</strong>该属性定义了逻辑表的类型，目前逻辑表只有全局表和普通表两种类型。对应的配置：</p>
+<p>​            全局表：global</p>
+<p>​            普通表：不指定该值为global的所有表</p>
+<p><strong>autoIncrement：</strong>mysql 对非自增长主键，使用 last_insert_id()是不会返回结果的，只会返回 0。所以，只有定义了自增长主键的表才可以用 last_insert_id()返回主键值。mycat 目前提供了自增长主键功能，但是如果对应的 mysql 节点上数据表，没有定义 auto_increment，那么在 mycat 层调用 last_insert_id()也是不会返回结果的。由于 insert 操作的时候没有带入分片键， mycat 会先取下这个表对应的全局序列，然后赋值给分片键。 这样才能正常的插入到数据库中，最后使用 last_insert_id()才会返回插入的分片键值。如果要使用这个功能最好配合使用数据库模式的全局序列。使用 autoIncrement=“true” 指定这个表有使用自增长主键，这样 mycat 才会不抛出分片键找不到的异常。使用 autoIncrement=“false” 来禁用这个功能，当然你也可以直接删除掉这个属性。默认就是禁用的。  </p>
+<p><strong>needAddLimit：</strong>指定表是否需要自动的在每个语句后面加上limit限制。由于使用了分库分表，数据量有时会特别巨大。这时候执行查询语句，如果恰巧又忘记了加上数量限制的话，那么查询所有的数据出来，就会执行很久的时间，所以mycat自动为我们加上了limit 100。当前如果语句中又limit，那么就不会添加了。</p>
+<h4 id="childTable"><a href="#childTable" class="headerlink" title="childTable"></a>childTable</h4><p>childTable标签用于定义ER分片的子表。通过标签上的属性与父表进行关联。</p>
+<p><strong>name：</strong>定义子表的表名</p>
+<p><strong>joinKey：</strong>插入子表的时候会使用这个列的值查找父表存储的数据节点</p>
+<p><strong>parentKey：</strong>属性指定的值一般为与父表建立关联关系的列名。程序首先获取joinkey的值，再通过parentKey属性指定的列名产生查询语句，通过执行该语句得到父表存储再哪个分片上，从而确定子表存储的位置。</p>
+<p><strong>primaryKey：</strong>跟table标签所描述相同</p>
+<p><strong>needAddLimit：</strong>跟table标签所描述相同</p>
+<h4 id="dataNode"><a href="#dataNode" class="headerlink" title="dataNode"></a>dataNode</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dataNode</span> <span class="attr">name</span>=<span class="string">"dn1"</span> <span class="attr">dataHost</span>=<span class="string">"lch3307"</span> <span class="attr">database</span>=<span class="string">"db1"</span> &gt;</span><span class="tag">&lt;/<span class="name">dataNode</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>dataNode标签定义了mycat中的数据节点，也就是我们通常说的数据分片，一个dataNode标签就是一个独立的数据分片。</p>
+<p><strong>name：</strong>定义数据节点的名字，这个名字需要是唯一的，我们需要再table标签上应用这个名字，来建立表与分片对应的关系</p>
+<p><strong>dataHost：</strong>该属性用于定义该分片属于哪个数据库实例，属性值是引用dataHost标签上定义的name属性。</p>
+<p><strong>database：</strong>该属性用于定义该分片属性哪个具体数据库实力上的具体库，</p>
+<h4 id="dataHost"><a href="#dataHost" class="headerlink" title="dataHost"></a>dataHost</h4><p>该标签定义了具体的数据库实例、读写分离配置和心跳语句</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dataHost</span> <span class="attr">name</span>=<span class="string">"localhost1"</span> <span class="attr">maxCon</span>=<span class="string">"1000"</span> <span class="attr">minCon</span>=<span class="string">"10"</span> <span class="attr">balance</span>=<span class="string">"0"</span></span></span><br><span class="line"><span class="tag"><span class="attr">writeType</span>=<span class="string">"0"</span> <span class="attr">dbType</span>=<span class="string">"mysql"</span> <span class="attr">dbDriver</span>=<span class="string">"native"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">heartbeat</span>&gt;</span>select user()<span class="tag">&lt;/<span class="name">heartbeat</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- can have multi write hosts --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">writeHost</span> <span class="attr">host</span>=<span class="string">"hostM1"</span> <span class="attr">url</span>=<span class="string">"localhost:3306"</span> <span class="attr">user</span>=<span class="string">"root"</span></span></span><br><span class="line"><span class="tag"><span class="attr">password</span>=<span class="string">"123456"</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- can have multi read hosts --&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- &lt;readHost host="hostS1" url="localhost:3306" user="root" password="123456"</span></span><br><span class="line"><span class="comment">/&gt; --&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">writeHost</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- &lt;writeHost host="hostM2" url="localhost:3316" user="root" password="123456"/&gt; --&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dataHost</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>name：</strong>唯一标识dataHost标签，供上层的标签使用</p>
+<p><strong>maxcon：</strong>指定每个读写实例连接池的最大连接</p>
+<p><strong>mincon：</strong>指定每个读写实例连接连接池的最小链接，初始化连接池的大小</p>
+<p><strong>balance：</strong>负载均衡类型：</p>
+<p>​    0：不开启读写分离机制，所有读操作都发送到当前可用的writeHost上</p>
+<p>​    1：全部的readHost和stand by writeHost参与select语句的负载均衡，简单的说，当双主双从模式（M1-&gt;S1,M2-&gt;S2,并且M1与M2互为主备），正常情况下，M2,S1,S2都参与select语句的负载均衡</p>
+<p>​    2：所有读操作都随机的再writeHost、readHost上分发</p>
+<p>​    3：所有读请求随机的分发到writeHost对应readHost执行，writeHost不负担读压力，在之后的版本中失效。</p>
+<p><strong>writeType：</strong>写类型</p>
+<p>​    writeType=0：所有的写操作发送到配置的第一个writeHost，第一个挂了切换到还生存的第二个writeHost，重启之后以切换后的为准，切换记录保存在配置文件 dnindex.properties</p>
+<p>​    writeType=1：所有写操作都随机的发送到配置的writeHost，1.5以后废弃不推荐</p>
+<p><strong>dbType：</strong>指定后端连接的数据库类型，如MySQL，mongodb,oracle</p>
+<p><strong>dbDriver：</strong>指定连接后端数据库使用的Driver，目前可选的值有native和JDBC。使用native的话，因为这个值执行的是二进制的mysql协议，所以可以使用mysql和maridb，其他类型的数据库则需要使用JDBC驱动来支持。</p>
+<p><strong>switchType：</strong>是否进行主从切换</p>
+<p>​    -1：表示不自动切换</p>
+<p>​    1：默认值，自动切换</p>
+<p>​    2：基于mysql主从同步的状态决定是否切换</p>
+<h4 id="heartbeat"><a href="#heartbeat" class="headerlink" title="heartbeat"></a>heartbeat</h4><p>这个标签指明用于和后端数据库进行心跳检测的语句。</p>
+<h3 id="server-xml"><a href="#server-xml" class="headerlink" title="server.xml"></a>server.xml</h3><p>server.xml几乎保存了所有mycat需要的系统配置信息。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">user</span> <span class="attr">name</span>=<span class="string">"test"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"password"</span>&gt;</span>test<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"schemas"</span>&gt;</span>TESTDB<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"schemas"</span>&gt;</span>TESTDB<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"schemas"</span>&gt;</span>TESTDB<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"schemas"</span>&gt;</span>TESTDB<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">privileges</span> <span class="attr">check</span>=<span class="string">"false"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">schema</span> <span class="attr">name</span>=<span class="string">"TESTDB"</span> <span class="attr">dml</span>=<span class="string">"0010"</span> <span class="attr">showTables</span>=<span class="string">"custome/mysql"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">table</span> <span class="attr">name</span>=<span class="string">"tbl_user"</span> <span class="attr">dml</span>=<span class="string">"0110"</span>&gt;</span><span class="tag">&lt;/<span class="name">table</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">table</span> <span class="attr">name</span>=<span class="string">"tbl_dynamic"</span> <span class="attr">dml</span>=<span class="string">"1111"</span>&gt;</span><span class="tag">&lt;/<span class="name">table</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">schema</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">privileges</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">user</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>server.xml中的标签本就不多，这个标签主要用于定义登录mycat的用户和权限。</p>
+<p>property标签用来声明具体的属性值，name用来指定用户名，password用来修改密码，readonly用来限制用户是否是只读的，schemas用来控制用户课访问的schema，如果有多个的话，用逗号分隔</p>
+<p>privileges标签是对用户的schema及下级的table进行精细化的DML控制，privileges节点的check属性适用于标识是否开启DML权限检查，默认false标识不检查，当然不配置等同于不检查</p>
+<p>在进行检查的时候，是通过四个二进制位来标识的，insert，update，select，delete按照顺序标识，0表示未检查，1表示要检查</p>
+<p>system标签表示系统的相关属性：</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>含义</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>charset</td>
+<td>字符集设置</td>
+<td>utf8,utf8mb4</td>
+</tr>
+<tr>
+<td>defaultSqlParser</td>
+<td>指定的默认解析器</td>
+<td>druidparser，fdbparser(1.4之后作废)</td>
+</tr>
+<tr>
+<td>processors</td>
+<td>系统可用的线程数，</td>
+<td>默认为机器CPU核心线程数</td>
+</tr>
+<tr>
+<td>processorBufferChunk</td>
+<td>每次分配socket direct buffer的大小</td>
+<td>默认是4096个字节</td>
+</tr>
+<tr>
+<td>processorExecutor</td>
+<td>指定NIOProcessor共享的businessExecutor固定线程池大小，mycat在处理异步逻辑的时候会把任务提交到这个线程池中</td>
+<td></td>
+</tr>
+<tr>
+<td>sequnceHandlerType</td>
+<td>mycat全局序列的类型</td>
+<td>0为本地文件，1为数据库方式，2为时间戳方式，3为分布式ZK ID生成器，4为zk递增id生成</td>
+</tr>
+</tbody></table>
+<h3 id="rule-xml"><a href="#rule-xml" class="headerlink" title="rule.xml"></a>rule.xml</h3><p>rule.xml里面就定义了我们对表进行拆分所涉及到的规则定义。我们可以灵活的对表使用不同的分片算法，或者对表使用相同的算法但具体的参数不同，这个文件里面主要有tableRule和function这两个标签。</p>
+<h4 id="tableRule"><a href="#tableRule" class="headerlink" title="tableRule"></a>tableRule</h4><p>这个标签被用来定义表规则，定义的表规则在schema.xml文件中</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">tableRule</span> <span class="attr">name</span>=<span class="string">"rule1"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">rule</span>&gt;</span></span><br><span class="line">    	<span class="tag">&lt;<span class="name">columns</span>&gt;</span>id<span class="tag">&lt;/<span class="name">columns</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">algorithm</span>&gt;</span>func1<span class="tag">&lt;/<span class="name">algorithm</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">rule</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tableRule</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>name属性指定唯一的名字，用来标识不同的表规则</p>
+<p>内嵌的rule标签则指定对物理表中的哪一列进行拆分和使用什么路由算法</p>
+<p>columns内指定要拆分的列的名字</p>
+<p>algorithm使用function标签中的那么属性，连接表规则和具体路由算法。当然，多个表规则可以连接到同一个路由算法上。</p>
+<h4 id="function"><a href="#function" class="headerlink" title="function"></a>function</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">function</span> <span class="attr">name</span>=<span class="string">"hash-int"</span> <span class="attr">class</span>=<span class="string">"io.mycat.route.function.PartitionByFileMap"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"mapFile"</span>&gt;</span>partition-hash-int.txt<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">function</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>name指定算法的名字</p>
+<p>class指定路由算法具体的类名字</p>
+<p>property为具体算法需要用到的一些属性</p>
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2021年03月10日 17:37</p>
+        <p>最后更新： 2021年03月11日 14:33</p>
         <p>原始链接： <a class="post-url" href="/2020/09/10/mycat-install/" title="&#39;MyCat 的安装及使用 &#39;">https://midkuro.gitee.io/2020/09/10/mycat-install/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">
@@ -390,26 +505,26 @@
 
     <aside class="post-toc-pos post-toc-top" id="post-toc">
         <nav class="post-toc-wrap">
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#MyCat"><span class="post-toc-text">MyCat</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安装"><span class="post-toc-text">安装</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#解压"><span class="post-toc-text">解压</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#配置mycat"><span class="post-toc-text">配置mycat</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#启动mycat"><span class="post-toc-text">启动mycat</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#登录验证"><span class="post-toc-text">登录验证</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#双主双从"><span class="post-toc-text">双主双从</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#MYSQL配置"><span class="post-toc-text">MYSQL配置</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#MyCat配置"><span class="post-toc-text">MyCat配置</span></a></li></ol></li></ol></li></ol>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#MyCat"><span class="post-toc-text">MyCat</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安装"><span class="post-toc-text">安装</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#解压"><span class="post-toc-text">解压</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#配置mycat"><span class="post-toc-text">配置mycat</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#启动mycat"><span class="post-toc-text">启动mycat</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#登录验证"><span class="post-toc-text">登录验证</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#双主双从"><span class="post-toc-text">双主双从</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#MYSQL配置"><span class="post-toc-text">MYSQL配置</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#MyCat配置"><span class="post-toc-text">MyCat配置</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#配置详解"><span class="post-toc-text">配置详解</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#schema-xml"><span class="post-toc-text">schema.xml</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#table"><span class="post-toc-text">table</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#childTable"><span class="post-toc-text">childTable</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#dataNode"><span class="post-toc-text">dataNode</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#dataHost"><span class="post-toc-text">dataHost</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#heartbeat"><span class="post-toc-text">heartbeat</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#server-xml"><span class="post-toc-text">server.xml</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#rule-xml"><span class="post-toc-text">rule.xml</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#tableRule"><span class="post-toc-text">tableRule</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#function"><span class="post-toc-text">function</span></a></li></ol></li></ol></li></ol></li></ol>
         </nav>
     </aside>
     
 
 <nav id="article-nav">
   
-    <a href="/2020/09/10/mycat-split/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/09/10/mycat-base/" id="article-nav-newer" class="article-nav-link-wrap">
 
       <span class="article-nav-title">
         <i class="fa fa-hand-o-left" aria-hidden="true"></i>
         
-          &#39;MyCat 垂直切分和水平切分 &#39;
+          &#39;MyCat 的基本介绍及安装 &#39;
         
       </span>
     </a>
   
   
-    <a href="/2020/09/10/mycat-base/" id="article-nav-older" class="article-nav-link-wrap">
-      <span class="article-nav-title">&#39;MyCat 的基本介绍及安装 &#39;</span>
+    <a href="/2020/09/10/mysql-cluster/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">&#39;MySQL 主从复制 &#39;</span>
       <i class="fa fa-hand-o-right" aria-hidden="true"></i>
     </a>
   

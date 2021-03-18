@@ -23,7 +23,7 @@
 <meta property="og:image" content="https://midkuro.gitee.io/images/mysql-cluster/cluster-01.png">
 <meta property="og:image" content="https://midkuro.gitee.io/images/mysql-cluster/cluster-02.png">
 <meta property="article:published_time" content="2020-09-10T01:00:00.000Z">
-<meta property="article:modified_time" content="2021-03-10T08:02:50.931Z">
+<meta property="article:modified_time" content="2021-03-11T15:13:05.050Z">
 <meta property="article:author" content="Kuro">
 <meta property="article:tag" content="MySql">
 <meta name="twitter:card" content="summary">
@@ -211,7 +211,7 @@
 
 <p><img src="/images/mysql-cluster/cluster-02.png" alt="mysql"></p>
 <p>6.从节点的配置</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#重启从节点的mysql服务</span><br><span class="line">service mysqld restart</span><br><span class="line">#登录mysql</span><br><span class="line">mysql -uroot -p</span><br><span class="line"></span><br><span class="line">#配置连接主服务器</span><br><span class="line">change master to master_host&#x3D;&#39;192.168.85.11&#39;,master_user&#x3D;&#39;root&#39;,master_password&#x3D;&#39;123456&#39;,master_port&#x3D;3306,master_log_file&#x3D;&#39;master-bin.000001&#39;,master_log_pos&#x3D;1034;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#重启从节点的mysql服务</span><br><span class="line">service mysqld restart</span><br><span class="line">#登录mysql</span><br><span class="line">mysql -uroot -p</span><br><span class="line"></span><br><span class="line">#配置连接主服务器</span><br><span class="line">change master to master_host&#x3D;&#39;192.168.85.11&#39;,master_user&#x3D;&#39;root&#39;,master_password&#x3D;&#39;123456&#39;,master_port&#x3D;3306,master_log_file&#x3D;&#39;master-bin.000001&#39;,master_log_pos&#x3D;154;</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#启动slave</span><br><span class="line">start slave</span><br><span class="line">#查看slave的状态</span><br><span class="line">show slave status\G(注意没有分号)</span><br><span class="line"></span><br><span class="line">#停止从机同步</span><br><span class="line">stop slave</span><br><span class="line"></span><br><span class="line">#重置 slave</span><br><span class="line">reset slave</span><br></pre></td></tr></table></figure>
 
@@ -221,7 +221,7 @@
 
             <div class="post-copyright">
     <div class="content">
-        <p>最后更新： 2021年03月10日 16:02</p>
+        <p>最后更新： 2021年03月11日 23:13</p>
         <p>原始链接： <a class="post-url" href="/2020/09/10/mysql-cluster/" title="&#39;MySQL 主从复制 &#39;">https://midkuro.gitee.io/2020/09/10/mysql-cluster/</a></p>
         <footer>
             <a href="https://midkuro.gitee.io">
@@ -346,12 +346,12 @@
 
 <nav id="article-nav">
   
-    <a href="/2020/09/10/mycat-base/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/09/10/mycat-install/" id="article-nav-newer" class="article-nav-link-wrap">
 
       <span class="article-nav-title">
         <i class="fa fa-hand-o-left" aria-hidden="true"></i>
         
-          &#39;MyCat 的基本介绍及安装 &#39;
+          &#39;MyCat 的安装及使用 &#39;
         
       </span>
     </a>
